@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SGT | Roles</title>
+
+<link rel="stylesheet" href="../css/admin.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <div class="logo">
+
+        <img src="../img/logo.png">
+
+        <h2>SGT</h2>
+
+        <p>Dirección de Tránsito y Transportes</p>
+
+    </div>
+
+    <ul>
+
+        <li onclick="location='dashboard.html'">
+            <i class="fa-solid fa-house"></i>
+            Dashboard
+        </li>
+
+        <li onclick="location='usuarios.html'">
+            <i class="fa-solid fa-users"></i>
+            Usuarios
+        </li>
+
+        <li class="activo">
+            <i class="fa-solid fa-user-shield"></i>
+            Roles
+        </li>
+
+        <li onclick="location='../movilidad/dashboard.html'">
+            <i class="fa-solid fa-road"></i>
+            Movilidad Urbana
+        </li>
+
+    </ul>
+
+</div>
+
+<div class="contenido">
+
+<h1>Asignación de Roles</h1>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Usuario</th>
+
+<th>Administrador</th>
+
+<th>Movilidad Urbana</th>
+
+<th>Cámaras e Incidencias</th>
+
+<th>Guardar</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>admin</td>
+
+<td><input type="checkbox" checked></td>
+
+<td><input type="checkbox" checked></td>
+
+<td><input type="checkbox" checked></td>
+
+<td><button>Guardar</button></td>
+
+</tr>
+
+<tr>
+
+<td>operador1</td>
+
+<td><input type="checkbox"></td>
+
+<td><input type="checkbox" checked></td>
+
+<td><input type="checkbox"></td>
+
+<td><button>Guardar</button></td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</body>
+
+</html>
