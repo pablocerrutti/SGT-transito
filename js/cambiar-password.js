@@ -1,112 +1,232 @@
-function cambiarPassword(){
-
-
-let actual=
-document.getElementById("actual").value;
-
-
-let nueva=
-document.getElementById("nueva").value;
-
-
-let confirmar=
-document.getElementById("confirmar").value;
+// =====================================
+// SGT - CAMBIO DE CONTRASEÑA
+// =====================================
 
 
 
-let usuario=
+let usuarioActual =
+
 JSON.parse(
+
 localStorage.getItem("usuarioActual")
+
 );
 
 
 
-if(!usuario){
 
-alert("Sesión no válida");
 
-window.location="../login.html";
+if(!usuarioActual){
 
-return;
+
+window.location="login.html";
+
 
 }
 
 
 
 
-if(usuario.password!==actual){
 
-alert("La contraseña actual no es correcta");
+
+
+function cambiarPassword(){
+
+
+
+let nueva =
+
+document
+.getElementById("nuevaPassword")
+.value;
+
+
+
+let confirmar =
+
+document
+.getElementById("confirmarPassword")
+.value;
+
+
+
+
+
+if(nueva==="" || confirmar===""){
+
+
+alert("Complete ambos campos");
+
 
 return;
+
 
 }
 
 
 
-
-if(nueva.length<6){
-
-alert("La nueva contraseña debe tener al menos 6 caracteres");
-
-return;
-
-}
 
 
 
 if(nueva!==confirmar){
 
+
 alert("Las contraseñas no coinciden");
 
+
 return;
+
 
 }
 
 
 
 
-let usuarios=
-JSON.parse(
-localStorage.getItem("usuariosSGT")
-);
+
+
+if(nueva.length < 6){
+
+
+alert("La contraseña debe tener al menos 6 caracteres");
+
+
+return;
+
+
+}
 
 
 
-let posicion=
-usuarios.findIndex(
-
-u=>u.usuario===usuario.usuario
-
-);
 
 
 
-usuarios[posicion].password=nueva;
 
-usuarios[posicion].debeCambiarPassword=false;
+usuarioActual.clave=nueva;
+
+
+usuarioActual.cambiarPassword=false;
+
+
+
 
 
 
 localStorage.setItem(
-"usuariosSGT",
-JSON.stringify(usuarios)
-);
 
-
-
-localStorage.setItem(
 "usuarioActual",
-JSON.stringify(usuarios[posicion])
+
+JSON.stringify(usuarioActual)
+
 );
 
 
 
-alert("Contraseña actualizada correctamente");
 
 
 
-window.location="dashboard.html";
+// Guardar también en usuarios locales
+
+let usuarios =
+
+JSON.parse(
+
+localStorage.getItem("usuariosSGT")
+
+)
+
+|| [];
+
+
+
+
+
+
+
+let existe = usuarios.find(
+
+u=>u.usuario===usuarioActual.usuario
+
+);
+
+
+
+
+
+
+if(existe){
+
+
+existe.clave=nueva;
+
+
+existe.cambiarPassword=false;
+
+
+}
+
+else{
+
+
+usuarios.push(usuarioActual);
+
+
+}
+
+
+
+
+
+
+localStorage.setItem(
+
+"usuariosSGT",
+
+JSON.stringify(usuarios)
+
+);
+
+
+
+
+
+
+
+alert(
+
+"Contraseña actualizada correctamente"
+
+);
+
+
+
+
+
+
+
+if(usuarioActual.rol==="Administrador"){
+
+
+window.location="admin/dashboard.html";
+
+
+}
+
+else if(usuarioActual.rol==="Movilidad Urbana"){
+
+
+window.location="movilidad/dashboard.html";
+
+
+}
+
+else{
+
+
+window.location="inspector/dashboard.html";
+
+
+}
+
 
 
 }
