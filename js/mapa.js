@@ -1,16 +1,15 @@
 // =====================================
 // SGT - MAPA MOVILIDAD URBANA
-// Dirección de Tránsito y Transportes
 // =====================================
 
 
-// VARIABLES GLOBALES
-
 let mapa;
 
-let ubicacionSeleccionada = null;
 
-let marcadorTemporal = null;
+let ubicacionSeleccionada=null;
+
+
+let marcadorTemporal=null;
 
 
 
@@ -23,9 +22,9 @@ localStorage.getItem("elementosSGT")
 
 
 
-// =====================================
-// INICIALIZAR MAPA
-// =====================================
+
+
+// CREAR MAPA
 
 
 mapa = L.map("mapa").setView(
@@ -35,6 +34,7 @@ mapa = L.map("mapa").setView(
 15
 
 );
+
 
 
 
@@ -58,9 +58,8 @@ attribution:"© OpenStreetMap"
 
 
 
-// =====================================
-// CARGAR ELEMENTOS EXISTENTES
-// =====================================
+
+// CARGAR MARCADORES
 
 
 elementos.forEach(function(elemento){
@@ -77,20 +76,25 @@ crearMarcador(elemento);
 
 
 
-// =====================================
-// SELECCIONAR UBICACIÓN EN MAPA
-// =====================================
+
+// CLICK EN MAPA
 
 
-mapa.on(
-
-"click",
-
-function(e){
+mapa.on("click",function(e){
 
 
 
-ubicacionSeleccionada = e.latlng;
+if(!puedeCrearElementos()){
+
+
+return;
+
+
+}
+
+
+
+ubicacionSeleccionada=e.latlng;
 
 
 
@@ -109,7 +113,7 @@ mapa.removeLayer(marcadorTemporal);
 
 
 
-marcadorTemporal = L.marker(
+marcadorTemporal=L.marker(
 
 [
 
@@ -125,8 +129,6 @@ e.latlng.lng
 
 
 
-
-
 marcadorTemporal.bindPopup(
 
 "Ubicación seleccionada"
@@ -137,9 +139,7 @@ marcadorTemporal.bindPopup(
 
 
 
-}
-
-);
+});
 
 
 
@@ -149,13 +149,25 @@ marcadorTemporal.bindPopup(
 
 
 
-// =====================================
-// ABRIR / CERRAR MODAL
-// =====================================
 
+// ABRIR MODAL
 
 
 function abrirNuevo(){
+
+
+
+if(!puedeCrearElementos()){
+
+
+alert("No tiene permisos para crear elementos");
+
+
+return;
+
+
+}
+
 
 
 document.getElementById("modal")
@@ -164,6 +176,7 @@ document.getElementById("modal")
 
 
 }
+
 
 
 
@@ -188,23 +201,33 @@ document.getElementById("modal")
 
 
 
-// =====================================
+
 // GUARDAR ELEMENTO
-// =====================================
 
 
 function guardarElemento(){
 
 
 
+if(!puedeCrearElementos()){
+
+
+alert("No autorizado");
+
+
+return;
+
+
+}
+
+
+
+
+
 if(!ubicacionSeleccionada){
 
 
-alert(
-
-"Debe seleccionar una ubicación en el mapa"
-
-);
+alert("Seleccione una ubicación en el mapa");
 
 
 return;
@@ -217,104 +240,7 @@ return;
 
 
 
-let tipo =
-
-document.getElementById("tipo").value;
-
-
-
-
-
-
-let codigo =
-
-document.getElementById("codigo").value;
-
-
-
-
-
-
-let nombre =
-
-document.getElementById("nombre").value;
-
-
-
-
-
-
-let descripcion =
-
-document.getElementById("descripcion").value;
-
-
-
-
-
-
-let caracteristicasTexto =
-
-document.getElementById("caracteristicas").value;
-
-
-
-
-
-
-let actuacion =
-
-document.getElementById("actuacion").value;
-
-
-
-
-
-
-
-if(
-
-codigo==="" ||
-
-nombre===""
-
-){
-
-
-alert(
-
-"Debe completar código y nombre"
-
-);
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-let caracteristicas =
-
-caracteristicasTexto
-
-.split("\n")
-
-.filter(c=>c.trim()!=="");
-
-
-
-
-
-
-
-
-let nuevoElemento = {
+let elemento={
 
 
 
@@ -322,56 +248,72 @@ id:Date.now(),
 
 
 
-codigo:codigo,
+codigo:
+
+document.getElementById("codigo").value,
 
 
 
-tipo:tipo,
+tipo:
+
+document.getElementById("tipo").value,
 
 
 
-nombre:nombre,
+nombre:
+
+document.getElementById("nombre").value,
 
 
 
-descripcion:descripcion,
+descripcion:
+
+document.getElementById("descripcion").value,
 
 
 
-caracteristicas:caracteristicas,
+caracteristicas:
+
+document.getElementById("caracteristicas").value
+
+.split("\n"),
 
 
 
 actuaciones:[
 
-
 {
-
 
 fecha:new Date()
 
 .toLocaleDateString("es-UY"),
 
 
-accion:actuacion || "Alta del elemento",
+accion:
+
+document.getElementById("actuacion").value || "Alta del elemento",
 
 
-responsable:"Sistema SGT"
+responsable:
+
+usuarioActual.nombre
 
 
 }
-
 
 ],
 
 
 
+lat:
 
-lat:ubicacionSeleccionada.lat,
+ubicacionSeleccionada.lat,
 
 
 
-lng:ubicacionSeleccionada.lng,
+lng:
+
+ubicacionSeleccionada.lng,
 
 
 
@@ -387,8 +329,7 @@ estado:"Activo"
 
 
 
-elementos.push(nuevoElemento);
-
+elementos.push(elemento);
 
 
 
@@ -408,18 +349,7 @@ JSON.stringify(elementos)
 
 
 
-
-
-crearMarcador(nuevoElemento);
-
-
-
-
-
-
-
-limpiarFormulario();
-
+crearMarcador(elemento);
 
 
 
@@ -430,13 +360,9 @@ cerrarNuevo();
 
 
 
-
-
-
-
 alert(
 
-"Elemento registrado correctamente"
+"Elemento creado correctamente"
 
 );
 
@@ -452,44 +378,9 @@ alert(
 
 
 
-// =====================================
-// LIMPIAR FORMULARIO
-// =====================================
 
 
-function limpiarFormulario(){
-
-
-
-document.getElementById("codigo").value="";
-
-
-document.getElementById("nombre").value="";
-
-
-document.getElementById("descripcion").value="";
-
-
-document.getElementById("caracteristicas").value="";
-
-
-document.getElementById("actuacion").value="";
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =====================================
 // CREAR MARCADOR
-// =====================================
 
 
 function crearMarcador(elemento){
@@ -500,10 +391,7 @@ let icono="📍";
 
 
 
-
-
 switch(elemento.tipo){
-
 
 
 case "Semáforo":
@@ -513,13 +401,11 @@ icono="🚦";
 break;
 
 
-
 case "Paso peatonal":
 
 icono="🚸";
 
 break;
-
 
 
 case "Parada de taxi":
@@ -529,13 +415,11 @@ icono="🚕";
 break;
 
 
-
 case "Carga y descarga":
 
 icono="🚚";
 
 break;
-
 
 
 case "Cordón reservado":
@@ -545,17 +429,13 @@ icono="🅿️";
 break;
 
 
-
 }
 
 
 
 
 
-
-
-
-let marcador = L.marker(
+let marcador=L.marker(
 
 [
 
@@ -574,29 +454,13 @@ elemento.lng
 
 
 
-
-
-// LEYENDA AL PASAR POR ENCIMA
-
-
-
 marcador.bindTooltip(
-
-
 
 `
 
-<div>
-
-<b>
-
-${icono} ${elemento.tipo}
-
-</b>
+<b>${icono} ${elemento.tipo}</b>
 
 <br>
-
-Código:
 
 ${elemento.codigo}
 
@@ -604,27 +468,7 @@ ${elemento.codigo}
 
 ${elemento.nombre}
 
-<br>
-
-Estado:
-
-${elemento.estado}
-
-</div>
-
-`,
-
-
-
-{
-
-direction:"top",
-
-offset:[0,-10]
-
-}
-
-
+`
 
 );
 
@@ -633,36 +477,15 @@ offset:[0,-10]
 
 
 
-
-
-
-// FICHA COMPLETA AL HACER CLICK
-
-
-
 marcador.bindPopup(
-
-
 
 `
 
-<div style="min-width:280px">
-
-
-
 <h3>
-
-${icono}
 
 ${elemento.nombre}
 
 </h3>
-
-
-
-
-<hr>
-
 
 
 
@@ -698,63 +521,37 @@ ${elemento.estado}
 
 <b>Descripción:</b>
 
-
-<p>
-
-${elemento.descripcion || "Sin descripción"}
-
-</p>
+${elemento.descripcion}
 
 
+
+<br><br>
 
 
 
 <b>Características:</b>
 
-
-
 <ul>
 
+${elemento.caracteristicas
 
-${
-elemento.caracteristicas
+.map(c=>`<li>${c}</li>`)
 
-.map(
-
-c=>`
-
-<li>${c}</li>
-
-`
-
-)
-
-.join("")
-
-}
-
+.join("")}
 
 </ul>
 
 
 
-
-
-
-
 <b>Actuaciones:</b>
-
-
 
 <ul>
 
+${elemento.actuaciones
 
-${
-elemento.actuaciones
+.map(a=>
 
-.map(
-
-a=>`
+`
 
 <li>
 
@@ -766,36 +563,21 @@ ${a.accion}
 
 <br>
 
-Responsable:
-
 ${a.responsable}
 
 </li>
-
-<br>
 
 `
 
 )
 
-.join("")
-
-}
-
+.join("")}
 
 </ul>
 
 
 
-
-
-</div>
-
-
-
 `
-
-
 
 );
 

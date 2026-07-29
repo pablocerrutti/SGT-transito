@@ -4,9 +4,6 @@
 // =====================================
 
 
-
-// Obtener usuario conectado
-
 let usuarioActual = JSON.parse(
 
 localStorage.getItem("usuarioActual")
@@ -16,8 +13,7 @@ localStorage.getItem("usuarioActual")
 
 
 
-
-// Si no existe sesión
+// CONTROL DE SESIÓN
 
 if(!usuarioActual){
 
@@ -33,9 +29,8 @@ window.location="../login.html";
 
 
 // =====================================
-// FUNCIONES DE ROLES
+// ROLES
 // =====================================
-
 
 
 function esAdministrador(){
@@ -64,11 +59,11 @@ usuarioActual.rol === "Movilidad Urbana";
 
 
 
-function esCamaras(){
+function esInspector(){
 
 
 return usuarioActual &&
-usuarioActual.rol === "Cámaras e Incidencias";
+usuarioActual.rol === "Inspector";
 
 
 }
@@ -78,10 +73,11 @@ usuarioActual.rol === "Cámaras e Incidencias";
 
 
 
-// =====================================
-// PROTECCIÓN DE MÓDULOS
-// =====================================
 
+
+// =====================================
+// ACCESO A MÓDULOS
+// =====================================
 
 
 function permitirModulo(modulo){
@@ -101,95 +97,12 @@ return false;
 
 
 
-switch(modulo){
 
 
-
-case "admin":
-
+// ADMINISTRADOR ACCEDE A TODO
 
 
-if(!esAdministrador()){
-
-
-alert("Acceso restringido");
-
-
-window.location="../login.html";
-
-
-return false;
-
-
-}
-
-
-break;
-
-
-
-
-
-
-case "movilidad":
-
-
-
-if(
-!esAdministrador() &&
-!esMovilidad()
-){
-
-
-alert("No tiene permisos para Movilidad Urbana");
-
-
-window.location="../login.html";
-
-
-return false;
-
-
-}
-
-
-break;
-
-
-
-
-
-
-
-case "camaras":
-
-
-
-if(
-!esAdministrador() &&
-!esCamaras()
-){
-
-
-alert("No tiene permisos para Cámaras e Incidencias");
-
-
-window.location="../login.html";
-
-
-return false;
-
-
-}
-
-
-break;
-
-
-
-}
-
-
+if(esAdministrador()){
 
 
 return true;
@@ -203,10 +116,166 @@ return true;
 
 
 
+switch(modulo){
+
+
+
+case "admin":
+
+
+
+alert("Acceso exclusivo de administración");
+
+window.location="../login.html";
+
+return false;
+
+
+
+
+
+
+case "movilidad":
+
+
+
+if(esMovilidad()){
+
+
+return true;
+
+
+}
+
+
+
+alert(
+
+"No tiene permisos para Movilidad Urbana"
+
+);
+
+
+window.location="../login.html";
+
+
+return false;
+
+
+
+
+
+
+
+
+case "inspector":
+
+
+
+if(esInspector()){
+
+
+return true;
+
+
+}
+
+
+
+alert(
+
+"Acceso exclusivo de inspectores"
+
+);
+
+
+window.location="../login.html";
+
+
+return false;
+
+
+
+}
+
+
+
+
+return false;
+
+
+}
+
+
+
+
+
+
+
+
+
 // =====================================
-// MOSTRAR USUARIO ACTUAL
+// PERMISOS DE MOVILIDAD
 // =====================================
 
+
+// Administrador y Movilidad pueden crear puntos
+
+
+function puedeCrearElementos(){
+
+
+
+return (
+
+esAdministrador()
+
+||
+
+esMovilidad()
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+// Administrador y Movilidad pueden registrar actuaciones
+
+
+function puedeRegistrarActuaciones(){
+
+
+
+return (
+
+esAdministrador()
+
+||
+
+esMovilidad()
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// MOSTRAR USUARIO
+// =====================================
 
 
 function cargarUsuario(){
@@ -214,25 +283,28 @@ function cargarUsuario(){
 
 
 let elementos =
+
 document.querySelectorAll(".usuarioNombre");
 
 
 
-elementos.forEach(function(elemento){
+
+elementos.forEach(function(e){
 
 
 
-elemento.innerHTML = `
+e.innerHTML =
 
-<i class="fa-solid fa-user"></i>
+usuarioActual.nombre +
 
-${usuarioActual.nombre}
+" | " +
 
-`;
+usuarioActual.rol;
 
 
 
 });
+
 
 
 }
