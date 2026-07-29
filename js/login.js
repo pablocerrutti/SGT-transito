@@ -4,41 +4,47 @@
 // =====================================
 
 
-// Usuarios provisionales
-// Luego serán reemplazados por Google Sheets
 
 const usuarios = [
+
 
 {
 usuario:"Pcerrutti",
 clave:"SGT12345",
-rol:"Administrador"
+rol:"Administrador",
+cambiarPassword:true
 },
+
 
 {
 usuario:"Mperez",
 clave:"SGT12345",
-rol:"Administrador"
+rol:"Administrador",
+cambiarPassword:true
 },
+
 
 {
 usuario:"Gbentancur",
 clave:"SGT12345",
-rol:"Administrador"
+rol:"Administrador",
+cambiarPassword:true
 },
 
 
 {
 usuario:"movilidad",
 clave:"123456",
-rol:"Movilidad Urbana"
+rol:"Movilidad Urbana",
+cambiarPassword:true
 },
 
 
 {
 usuario:"inspector",
 clave:"123456",
-rol:"Inspector"
+rol:"Inspector",
+cambiarPassword:true
 }
 
 
@@ -48,9 +54,8 @@ rol:"Inspector"
 
 
 
-// ================================
+
 // LOGIN USUARIO
-// ================================
 
 
 document
@@ -59,17 +64,16 @@ document
 
 
 let usuario =
-document.querySelectorAll("input")[0]
-.value;
+document.querySelectorAll("input")[0].value;
 
 
 let clave =
-document.querySelectorAll("input")[1]
-.value;
+document.querySelectorAll("input")[1].value;
 
 
 
 validarLogin(usuario,clave);
+
 
 
 });
@@ -79,9 +83,7 @@ validarLogin(usuario,clave);
 
 
 
-// ================================
 // LOGIN ADMIN
-// ================================
 
 
 document
@@ -89,20 +91,17 @@ document
 .addEventListener("click",function(){
 
 
-
 let usuario =
-document.querySelectorAll("input")[2]
-.value;
-
+document.querySelectorAll("input")[2].value;
 
 
 let clave =
-document.querySelectorAll("input")[3]
-.value;
+document.querySelectorAll("input")[3].value;
 
 
 
 validarLogin(usuario,clave);
+
 
 
 });
@@ -111,12 +110,6 @@ validarLogin(usuario,clave);
 
 
 
-
-
-
-// ================================
-// VALIDAR
-// ================================
 
 
 function validarLogin(usuario,clave){
@@ -174,7 +167,43 @@ JSON.stringify(encontrado)
 
 
 
-if(encontrado.rol==="Administrador"){
+// OBLIGAR CAMBIO DE CONTRASEÑA
+
+
+if(encontrado.cambiarPassword===true){
+
+
+window.location="cambiar-password.html";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+entrarSistema(encontrado);
+
+
+
+}
+
+
+
+
+
+
+
+
+function entrarSistema(usuario){
+
+
+
+if(usuario.rol==="Administrador"){
 
 
 window.location="admin/dashboard.html";
@@ -184,7 +213,7 @@ window.location="admin/dashboard.html";
 
 
 
-else if(encontrado.rol==="Movilidad Urbana"){
+else if(usuario.rol==="Movilidad Urbana"){
 
 
 window.location="movilidad/dashboard.html";
@@ -194,7 +223,7 @@ window.location="movilidad/dashboard.html";
 
 
 
-else if(encontrado.rol==="Inspector"){
+else if(usuario.rol==="Inspector"){
 
 
 window.location="inspector/dashboard.html";
