@@ -1,6 +1,5 @@
-
 // =====================================
-// SGT - INFORMES DE INSPECCION
+// SGT - INFORMES DE INSPECCION + PDF
 // Google Sheets API
 // =====================================
 
@@ -19,8 +18,10 @@ let elementos=[];
 
 
 
+
+
 // =====================================
-// CARGA INICIAL
+// CARGA DATOS
 // =====================================
 
 
@@ -37,17 +38,31 @@ function cargarDatos(){
 Promise.all([
 
 
-fetch(API_URL+"?accion=inspecciones")
+
+fetch(
+
+API_URL+"?accion=inspecciones"
+
+)
+
 .then(r=>r.json()),
 
 
 
-fetch(API_URL+"?accion=elementos")
+
+
+fetch(
+
+API_URL+"?accion=elementos"
+
+)
+
 .then(r=>r.json())
 
 
 
 ])
+
 
 
 .then(resultado=>{
@@ -91,9 +106,10 @@ mostrarInformes();
 .catch(error=>{
 
 
+
 console.error(
 
-"ERROR CARGANDO INFORMES",
+"ERROR DATOS",
 
 error
 
@@ -108,13 +124,14 @@ document.getElementById(
 ).innerHTML=
 
 
+
 `
 
 <tr>
 
-<td colspan="6">
+<td colspan="7">
 
-Error al cargar datos
+Error cargando información
 
 </td>
 
@@ -139,7 +156,7 @@ Error al cargar datos
 
 
 // =====================================
-// MOSTRAR TABLA
+// TABLA INFORMES
 // =====================================
 
 
@@ -161,7 +178,7 @@ tabla.innerHTML="";
 
 
 
-if(inspecciones.length===0){
+if(!inspecciones.length){
 
 
 
@@ -172,9 +189,9 @@ tabla.innerHTML=
 
 <tr>
 
-<td colspan="6">
+<td colspan="7">
 
-No existen inspecciones registradas
+No existen inspecciones
 
 </td>
 
@@ -203,7 +220,7 @@ let elemento=elementos.find(function(e){
 
 
 
-return String(e.id) === String(i.elementoId);
+return String(e.id)===String(i.elementoId);
 
 
 
@@ -215,11 +232,7 @@ return String(e.id) === String(i.elementoId);
 
 
 
-let nombreElemento=
-
-
-
-elemento
+let nombreElemento = elemento
 
 ?
 
@@ -227,7 +240,7 @@ elemento.nombre
 
 :
 
-"Elemento no encontrado";
+"Elemento desconocido";
 
 
 
@@ -252,7 +265,9 @@ foto=
 
 <a href="${i.foto}" target="_blank">
 
+
 <img src="${i.foto}">
+
 
 </a>
 
@@ -276,7 +291,9 @@ foto="-";
 
 
 
-let claseEstado="";
+
+
+let clase="";
 
 
 
@@ -285,32 +302,37 @@ let claseEstado="";
 switch(i.estado){
 
 
+
 case "Bueno":
 
-claseEstado="Bueno";
+clase="Bueno";
 
 break;
+
 
 
 case "Observado":
 
-claseEstado="Observado";
+clase="Observado";
 
 break;
+
 
 
 case "Deteriorado":
 
-claseEstado="Deteriorado";
+clase="Deteriorado";
 
 break;
+
 
 
 case "Fuera de servicio":
 
-claseEstado="Fuera";
+clase="Fuera";
 
 break;
+
 
 
 }
@@ -332,6 +354,7 @@ tabla.innerHTML +=
 <tr>
 
 
+
 <td>
 
 ${formatearFecha(i.fecha)}
@@ -340,66 +363,108 @@ ${formatearFecha(i.fecha)}
 
 
 
+
+
 <td>
+
+
+<b>
 
 ${nombreElemento}
 
+</b>
+
+
 <br>
 
-<small>
 
 ${elemento ? elemento.tipo:""}
 
-</small>
 
 </td>
 
 
 
 
+
 <td>
 
-<span class="estado ${claseEstado}">
+
+<span class="estado ${clase}">
+
 
 ${i.estado || "-"}
 
+
 </span>
+
 
 </td>
 
 
 
 
+
 <td>
+
 
 ${i.observacion || "-"}
 
+
 </td>
 
 
 
 
+
 <td>
+
 
 ${i.usuario || "-"}
 
+
 </td>
+
 
 
 
 
 <td>
 
+
 ${foto}
 
+
 </td>
+
+
+
+
+
+<td>
+
+
+<button class="btn-pdf"
+
+onclick="generarPDF('${i.id}')">
+
+
+📄 PDF
+
+
+</button>
+
+
+</td>
+
 
 
 
 </tr>
 
-`;
 
+
+`;
 
 
 
@@ -418,9 +483,8 @@ ${foto}
 
 
 
-
 // =====================================
-// FORMATO FECHA
+// FORMATEAR FECHA
 // =====================================
 
 
@@ -428,11 +492,9 @@ function formatearFecha(fecha){
 
 
 
-if(!fecha){
+if(!fecha)
 
 return "-";
-
-}
 
 
 
@@ -440,23 +502,9 @@ let f=new Date(fecha);
 
 
 
-return f.toLocaleDateString(
+return f.toLocaleString(
 
-"es-UY",
-
-{
-
-day:"2-digit",
-
-month:"2-digit",
-
-year:"numeric",
-
-hour:"2-digit",
-
-minute:"2-digit"
-
-}
+"es-UY"
 
 );
 
@@ -473,14 +521,359 @@ minute:"2-digit"
 
 
 // =====================================
-// ACTUALIZAR
+// GENERAR PDF
 // =====================================
 
 
-setInterval(function(){
+function generarPDF(id){
 
 
-cargarDatos();
+
+let inspeccion=inspecciones.find(function(i){
 
 
-},300000);
+
+return String(i.id)===String(id);
+
+
+
+});
+
+
+
+
+
+if(!inspeccion){
+
+
+
+alert(
+
+"No encontrada"
+
+);
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+let elemento=elementos.find(function(e){
+
+
+
+return String(e.id)===String(inspeccion.elementoId);
+
+
+
+});
+
+
+
+
+
+
+
+let ventana=window.open("");
+
+
+
+
+
+
+ventana.document.write(
+
+
+
+`
+
+<!DOCTYPE html>
+
+<html>
+
+
+<head>
+
+
+<title>
+
+Informe SGT
+
+</title>
+
+
+
+<style>
+
+
+body{
+
+
+font-family:Arial;
+
+padding:40px;
+
+}
+
+
+h1{
+
+
+color:#0f6fae;
+
+}
+
+
+h2{
+
+
+border-bottom:1px solid #ccc;
+
+padding-bottom:10px;
+
+}
+
+
+.dato{
+
+
+margin:8px 0;
+
+}
+
+
+.foto{
+
+
+width:450px;
+
+border-radius:10px;
+
+}
+
+
+button{
+
+
+padding:12px;
+
+background:#0f6fae;
+
+color:white;
+
+border:0;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}
+
+
+
+</style>
+
+
+
+</head>
+
+
+
+
+<body>
+
+
+
+<h1>
+
+SGT
+
+</h1>
+
+
+<h2>
+
+Informe de Inspección
+
+</h2>
+
+
+
+
+<div class="dato">
+
+<b>Elemento:</b>
+
+${elemento ? elemento.nombre:"-"}
+
+</div>
+
+
+
+<div class="dato">
+
+<b>Tipo:</b>
+
+${elemento ? elemento.tipo:"-"}
+
+</div>
+
+
+
+
+<div class="dato">
+
+<b>Código:</b>
+
+${elemento ? elemento.codigo:"-"}
+
+</div>
+
+
+
+
+
+<div class="dato">
+
+<b>Coordenadas:</b>
+
+${elemento ? elemento.lat+" / "+elemento.lng:"-"}
+
+</div>
+
+
+
+
+<hr>
+
+
+
+<h2>
+
+Inspección
+
+</h2>
+
+
+
+<div class="dato">
+
+<b>Fecha:</b>
+
+${formatearFecha(inspeccion.fecha)}
+
+</div>
+
+
+
+
+<div class="dato">
+
+<b>Inspector:</b>
+
+${inspeccion.usuario || "-"}
+
+</div>
+
+
+
+
+
+<div class="dato">
+
+<b>Estado:</b>
+
+${inspeccion.estado || "-"}
+
+</div>
+
+
+
+
+
+<div class="dato">
+
+<b>Observación:</b>
+
+</div>
+
+
+<p>
+
+${inspeccion.observacion || "-"}
+
+</p>
+
+
+
+
+
+
+
+${
+inspeccion.foto
+
+?
+
+`
+
+<h2>
+
+Evidencia
+
+</h2>
+
+
+<img class="foto"
+
+src="${inspeccion.foto}">
+
+
+`
+
+:
+
+""
+
+}
+
+
+
+
+<br><br>
+
+
+
+<button onclick="window.print()">
+
+Guardar PDF
+
+</button>
+
+
+
+
+</body>
+
+
+</html>
+
+
+
+`
+
+
+
+);
+
+
+
+}
