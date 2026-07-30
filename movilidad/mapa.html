@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>SGT | Mapa Movilidad Urbana</title>
+
+
+<link rel="stylesheet" href="../css/admin.css">
+
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+
+
+<style>
+
+
+#mapa{
+
+width:100%;
+
+height:70vh;
+
+border-radius:15px;
+
+}
+
+
+
+.barraMapa{
+
+display:flex;
+
+gap:10px;
+
+margin-bottom:15px;
+
+flex-wrap:wrap;
+
+}
+
+
+
+.barraMapa input,
+.barraMapa select{
+
+padding:12px;
+
+border-radius:8px;
+
+border:1px solid #ccc;
+
+}
+
+
+
+.barraMapa input{
+
+flex:1;
+
+}
+
+
+
+.barraMapa button{
+
+background:#0f6fae;
+
+color:white;
+
+border:none;
+
+padding:12px 20px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}
+
+
+
+
+.modal{
+
+display:none;
+
+position:fixed;
+
+inset:0;
+
+background:rgba(0,0,0,.6);
+
+justify-content:center;
+
+align-items:center;
+
+z-index:2000;
+
+}
+
+
+
+.modal-contenido{
+
+
+background:white;
+
+color:#333;
+
+width:420px;
+
+max-height:90vh;
+
+overflow:auto;
+
+padding:25px;
+
+border-radius:15px;
+
+
+}
+
+
+
+.modal-contenido input,
+.modal-contenido select,
+.modal-contenido textarea{
+
+
+width:100%;
+
+padding:12px;
+
+margin-bottom:12px;
+
+border-radius:8px;
+
+border:1px solid #ccc;
+
+
+}
+
+
+
+.modal-contenido button{
+
+
+padding:10px 20px;
+
+border:none;
+
+border-radius:8px;
+
+cursor:pointer;
+
+margin-right:10px;
+
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+<div class="sidebar">
+
+
+
+<div class="logo">
+
+
+<img src="../img/logo.png">
+
+
+<h2>SGT</h2>
+
+
+<p>
+Dirección de Tránsito y Transportes
+</p>
+
+
+</div>
+
+
+
+
+
+<ul>
+
+
+
+<li onclick="location='dashboard.html'">
+
+
+<i class="fa-solid fa-house"></i>
+
+
+Dashboard
+
+
+</li>
+
+
+
+
+<li class="activo">
+
+
+<i class="fa-solid fa-map"></i>
+
+
+Mapa Interactivo
+
+
+</li>
+
+
+
+
+
+<li onclick="location='elementos.html'">
+
+
+<i class="fa-solid fa-location-dot"></i>
+
+
+Elementos
+
+
+</li>
+
+
+
+
+
+<li onclick="cerrarSesion()">
+
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+
+Salir
+
+
+</li>
+
+
+
+</ul>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="contenido">
+
+
+
+<header>
+
+
+<div>
+
+
+<h1>
+
+Mapa de Movilidad Urbana
+
+</h1>
+
+
+<p>
+
+Infraestructura vial geolocalizada
+
+</p>
+
+
+</div>
+
+
+
+<div class="usuarioNombre"></div>
+
+
+</header>
+
+
+
+
+<div class="barraMapa">
+
+
+<input 
+placeholder="Buscar elemento..."
+onkeyup="buscarElemento(this.value)">
+
+
+
+<select onchange="filtrarTipo(this.value)"
+id="filtro">
+
+
+<option>
+
+Todos
+
+</option>
+
+<option>
+
+Semáforo
+
+</option>
+
+<option>
+
+Paso peatonal
+
+</option>
+
+<option>
+
+Radar
+
+</option>
+
+<option>
+
+Cámara
+
+</option>
+
+<option>
+
+Lomo de burro
+
+</option>
+
+<option>
+
+Otro
+
+</option>
+
+
+</select>
+
+
+
+<button onclick="abrirNuevo()">
+
+<i class="fa-solid fa-plus"></i>
+
+Nuevo elemento
+
+</button>
+
+
+</div>
+
+
+
+
+<div id="mapa"></div>
+
+
+
+
+
+
+<div class="modal" id="modal">
+
+
+<div class="modal-contenido">
+
+
+<h2>
+
+Nuevo elemento
+
+</h2>
+
+
+
+
+
+<select id="tipo">
+
+
+<option>Semáforo</option>
+
+<option>Paso peatonal</option>
+
+<option>Parada de taxi</option>
+
+<option>Carga y descarga</option>
+
+<option>Cordón reservado</option>
+
+<option>Lomo de burro</option>
+
+<option>Radar</option>
+
+<option>Cámara</option>
+
+<option>Cartel PARE</option>
+
+<option>Señal vertical</option>
+
+<option>Señal horizontal</option>
+
+<option>Reductor de velocidad</option>
+
+<option>Otro</option>
+
+
+</select>
+
+
+
+
+
+
+
+<input 
+id="codigo"
+placeholder="Código del elemento">
+
+
+
+
+
+
+
+<input
+id="nombre"
+placeholder="Nombre o referencia">
+
+
+
+
+
+
+
+<textarea
+id="descripcion"
+placeholder="Descripción">
+
+</textarea>
+
+
+
+
+
+
+
+<textarea
+id="caracteristicas"
+placeholder="Características (una por línea)">
+
+</textarea>
+
+
+
+
+
+
+
+<textarea
+id="actuacion"
+placeholder="Actuación inicial">
+
+</textarea>
+
+
+
+
+
+
+
+
+<button onclick="guardarElemento()">
+
+Guardar
+
+</button>
+
+
+
+
+
+
+
+<button onclick="cerrarNuevo()">
+
+Cancelar
+
+</button>
+
+
+
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<script src="../js/permisos.js"></script>
+
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+
+<script src="../js/mapa.js"></script>
+
+
+
+
+
+<script>
+
+
+permitirModulo("movilidad");
+
+
+cargarUsuario();
+
+
+
+
+function cerrarSesion(){
+
+
+localStorage.removeItem("usuarioActual");
+
+
+window.location="../login.html";
+
+
+}
+
+
+
+
+</script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SGT | Panel Administrador</title>
+
+<link rel="stylesheet" href="../css/admin.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+
+<body>
+
+
+<div class="sidebar">
+
+
+<div class="logo">
+
+
+<img src="../img/logo.png">
+
+
+<h2>SGT</h2>
+
+
+<p>
+Dirección de Tránsito y Transportes
+</p>
+
+
+</div>
+
+
+
+
+
+<ul>
+
+
+<li class="activo">
+
+<i class="fa-solid fa-house"></i>
+
+Dashboard
+
+</li>
+
+
+
+
+<li onclick="location='usuarios.html'">
+
+<i class="fa-solid fa-users"></i>
+
+Usuarios
+
+</li>
+
+
+
+
+
+<li onclick="location='roles.html'">
+
+<i class="fa-solid fa-user-shield"></i>
+
+Roles
+
+</li>
+
+
+
+
+
+<li onclick="location='../movilidad/dashboard.html'">
+
+<i class="fa-solid fa-road"></i>
+
+Movilidad Urbana
+
+</li>
+
+
+
+
+
+<li onclick="location='../camaras/dashboard.html'">
+
+<i class="fa-solid fa-video"></i>
+
+Cámaras e Incidencias
+
+</li>
+
+
+
+
+
+<li onclick="cerrarSesion()">
+
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+Cerrar sesión
+
+
+</li>
+
+
+
+</ul>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="contenido">
+
+
+
+
+
+<header>
+
+
+<div>
+
+
+<h1>
+
+Panel Administrador
+
+</h1>
+
+
+<p>
+
+Sistema de Gestión de Tránsito
+
+</p>
+
+
+</div>
+
+
+
+
+
+<div class="usuarioNombre">
+
+</div>
+
+
+
+</header>
+
+
+
+
+
+
+
+<section class="tarjetas">
+
+
+
+
+
+<div class="card">
+
+
+<i class="fa-solid fa-users"></i>
+
+
+<h3>
+
+Usuarios
+
+</h3>
+
+
+<p>
+
+Administrar cuentas del sistema.
+
+</p>
+
+
+<button onclick="location='usuarios.html'">
+
+Ingresar
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<i class="fa-solid fa-road"></i>
+
+
+<h3>
+
+Movilidad Urbana
+
+</h3>
+
+
+<p>
+
+Mapa e infraestructura vial.
+
+</p>
+
+
+<button onclick="location='../movilidad/dashboard.html'">
+
+Ingresar
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<i class="fa-solid fa-video"></i>
+
+
+<h3>
+
+Cámaras e Incidencias
+
+</h3>
+
+
+<p>
+
+Gestión de cámaras y eventos.
+
+</p>
+
+
+<button onclick="location='../camaras/dashboard.html'">
+
+Ingresar
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+
+<h2>
+
+Estado del sistema
+
+</h2>
+
+
+
+
+<table>
+
+
+<thead>
+
+<tr>
+
+<th>
+Módulo
+</th>
+
+
+<th>
+Estado
+</th>
+
+
+<th>
+Descripción
+</th>
+
+
+</tr>
+
+</thead>
+
+
+
+
+
+<tbody>
+
+
+
+<tr>
+
+<td>
+Usuarios
+</td>
+
+
+<td>
+Activo
+</td>
+
+
+<td>
+Gestión administrativa
+</td>
+
+
+</tr>
+
+
+
+
+
+<tr>
+
+<td>
+Movilidad Urbana
+</td>
+
+
+<td>
+Activo
+</td>
+
+
+<td>
+Mapa interactivo
+</td>
+
+
+</tr>
+
+
+
+
+
+<tr>
+
+<td>
+Cámaras
+</td>
+
+
+<td>
+Pendiente
+</td>
+
+
+<td>
+Próximo módulo
+</td>
+
+
+</tr>
+
+
+
+</tbody>
+
+
+</table>
+
+
+
+</section>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<script src="../js/permisos.js"></script>
+
+<script>
+
+
+permitirModulo("admin");
+
+
+cargarUsuario();
+
+
+
+
+function cerrarSesion(){
+
+
+localStorage.removeItem("usuarioActual");
+
+
+window.location="../login.html";
+
+
+}
+
+
+</script>
+
+
+
+</body>
+
+</html>
