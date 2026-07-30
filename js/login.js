@@ -9,22 +9,42 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzYU8xREGRuJ3-8ZrK-dbYU
 
 
 
+
+// =====================================
 // LOGIN USUARIO
+// =====================================
+
 
 document
 .querySelector(".btnUsuario")
 .addEventListener("click",function(){
 
 
+
 let usuario =
-document.querySelectorAll("input")[0].value;
+
+document.querySelectorAll("input")[0]
+
+.value
+
+.trim();
+
+
 
 
 let clave =
-document.querySelectorAll("input")[1].value;
+
+document.querySelectorAll("input")[1]
+
+.value
+
+.trim();
+
+
 
 
 validarLogin(usuario,clave);
+
 
 
 });
@@ -34,22 +54,43 @@ validarLogin(usuario,clave);
 
 
 
+
+
+// =====================================
 // LOGIN ADMIN
+// =====================================
+
 
 document
 .querySelector(".btnAdmin")
 .addEventListener("click",function(){
 
 
+
 let usuario =
-document.querySelectorAll("input")[2].value;
+
+document.querySelectorAll("input")[2]
+
+.value
+
+.trim();
+
+
 
 
 let clave =
-document.querySelectorAll("input")[3].value;
+
+document.querySelectorAll("input")[3]
+
+.value
+
+.trim();
+
+
 
 
 validarLogin(usuario,clave);
+
 
 
 });
@@ -60,12 +101,16 @@ validarLogin(usuario,clave);
 
 
 
+
+
 // =====================================
-// VALIDAR CONTRA GOOGLE SHEETS
+// VALIDAR LOGIN
 // =====================================
 
 
 function validarLogin(usuario,clave){
+
+
 
 
 
@@ -77,18 +122,53 @@ API_URL+"?accion=usuarios"
 
 
 
-.then(r=>r.json())
+.then(function(respuesta){
+
+
+return respuesta.json();
+
+
+})
 
 
 
-.then(usuarios=>{
+.then(function(usuarios){
+
+
 
 
 
 console.log(
-"USUARIOS:",
+
+"USUARIOS SGT:",
+
 usuarios
+
 );
+
+
+
+
+
+
+
+if(!Array.isArray(usuarios)){
+
+
+alert(
+
+"Error cargando usuarios"
+
+);
+
+
+return;
+
+
+}
+
+
+
 
 
 
@@ -101,8 +181,12 @@ let encontrado = usuarios.find(function(u){
 
 return (
 
+
+
 String(u.usuario)
+
 .toLowerCase()
+
 ===
 
 usuario.toLowerCase()
@@ -114,7 +198,9 @@ usuario.toLowerCase()
 
 
 String(u.password)
+
 ===
+
 clave
 
 
@@ -131,12 +217,17 @@ clave
 
 
 
+
 if(!encontrado){
 
 
+
 alert(
+
 "Usuario o contraseña incorrectos"
+
 );
+
 
 
 return;
@@ -150,27 +241,45 @@ return;
 
 
 
-let sesion={
+
+
+
+
+
+// CREAR SESION
+
+
+let usuarioActual={
 
 
 
 id:
+
 encontrado.id,
 
 
 
 nombre:
+
 encontrado.nombre,
 
 
 
 usuario:
+
 encontrado.usuario,
 
 
 
 rol:
-encontrado.rol
+
+encontrado.rol,
+
+
+
+cambiarPassword:
+
+encontrado.cambiarPassword || "NO"
 
 
 
@@ -182,11 +291,13 @@ encontrado.rol
 
 
 
+
+
 localStorage.setItem(
 
 "usuarioActual",
 
-JSON.stringify(sesion)
+JSON.stringify(usuarioActual)
 
 );
 
@@ -196,7 +307,51 @@ JSON.stringify(sesion)
 
 
 
-entrarSistema(sesion);
+
+
+
+
+// =====================================
+// CAMBIO OBLIGATORIO PASSWORD
+// =====================================
+
+
+
+
+if(
+
+String(encontrado.cambiarPassword)
+
+.toUpperCase()
+
+===
+
+"SI"
+
+){
+
+
+
+window.location="cambiar-password.html";
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+entrarSistema(usuarioActual);
+
+
 
 
 
@@ -204,16 +359,26 @@ entrarSistema(sesion);
 
 
 
+.catch(function(error){
 
-.catch(error=>{
 
 
-console.error(error);
+console.error(
+
+"ERROR LOGIN:",
+
+error
+
+);
+
 
 
 alert(
+
 "No se pudo conectar con la base de datos"
+
 );
+
 
 
 });
@@ -221,6 +386,8 @@ alert(
 
 
 }
+
+
 
 
 
@@ -239,17 +406,25 @@ function entrarSistema(usuario){
 
 
 
+
+
 switch(usuario.rol){
+
+
 
 
 
 case "Administrador":
 
 
+
 window.location="admin/dashboard.html";
 
 
+
 break;
+
+
 
 
 
@@ -258,7 +433,9 @@ break;
 case "Movilidad":
 
 
+
 window.location="movilidad/dashboard.html";
+
 
 
 break;
@@ -267,7 +444,10 @@ break;
 
 
 
+
+
 default:
+
 
 
 alert(
@@ -278,7 +458,13 @@ alert(
 
 
 
+break;
+
+
+
 }
+
+
 
 
 
