@@ -1,208 +1,64 @@
 // =====================================
-// SGT - GESTIÓN DE USUARIOS
-// Dirección de Tránsito y Transportes
+// SGT - GESTION USUARIOS
+// GOOGLE SHEETS
 // =====================================
 
 
-// =====================================
-// CREACIÓN INICIAL DE ADMINISTRADORES
-// =====================================
 
-
-let usuarios = JSON.parse(
-
-localStorage.getItem("usuariosSGT")
-
-);
+const API_URL = "https://script.google.com/macros/s/AKfycbzYU8xREGRuJ3-8ZrK-dbYUZNzVBhPiIceVWU3OftmxvO6fNCBFcFwrnurmWofjkFxR/exec";
 
 
 
-if(!usuarios){
-
-
-
-usuarios = [
-
-
-{
-nombre:"Pablo Cerrutti",
-usuario:"Pcerrutti",
-password:"Admin123",
-rol:"Administrador",
-estado:"Activo",
-debeCambiarPassword:true
-},
-
-
-
-{
-nombre:"Marcelo Perez",
-usuario:"Mperez",
-password:"Admin123",
-rol:"Administrador",
-estado:"Activo",
-debeCambiarPassword:true
-},
-
-
-
-{
-nombre:"Gustavo Bentancur",
-usuario:"Gbentancur",
-password:"Admin123",
-rol:"Administrador",
-estado:"Activo",
-debeCambiarPassword:true
-}
-
-
-];
-
-
-
-localStorage.setItem(
-
-"usuariosSGT",
-
-JSON.stringify(usuarios)
-
-);
-
-
-
-}
-
-
-
-// =====================================
-// CONTROL DE ACCESO
-// =====================================
-
-
-let usuarioActual = JSON.parse(
-
-localStorage.getItem("usuarioActual")
-
-);
-
-
-
-if(
-!usuarioActual ||
-usuarioActual.rol !== "Administrador"
-){
-
-
-alert("Acceso restringido");
-
-
-window.location="../login.html";
-
-
-}
+let usuarios=[];
 
 
 
 
 
 
-// =====================================
-// CARGAR TABLA
-// =====================================
+cargarUsuarios();
+
+
+
+
+
+
+function cargarUsuarios(){
+
+
+
+fetch(
+
+API_URL+"?accion=usuarios"
+
+)
+
+
+
+.then(r=>r.json())
+
+
+
+.then(data=>{
+
+
+
+usuarios=data;
+
 
 
 mostrarUsuarios();
 
 
 
-
-function mostrarUsuarios(){
-
-
-
-let tabla = document.getElementById(
-
-"tablaUsuarios"
-
-);
+})
 
 
 
-if(!tabla){
-
-return;
-
-}
+.catch(error=>{
 
 
-
-
-tabla.innerHTML="";
-
-
-
-
-
-usuarios.forEach(function(usuario,index){
-
-
-
-let fila = tabla.insertRow();
-
-
-
-
-fila.innerHTML = `
-
-
-
-<td>
-
-${usuario.nombre}
-
-</td>
-
-
-
-<td>
-
-${usuario.usuario}
-
-</td>
-
-
-
-<td>
-
-${usuario.rol}
-
-</td>
-
-
-
-<td>
-
-${usuario.estado}
-
-</td>
-
-
-
-<td>
-
-
-<button onclick="eliminarUsuario(${index})">
-
-Eliminar
-
-</button>
-
-
-</td>
-
-
-`;
-
+console.error(error);
 
 
 });
@@ -217,243 +73,63 @@ Eliminar
 
 
 
-// =====================================
-// CREAR NUEVO USUARIO
-// =====================================
+
+
+function mostrarUsuarios(){
 
 
 
-function guardarUsuario(){
+let tabla=document.getElementById(
+
+"tablaUsuarios"
+
+);
 
 
 
-let nombre =
-document.getElementById("nombre").value;
-
-
-
-let usuario =
-document.getElementById("usuario").value;
-
-
-
-let password =
-document.getElementById("password").value;
-
-
-
-let rol =
-document.getElementById("rol").value;
-
-
-
-let estado =
-document.getElementById("estado").value;
-
-
-
-
-
-
-if(
-nombre=="" ||
-usuario=="" ||
-password==""
-){
-
-
-alert("Complete todos los campos");
-
+if(!tabla)
 
 return;
 
 
-}
 
 
 
 
+tabla.innerHTML="";
 
 
 
-// evitar usuarios repetidos
 
 
-let existe = usuarios.find(
 
-u=>u.usuario===usuario
 
-);
+usuarios.forEach(function(u){
 
 
 
-if(existe){
+tabla.innerHTML+=
 
 
-alert("El usuario ya existe");
 
+`
 
-return;
+<tr>
 
+<td>${u.nombre}</td>
 
-}
+<td>${u.usuario}</td>
 
+<td>${u.rol}</td>
 
+<td>${u.estado || "Activo"}</td>
 
+</tr>
 
+`;
 
 
-
-let nuevoUsuario = {
-
-
-
-nombre:nombre,
-
-
-usuario:usuario,
-
-
-password:password,
-
-
-rol:rol,
-
-
-estado:estado,
-
-
-debeCambiarPassword:true
-
-
-
-};
-
-
-
-
-
-
-
-usuarios.push(nuevoUsuario);
-
-
-
-
-
-localStorage.setItem(
-
-"usuariosSGT",
-
-JSON.stringify(usuarios)
-
-);
-
-
-
-
-
-alert("Usuario creado correctamente");
-
-
-
-
-
-mostrarUsuarios();
-
-
-
-
-
-cerrarModal();
-
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// ELIMINAR USUARIO
-// =====================================
-
-
-
-function eliminarUsuario(index){
-
-
-
-if(confirm("¿Eliminar usuario?")){
-
-
-
-usuarios.splice(index,1);
-
-
-
-
-
-localStorage.setItem(
-
-"usuariosSGT",
-
-JSON.stringify(usuarios)
-
-);
-
-
-
-
-
-mostrarUsuarios();
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// MODAL
-// =====================================
-
-
-
-function abrirModal(){
-
-
-
-document.getElementById("modal")
-
-.style.display="flex";
-
-
-
-}
-
-
-
-
-
-function cerrarModal(){
-
-
-
-document.getElementById("modal")
-
-.style.display="none";
+});
 
 
 
