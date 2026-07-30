@@ -1,12 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 
+
 <head>
 
+
 <meta charset="UTF-8">
+
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SGT | Movilidad Urbana</title>
+
+
+<title>
+
+SGT | Movilidad
+
+</title>
+
 
 
 <link rel="stylesheet" href="../css/admin.css">
@@ -16,7 +27,10 @@
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 
+
 </head>
+
+
 
 
 
@@ -24,7 +38,11 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 
 
+
+
 <div class="sidebar">
+
+
 
 
 
@@ -34,11 +52,17 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 <img src="../img/logo.png">
 
 
-<h2>SGT</h2>
+<h2>
+
+SGT
+
+</h2>
 
 
 <p>
-Dirección de Tránsito y Transportes
+
+Movilidad Urbana
+
 </p>
 
 
@@ -49,20 +73,26 @@ Dirección de Tránsito y Transportes
 
 
 
+
+
+
 <ul>
+
+
 
 
 
 <li class="activo">
 
 
-<i class="fa-solid fa-road"></i>
+<i class="fa-solid fa-house"></i>
 
 
-Movilidad Urbana
+Dashboard
 
 
 </li>
+
 
 
 
@@ -71,13 +101,14 @@ Movilidad Urbana
 <li onclick="location='mapa.html'">
 
 
-<i class="fa-solid fa-map-location-dot"></i>
+<i class="fa-solid fa-map"></i>
 
 
-Mapa Interactivo
+Mapa
 
 
 </li>
+
 
 
 
@@ -90,23 +121,7 @@ Mapa Interactivo
 <i class="fa-solid fa-location-dot"></i>
 
 
-Elementos de Tránsito
-
-
-</li>
-
-
-
-
-
-
-<li>
-
-
-<i class="fa-solid fa-chart-line"></i>
-
-
-Reportes
+Elementos
 
 
 </li>
@@ -117,16 +132,17 @@ Reportes
 
 
 
-<li onclick="volverAdmin()">
+<li onclick="location='informes.html'">
 
 
-<i class="fa-solid fa-user-shield"></i>
+<i class="fa-solid fa-file-lines"></i>
 
 
-Panel Administrador
+Informes
 
 
 </li>
+
 
 
 
@@ -140,7 +156,8 @@ Panel Administrador
 <i class="fa-solid fa-right-from-bracket"></i>
 
 
-Cerrar sesión
+
+Salir
 
 
 
@@ -150,8 +167,8 @@ Cerrar sesión
 
 
 
-</ul>
 
+</ul>
 
 
 
@@ -169,9 +186,8 @@ Cerrar sesión
 
 
 
-
-
 <header>
+
 
 
 <div>
@@ -179,14 +195,15 @@ Cerrar sesión
 
 <h1>
 
-Gestión de Movilidad Urbana
+Panel Movilidad Urbana
 
 </h1>
 
 
+
 <p>
 
-Mapa y administración de infraestructura vial
+Gestión de infraestructura vial
 
 </p>
 
@@ -197,9 +214,8 @@ Mapa y administración de infraestructura vial
 
 
 
-<div class="usuarioNombre">
+<div class="usuarioNombre"></div>
 
-</div>
 
 
 
@@ -213,241 +229,105 @@ Mapa y administración de infraestructura vial
 
 
 
-<section class="tarjetas">
 
+<div class="tarjetas">
 
 
 
 
 
-<div class="card">
+<div class="card"
 
+onclick="location='mapa.html'">
 
-<i class="fa-solid fa-map"></i>
 
-
-
-<h3>
-
-Mapa Interactivo
-
-</h3>
-
-
-
-<p>
-
-Visualización de elementos urbanos.
-
-</p>
-
-
-
-<button onclick="location='mapa.html'">
-
-Ingresar
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<i class="fa-solid fa-traffic-light"></i>
-
-
-
-<h3>
-
-Elementos de Tránsito
-
-</h3>
-
-
-
-<p>
-
-Semáforos, pasos peatonales, paradas y zonas.
-
-</p>
-
-
-
-<button onclick="location='elementos.html'">
-
-Gestionar
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<i class="fa-solid fa-database"></i>
-
-
-
-<h3>
-
-Base de Datos Urbana
-
-</h3>
-
-
-
-<p>
-
-Información geolocalizada.
-
-</p>
-
-
-
-<button disabled>
-
-En desarrollo
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-</section>
-
-
-
-
-
-
-
-<section>
-
+<i class="fa-solid fa-map-location-dot"></i>
 
 
 <h2>
 
-Resumen
+Mapa
 
 </h2>
 
 
+<p>
 
-<table>
+Elementos georreferenciados
 
-
-
-<thead>
-
-<tr>
-
-<th>
-Elemento
-</th>
+</p>
 
 
-<th>
-Estado
-</th>
-
-
-<th>
-Acción
-</th>
-
-
-</tr>
-
-</thead>
-
-
-
-
-<tbody>
-
-
-
-<tr>
-
-<td>
-Mapa urbano
-</td>
-
-
-<td>
-Activo
-</td>
-
-
-<td>
-Disponible
-</td>
-
-
-</tr>
+</div>
 
 
 
 
 
-<tr>
-
-<td>
-Elementos geolocalizados
-</td>
-
-
-<td>
-En desarrollo
-</td>
-
-
-<td>
-Gestión pendiente
-</td>
-
-
-</tr>
 
 
 
+<div class="card"
 
-</tbody>
-
-
-
-</table>
+onclick="location='elementos.html'">
 
 
+<i class="fa-solid fa-road"></i>
 
-</section>
 
+<h2>
+
+Elementos
+
+</h2>
+
+
+<p>
+
+Inventario vial
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="card"
+
+onclick="location='informes.html'">
+
+
+<i class="fa-solid fa-file-lines"></i>
+
+
+<h2>
+
+Informes
+
+</h2>
+
+
+<p>
+
+Inspecciones realizadas
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+</div>
 
 
 
@@ -469,7 +349,8 @@ Gestión pendiente
 <script>
 
 
-permitirModulo("movilidad");
+
+verificarRol("Movilidad");
 
 
 cargarUsuario();
@@ -481,35 +362,13 @@ cargarUsuario();
 function cerrarSesion(){
 
 
-localStorage.removeItem("usuarioActual");
+localStorage.removeItem(
+"usuarioActual"
+);
+
 
 
 window.location="../login.html";
-
-
-}
-
-
-
-
-
-
-function volverAdmin(){
-
-
-if(esAdministrador()){
-
-
-window.location="../admin/dashboard.html";
-
-
-}else{
-
-
-alert("No tiene permisos administrativos");
-
-
-}
 
 
 }
@@ -523,5 +382,6 @@ alert("No tiene permisos administrativos");
 
 
 </body>
+
 
 </html>
