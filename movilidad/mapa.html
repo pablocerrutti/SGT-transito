@@ -93,6 +93,28 @@ cursor:pointer;
 
 
 
+.btn-volver{
+
+margin-bottom:15px;
+
+padding:10px 20px;
+
+border:none;
+
+border-radius:8px;
+
+cursor:pointer;
+
+background:#0f6fae;
+
+color:white;
+
+}
+
+
+
+
+
 .modal{
 
 display:none;
@@ -219,7 +241,7 @@ Dirección de Tránsito y Transportes
 
 
 
-<li onclick="location='dashboard.html'">
+<li onclick="volverDashboard()">
 
 <i class="fa-solid fa-house"></i>
 
@@ -325,6 +347,23 @@ Infraestructura vial geolocalizada
 
 
 
+<button 
+onclick="volverDashboard()" 
+class="btn-volver">
+
+
+<i class="fa-solid fa-arrow-left"></i>
+
+
+Volver Dashboard
+
+
+</button>
+
+
+
+
+
 
 
 
@@ -414,21 +453,6 @@ Nuevo elemento
 
 
 </div>
-
-
-
-
-
-
-<div id="mapa"></div>
-
-
-
-
-
-
-
-
 
 <!-- ========================= -->
 <!-- MODAL NUEVO ELEMENTO -->
@@ -761,26 +785,14 @@ Cancelar
 <script>
 
 
+// CONTROL DE ACCESO AL MODULO
+
 permitirModulo("movilidad");
 
 
+// MOSTRAR USUARIO
+
 cargarUsuario();
-
-
-
-
-
-function cerrarSesion(){
-
-
-localStorage.removeItem("usuarioActual");
-
-
-window.location="../login.html";
-
-
-}
-
 
 
 
@@ -794,3 +806,8 @@ window.location="../login.html";
 
 
 </html>
+
+
+
+
+<div id="mapa"></div>
