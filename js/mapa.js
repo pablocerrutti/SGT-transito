@@ -1,6 +1,6 @@
 // =====================================
 // SGT - MAPA MOVILIDAD URBANA
-// Google Sheets API + Inspecciones
+// Google Sheets API + Inspecciones + Fotos
 // =====================================
 
 
@@ -25,6 +25,8 @@ let ubicacionSeleccionada=null;
 let marcadorTemporal=null;
 
 let elementoEditando=null;
+
+
 
 
 
@@ -62,6 +64,9 @@ attribution:"© OpenStreetMap"
 
 
 
+
+
+
 // =====================================
 // CARGA INICIAL
 // =====================================
@@ -70,6 +75,9 @@ attribution:"© OpenStreetMap"
 cargarElementos();
 
 cargarInspecciones();
+
+
+
 
 
 
@@ -116,9 +124,14 @@ return r.json();
 
 
 console.log(
+
 "DATOS ELEMENTOS:",
+
 data
+
 );
+
+
 
 
 
@@ -126,8 +139,11 @@ if(!Array.isArray(data)){
 
 
 console.error(
+
 "Respuesta inválida",
+
 data
+
 );
 
 
@@ -156,20 +172,30 @@ dibujarMapa();
 
 
 console.error(
+
 "ERROR API:",
+
 error
+
 );
+
 
 
 alert(
+
 "No se pudo conectar con la base de datos"
+
 );
+
 
 
 });
 
 
 }
+
+
+
 
 
 
@@ -202,9 +228,14 @@ API_URL+"?accion=inspecciones"
 
 
 console.log(
+
 "DATOS INSPECCIONES:",
+
 data
+
 );
+
+
 
 
 
@@ -214,7 +245,12 @@ if(Array.isArray(data)){
 inspecciones=data;
 
 
+
+dibujarMapa();
+
+
 }
+
 
 
 })
@@ -225,8 +261,11 @@ inspecciones=data;
 
 
 console.error(
+
 "Error inspecciones:",
+
 error
+
 );
 
 
@@ -234,6 +273,8 @@ error
 
 
 }
+
+
 
 
 
@@ -266,6 +307,7 @@ mapa.removeLayer(layer);
 
 
 });
+
 
 
 
@@ -319,6 +361,7 @@ mapa.removeLayer(marcadorTemporal);
 
 
 
+
 marcadorTemporal=L.marker([
 
 e.latlng.lat,
@@ -330,7 +373,9 @@ e.latlng.lng
 .addTo(mapa)
 
 .bindPopup(
+
 "Ubicación seleccionada"
+
 )
 
 .openPopup();
@@ -349,8 +394,9 @@ e.latlng.lng
 
 
 
+
 // =====================================
-// FORMULARIO
+// FORMULARIO ELEMENTO
 // =====================================
 
 
@@ -364,6 +410,7 @@ limpiarFormulario();
 
 
 document.getElementById("modal")
+
 .style.display="flex";
 
 
@@ -373,14 +420,19 @@ document.getElementById("modal")
 
 
 
+
+
 function cerrarNuevo(){
 
 
 document.getElementById("modal")
+
 .style.display="none";
 
 
 }
+
+
 
 
 
@@ -423,7 +475,9 @@ if(!ubicacionSeleccionada){
 
 
 alert(
+
 "Seleccione un punto en el mapa"
+
 );
 
 
@@ -431,6 +485,8 @@ return;
 
 
 }
+
+
 
 
 
@@ -444,27 +500,37 @@ id:Date.now(),
 
 
 codigo:
+
 document.getElementById("codigo").value,
 
 
 
+
 tipo:
+
 document.getElementById("tipo").value,
 
 
 
+
 nombre:
+
 document.getElementById("nombre").value,
 
 
 
+
 descripcion:
+
 document.getElementById("descripcion").value,
 
 
 
+
 caracteristicas:
+
 document.getElementById("caracteristicas").value,
+
 
 
 
@@ -472,13 +538,18 @@ estado:"Activo",
 
 
 
+
 lat:
+
 ubicacionSeleccionada.lat,
 
 
 
+
 lng:
+
 ubicacionSeleccionada.lng,
+
 
 
 
@@ -497,6 +568,8 @@ usuarioActual.nombre
 
 
 };
+
+
 
 
 
@@ -522,29 +595,43 @@ datos:elemento
 
 )
 
+
+
 .then(r=>r.json())
 
 .then(resp=>{
 
 
 console.log(
+
 "GUARDADO:",
+
 resp
+
 );
 
 
+
 })
+
+
 
 .catch(err=>{
 
 
 console.error(
+
 "ERROR GUARDANDO:",
+
 err
+
 );
 
 
 });
+
+
+
 
 
 
@@ -565,21 +652,14 @@ cerrarNuevo();
 
 
 alert(
+
 "Elemento guardado"
+
 );
 
 
 
 }
-
-
-
-
-
-
-
-
-
 // =====================================
 // MARCADORES
 // =====================================
@@ -644,7 +724,6 @@ break;
 
 
 
-
 let marker=L.marker([
 
 Number(e.lat),
@@ -654,6 +733,7 @@ Number(e.lng)
 ])
 
 .addTo(mapa);
+
 
 
 
@@ -677,6 +757,8 @@ ${e.nombre || ""}
 
 
 
+
+
 let historial = inspecciones.filter(function(i){
 
 
@@ -689,7 +771,9 @@ return String(i.elementoId) === String(e.id);
 
 
 
+
 let textoInspecciones="";
+
 
 
 
@@ -705,46 +789,71 @@ textoInspecciones="Sin inspecciones registradas";
 else{
 
 
+
 historial.forEach(function(i){
 
 
 
 textoInspecciones += `
 
+
+
 <hr>
+
 
 <b>Fecha:</b>
 
 ${i.fecha || "-"}
 
+
 <br>
+
 
 <b>Estado:</b>
 
 ${i.estado || "-"}
 
-<br>
-
-${i.observacion || ""}
 
 <br>
 
 
-${i.foto ? 
+<b>Observación:</b>
 
-`<a href="${i.foto}" target="_blank">
+${i.observacion || "-"}
 
-📷 Ver foto
 
-</a>`
+<br>
 
-:""}
+
+
+${i.foto ?
+
+
+`
+
+<a href="${i.foto}" target="_blank">
+
+📷 Ver fotografía
+
+</a>
+
+`
+
+:
+
+""
+
+
+
+}
+
 
 `;
 
 
 
 });
+
 
 
 }
@@ -762,23 +871,30 @@ marker.bindPopup(
 <h3>${e.nombre || "Elemento"}</h3>
 
 
+
 <b>Tipo:</b>
 
 ${e.tipo || "-"}
 
+
 <br><br>
+
 
 
 <b>Código:</b>
 
 ${e.codigo || "-"}
 
+
 <br><br>
+
 
 
 <b>Estado:</b>
 
 ${e.estado || "-"}
+
+
 
 <br><br>
 
@@ -788,15 +904,373 @@ ${e.estado || "-"}
 ${e.descripcion || "-"}
 
 
+
 <h4>📋 Inspecciones</h4>
+
 
 
 ${textoInspecciones}
 
 
+
+<br>
+
+
+
+<button onclick="nuevaInspeccion('${e.id}')">
+
+➕ Nueva inspección
+
+</button>
+
+
+
 `
 
 );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// =====================================
+// NUEVA INSPECCION
+// =====================================
+
+
+function nuevaInspeccion(id){
+
+
+
+document.getElementById(
+
+"inspeccionElementoId"
+
+).value=id;
+
+
+
+
+document.getElementById(
+
+"modalInspeccion"
+
+)
+
+.style.display="flex";
+
+
+}
+
+
+
+
+
+
+
+function cerrarInspeccion(){
+
+
+document.getElementById(
+
+"modalInspeccion"
+
+)
+
+.style.display="none";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// GUARDAR INSPECCION CON FOTO
+// =====================================
+
+
+function guardarInspeccion(){
+
+
+
+let archivo = document.getElementById(
+
+"fotoInspeccion"
+
+).files[0];
+
+
+
+
+
+
+
+let inspeccion={
+
+
+
+id:Date.now(),
+
+
+
+elementoId:
+
+document.getElementById(
+
+"inspeccionElementoId"
+
+).value,
+
+
+
+
+fecha:
+
+new Date().toISOString(),
+
+
+
+
+usuario:
+
+(typeof usuarioActual !== "undefined")
+
+?
+
+usuarioActual.nombre
+
+:
+
+"Sistema",
+
+
+
+
+estado:
+
+document.getElementById(
+
+"inspeccionEstado"
+
+).value,
+
+
+
+
+observacion:
+
+document.getElementById(
+
+"inspeccionObservacion"
+
+).value,
+
+
+
+
+foto:""
+
+
+
+};
+
+
+
+
+
+
+
+
+
+if(archivo){
+
+
+
+let lector = new FileReader();
+
+
+
+
+
+
+lector.onload=function(){
+
+
+
+inspeccion.fotoBase64 = lector.result.split(",")[1];
+
+
+
+enviarInspeccion(inspeccion);
+
+
+
+};
+
+
+
+
+
+lector.readAsDataURL(archivo);
+
+
+
+}
+
+else{
+
+
+
+enviarInspeccion(inspeccion);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// ENVIAR INSPECCION API
+// =====================================
+
+
+function enviarInspeccion(inspeccion){
+
+
+
+fetch(
+
+API_URL,
+
+{
+
+method:"POST",
+
+body:JSON.stringify({
+
+accion:"guardarInspeccion",
+
+datos:inspeccion
+
+})
+
+}
+
+)
+
+
+
+
+
+.then(r=>r.json())
+
+.then(resp=>{
+
+
+
+console.log(
+
+"RESPUESTA INSPECCION:",
+
+resp
+
+);
+
+
+
+
+
+alert(
+
+"Inspección guardada correctamente"
+
+);
+
+
+
+
+
+cerrarInspeccion();
+
+
+
+
+
+document.getElementById(
+
+"inspeccionObservacion"
+
+).value="";
+
+
+
+document.getElementById(
+
+"fotoInspeccion"
+
+).value="";
+
+
+
+
+
+cargarInspecciones();
+
+
+
+})
+
+
+
+.catch(error=>{
+
+
+
+console.error(
+
+"ERROR INSPECCION:",
+
+error
+
+);
+
+
+
+alert(
+
+"No se pudo guardar la inspección"
+
+);
+
+
+
+});
 
 
 
@@ -823,27 +1297,44 @@ texto=texto.toLowerCase();
 
 
 
+
 elementos=elementosOriginales.filter(function(e){
 
 
 
 return (
 
+
 (e.nombre || "")
+
 .toLowerCase()
+
 .includes(texto)
 
+
+
 ||
+
+
 
 (e.codigo || "")
+
 .toLowerCase()
+
 .includes(texto)
+
+
 
 ||
 
+
+
 (e.tipo || "")
+
 .toLowerCase()
+
 .includes(texto)
+
 
 
 );
@@ -851,6 +1342,7 @@ return (
 
 
 });
+
 
 
 
@@ -881,6 +1373,7 @@ filtroActual=tipo;
 
 
 
+
 if(tipo==="Todos"){
 
 
@@ -892,13 +1385,17 @@ elementos=elementosOriginales;
 else{
 
 
+
 elementos=elementosOriginales.filter(function(e){
+
 
 
 return e.tipo===tipo;
 
 
+
 });
+
 
 
 }
@@ -920,7 +1417,7 @@ dibujarMapa();
 
 
 // =====================================
-// ACTUALIZACIÓN
+// ACTUALIZACION AUTOMATICA
 // =====================================
 
 
@@ -932,6 +1429,7 @@ function(){
 cargarElementos();
 
 cargarInspecciones();
+
 
 
 },
