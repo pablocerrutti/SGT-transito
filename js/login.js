@@ -1,17 +1,19 @@
 // =====================================
 // SGT - LOGIN
-// Google Sheets API
+// Dirección de Tránsito y Transportes
 // =====================================
 
 
-const API_URL = "https://script.google.com/macros/s/AKfycbzYU8xREGRuJ3-8ZrK-dbYUZNzVBhPiIceVWU3OftmxvO6fNCBFcFwrnurmWofjkFxR/exec";
+// URL API GOOGLE SHEETS
 
+const API_URL =
+"https://script.google.com/macros/s/AKfycbzYU8xREGRuJ3-8ZrK-dbYUZNzVBhPiIceVWU3OftmxvO6fNCBFcFwrnurmWofjkFxR/exec";
 
 
 
 
 // =====================================
-// LOGIN USUARIO
+// BOTON USUARIO
 // =====================================
 
 
@@ -20,26 +22,12 @@ document
 .addEventListener("click",function(){
 
 
-
 let usuario =
-
-document.querySelectorAll("input")[0]
-
-.value
-
-.trim();
-
-
+document.querySelectorAll("input")[0].value;
 
 
 let clave =
-
-document.querySelectorAll("input")[1]
-
-.value
-
-.trim();
-
+document.querySelectorAll("input")[1].value;
 
 
 
@@ -53,11 +41,8 @@ validarLogin(usuario,clave);
 
 
 
-
-
-
 // =====================================
-// LOGIN ADMIN
+// BOTON ADMIN
 // =====================================
 
 
@@ -68,24 +53,11 @@ document
 
 
 let usuario =
-
-document.querySelectorAll("input")[2]
-
-.value
-
-.trim();
-
-
+document.querySelectorAll("input")[2].value;
 
 
 let clave =
-
-document.querySelectorAll("input")[3]
-
-.value
-
-.trim();
-
+document.querySelectorAll("input")[3].value;
 
 
 
@@ -94,8 +66,6 @@ validarLogin(usuario,clave);
 
 
 });
-
-
 
 
 
@@ -112,43 +82,17 @@ function validarLogin(usuario,clave){
 
 
 
-
-
 fetch(
-
 API_URL+"?accion=usuarios"
-
 )
 
 
 
-.then(function(respuesta){
-
-
-return respuesta.json();
-
-
-})
+.then(r=>r.json())
 
 
 
-.then(function(usuarios){
-
-
-
-
-
-console.log(
-
-"USUARIOS SGT:",
-
-usuarios
-
-);
-
-
-
-
+.then(usuarios=>{
 
 
 
@@ -156,9 +100,7 @@ if(!Array.isArray(usuarios)){
 
 
 alert(
-
 "Error cargando usuarios"
-
 );
 
 
@@ -171,20 +113,14 @@ return;
 
 
 
-
-
-
-
-let encontrado = usuarios.find(function(u){
+let encontrado =
+usuarios.find(function(u){
 
 
 
 return (
 
-
-
-String(u.usuario)
-
+String(u.Usuario || u.usuario)
 .toLowerCase()
 
 ===
@@ -192,17 +128,14 @@ String(u.usuario)
 usuario.toLowerCase()
 
 
-
 &&
 
 
-
-String(u.password)
+String(u.Password || u.password)
 
 ===
 
 clave
-
 
 
 );
@@ -217,17 +150,12 @@ clave
 
 
 
-
 if(!encontrado){
 
 
-
 alert(
-
 "Usuario o contraseña incorrectos"
-
 );
-
 
 
 return;
@@ -239,47 +167,37 @@ return;
 
 
 
-
-
-
-
-
-
-
-// CREAR SESION
-
-
-let usuarioActual={
-
+let sesion={
 
 
 id:
-
-encontrado.id,
-
-
-
-nombre:
-
-encontrado.nombre,
-
+encontrado.ID,
 
 
 usuario:
+encontrado.Usuario || encontrado.usuario,
 
-encontrado.usuario,
 
+nombre:
+encontrado.Nombre || encontrado.nombre,
 
 
 rol:
-
-encontrado.rol,
-
+encontrado.Rol || encontrado.rol,
 
 
-cambiarPassword:
+debeCambiarPassword:
 
-encontrado.cambiarPassword || "NO"
+
+String(
+encontrado.DebeCambiar ||
+encontrado.debeCambiar
+
+)
+
+.toUpperCase()
+
+==="SI"
 
 
 
@@ -291,13 +209,11 @@ encontrado.cambiarPassword || "NO"
 
 
 
-
-
 localStorage.setItem(
 
 "usuarioActual",
 
-JSON.stringify(usuarioActual)
+JSON.stringify(sesion)
 
 );
 
@@ -307,29 +223,7 @@ JSON.stringify(usuarioActual)
 
 
 
-
-
-
-
-// =====================================
-// CAMBIO OBLIGATORIO PASSWORD
-// =====================================
-
-
-
-
-if(
-
-String(encontrado.cambiarPassword)
-
-.toUpperCase()
-
-===
-
-"SI"
-
-){
-
+if(sesion.debeCambiarPassword){
 
 
 window.location="cambiar-password.html";
@@ -338,7 +232,6 @@ window.location="cambiar-password.html";
 return;
 
 
-
 }
 
 
@@ -346,11 +239,7 @@ return;
 
 
 
-
-
-
-entrarSistema(usuarioActual);
-
+entrarSistema(sesion);
 
 
 
@@ -359,26 +248,15 @@ entrarSistema(usuarioActual);
 
 
 
-.catch(function(error){
+.catch(error=>{
 
 
-
-console.error(
-
-"ERROR LOGIN:",
-
-error
-
-);
-
+console.error(error);
 
 
 alert(
-
-"No se pudo conectar con la base de datos"
-
+"No se pudo conectar con el servidor"
 );
-
 
 
 });
@@ -386,9 +264,6 @@ alert(
 
 
 }
-
-
-
 
 
 
@@ -406,11 +281,7 @@ function entrarSistema(usuario){
 
 
 
-
-
 switch(usuario.rol){
-
-
 
 
 
@@ -421,10 +292,7 @@ case "Administrador":
 window.location="admin/dashboard.html";
 
 
-
 break;
-
-
 
 
 
@@ -437,10 +305,20 @@ case "Movilidad":
 window.location="movilidad/dashboard.html";
 
 
-
 break;
 
 
+
+
+
+case "Inspector":
+
+
+
+window.location="inspector/dashboard.html";
+
+
+break;
 
 
 
@@ -451,20 +329,12 @@ default:
 
 
 alert(
-
-"Rol no configurado: "+usuario.rol
-
+"Rol no reconocido"
 );
 
 
 
-break;
-
-
-
 }
-
-
 
 
 
