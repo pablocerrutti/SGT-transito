@@ -1,10 +1,18 @@
 // =====================================
 // SGT - MAPA MOVILIDAD URBANA
-// Dirección de Tránsito y Transportes
+// Google Sheets API
 // =====================================
 
 
+// URL DE TU APPS SCRIPT
+
+const API_URL = "https://script.google.com/macros/s/AKfycbzYU8xREGRuJ3-8ZrK-dbYUZNzVBhPiIceVWU3OftmxvO6fNCBFcFwrnurmWofjkFxR/exec";
+
+
+
 let mapa;
+
+let elementos=[];
 
 let ubicacionSeleccionada=null;
 
@@ -14,18 +22,9 @@ let elementoEditando=null;
 
 
 
-let elementos = JSON.parse(
-
-localStorage.getItem("elementosSGT")
-
-) || [];
-
-
-
-
 
 // =====================================
-// INICIAR MAPA
+// CREAR MAPA
 // =====================================
 
 
@@ -59,25 +58,50 @@ attribution:"© OpenStreetMap"
 
 
 // =====================================
-// CARGAR ELEMENTOS
+// CARGAR DATOS
 // =====================================
 
 
-cargarMarcadores();
+cargarElementos();
 
 
 
 
 
+function cargarElementos(){
 
 
-function cargarMarcadores(){
+fetch(
+
+API_URL+"?accion=elementos"
+
+)
 
 
-elementos.forEach(function(elemento){
+.then(r=>r.json())
 
 
-crearMarcador(elemento);
+.then(data=>{
+
+
+elementos=data;
+
+
+dibujarMapa();
+
+
+})
+
+
+.catch(error=>{
+
+
+console.log(error);
+
+
+alert(
+"No se pudo conectar con la base de datos"
+);
 
 
 });
@@ -91,9 +115,54 @@ crearMarcador(elemento);
 
 
 
+// =====================================
+// DIBUJAR MAPA
+// =====================================
+
+
+function dibujarMapa(){
+
+
+
+mapa.eachLayer(function(layer){
+
+
+
+if(layer instanceof L.Marker){
+
+
+mapa.removeLayer(layer);
+
+
+}
+
+
+
+});
+
+
+
+
+elementos.forEach(function(e){
+
+
+crearMarcador(e);
+
+
+});
+
+
+
+}
+
+
+
+
+
+
 
 // =====================================
-// SELECCIONAR PUNTO
+// CLICK MAPA
 // =====================================
 
 
@@ -102,6 +171,7 @@ mapa.on(
 "click",
 
 function(e){
+
 
 
 ubicacionSeleccionada=e.latlng;
@@ -131,9 +201,7 @@ e.latlng.lng
 .addTo(mapa)
 
 .bindPopup(
-
 "Ubicación seleccionada"
-
 )
 
 .openPopup();
@@ -150,32 +218,27 @@ e.latlng.lng
 
 
 
-
-
 // =====================================
-// ABRIR NUEVO ELEMENTO
+// ABRIR FORMULARIO
 // =====================================
 
 
 function abrirNuevo(){
 
 
-
 elementoEditando=null;
-
 
 
 limpiarFormulario();
 
 
-
-document
-.getElementById("modal")
+document.getElementById("modal")
 .style.display="flex";
 
 
-
 }
+
+
 
 
 
@@ -184,13 +247,11 @@ document
 function cerrarNuevo(){
 
 
-document
-.getElementById("modal")
+document.getElementById("modal")
 .style.display="none";
 
 
 }
-
 
 
 
@@ -213,6 +274,13 @@ document.getElementById("actuacion").value="";
 
 
 }
+
+
+
+
+
+
+
 // =====================================
 // GUARDAR ELEMENTO
 // =====================================
@@ -222,10 +290,12 @@ function guardarElemento(){
 
 
 
-if(!ubicacionSeleccionada && !elementoEditando){
+if(!ubicacionSeleccionada){
 
 
-alert("Seleccione una ubicación en el mapa");
+alert(
+"Seleccione un punto en el mapa"
+);
 
 
 return;
@@ -239,176 +309,41 @@ return;
 let elemento={
 
 
-
-id:
-
-elementoEditando
-
-?
-
-elementoEditando.id
-
-:
-
-Date.now(),
-
-
-
+id:Date.now(),
 
 
 codigo:
-
 document.getElementById("codigo").value,
 
 
-
-
-
 tipo:
-
 document.getElementById("tipo").value,
 
 
-
-
-
 nombre:
-
 document.getElementById("nombre").value,
 
 
-
-
-
 descripcion:
-
 document.getElementById("descripcion").value,
-
-
-
 
 
 caracteristicas:
 
-document
-
-.getElementById("caracteristicas")
-
-.value
-
-.split("\n")
-
-.filter(x=>x.trim()!==""),
+document.getElementById("caracteristicas").value,
 
 
 
-
-
-estado:
-
-elementoEditando
-
-?
-
-elementoEditando.estado
-
-:
-
-"Activo",
-
-
+estado:"Activo",
 
 
 
 lat:
-
-elementoEditando
-
-?
-
-elementoEditando.lat
-
-:
-
 ubicacionSeleccionada.lat,
 
 
-
-
-
 lng:
-
-elementoEditando
-
-?
-
-elementoEditando.lng
-
-:
-
 ubicacionSeleccionada.lng,
-
-
-
-
-
-actuaciones:
-
-elementoEditando
-
-?
-
-elementoEditando.actuaciones
-
-:
-
-[]
-
-
-
-};
-
-
-
-
-
-
-
-let nuevaActuacion =
-
-document
-
-.getElementById("actuacion")
-
-.value;
-
-
-
-
-
-
-
-if(nuevaActuacion!==""){
-
-
-
-elemento.actuaciones.push({
-
-
-
-fecha:
-
-new Date()
-
-.toLocaleDateString("es-UY"),
-
-
-
-
-accion:
-
-nuevaActuacion,
-
 
 
 
@@ -426,38 +361,33 @@ usuarioActual.nombre
 
 
 
-});
+};
 
 
+
+
+
+fetch(
+
+API_URL,
+
+{
+
+method:"POST",
+
+body:JSON.stringify({
+
+accion:"guardarElemento",
+
+datos:elemento
+
+})
 
 }
-
-
-
-
-
-
-if(elementoEditando){
-
-
-
-let posicion=
-
-elementos.findIndex(
-
-e=>e.id===elemento.id
 
 );
 
 
-
-elementos[posicion]=elemento;
-
-
-
-}
-
-else{
 
 
 
@@ -465,32 +395,7 @@ elementos.push(elemento);
 
 
 
-}
-
-
-
-
-
-
-
-
-localStorage.setItem(
-
-"elementosSGT",
-
-JSON.stringify(elementos)
-
-);
-
-
-
-
-
-
-
-cargarMapa();
-
-
+dibujarMapa();
 
 
 
@@ -498,11 +403,9 @@ cerrarNuevo();
 
 
 
-
-
 alert(
 
-"Elemento guardado correctamente"
+"Elemento guardado"
 
 );
 
@@ -518,154 +421,12 @@ alert(
 
 
 
-
 // =====================================
-// EDITAR ELEMENTO
-// =====================================
-
-
-function editarElemento(id){
-
-
-
-elementoEditando=
-
-elementos.find(
-
-e=>e.id===id
-
-);
-
-
-
-
-
-if(!elementoEditando){
-
-return;
-
-}
-
-
-
-
-
-document.getElementById("codigo").value=
-
-elementoEditando.codigo;
-
-
-
-
-document.getElementById("tipo").value=
-
-elementoEditando.tipo;
-
-
-
-
-document.getElementById("nombre").value=
-
-elementoEditando.nombre;
-
-
-
-
-document.getElementById("descripcion").value=
-
-elementoEditando.descripcion;
-
-
-
-
-document.getElementById("caracteristicas").value=
-
-(elementoEditando.caracteristicas||[])
-
-.join("\n");
-
-
-
-
-
-
-ubicacionSeleccionada={
-
-
-
-lat:elementoEditando.lat,
-
-
-lng:elementoEditando.lng
-
-
-
-};
-
-
-
-
-
-
-document
-
-.getElementById("modal")
-
-.style.display="flex";
-
-
-
-}
-
-
-
-
-
-
-
-
-// =====================================
-// RECARGAR MAPA
+// MARCADORES
 // =====================================
 
 
-function cargarMapa(){
-
-
-
-mapa.eachLayer(function(layer){
-
-
-
-if(layer instanceof L.Marker){
-
-
-
-mapa.removeLayer(layer);
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-cargarMarcadores();
-
-
-
-}
-// =====================================
-// CREAR MARCADOR
-// =====================================
-
-
-function crearMarcador(elemento){
+function crearMarcador(e){
 
 
 
@@ -673,40 +434,12 @@ let icono="📍";
 
 
 
-switch(elemento.tipo){
+switch(e.tipo){
 
 
 case "Semáforo":
 
 icono="🚦";
-
-break;
-
-
-case "Paso peatonal":
-
-icono="🚸";
-
-break;
-
-
-case "Parada de taxi":
-
-icono="🚕";
-
-break;
-
-
-case "Carga y descarga":
-
-icono="🚚";
-
-break;
-
-
-case "Cordón reservado":
-
-icono="🅿️";
 
 break;
 
@@ -732,11 +465,12 @@ icono="⚠️";
 break;
 
 
-case "Cartel PARE":
+case "Paso peatonal":
 
-icono="🛑";
+icono="🚸";
 
 break;
+
 
 
 }
@@ -744,11 +478,12 @@ break;
 
 
 
-let marcador=L.marker([
 
-elemento.lat,
+let marker=L.marker([
 
-elemento.lng
+Number(e.lat),
+
+Number(e.lng)
 
 ])
 
@@ -758,203 +493,50 @@ elemento.lng
 
 
 
+marker.bindTooltip(
 
-marcador.bindTooltip(`
+`
 
-<b>${icono} ${elemento.tipo}</b>
-
-<br>
-
-${elemento.codigo}
+<b>${icono} ${e.tipo}</b>
 
 <br>
 
-${elemento.nombre}
+${e.nombre}
 
-`);
+`
 
-
-
-
+);
 
 
 
-marcador.bindPopup(`
 
 
-<h3>
+marker.bindPopup(
 
-${elemento.nombre}
+`
 
-</h3>
-
-
-
-<b>Código:</b>
-
-${elemento.codigo}
-
-
-
-<br><br>
-
-
+<h3>${e.nombre}</h3>
 
 <b>Tipo:</b>
-
-${elemento.tipo}
-
-
+${e.tipo}
 
 <br><br>
 
-
-
-<b>Estado:</b>
-
-${elemento.estado}
-
-
+<b>Código:</b>
+${e.codigo}
 
 <br><br>
-
-
 
 <b>Descripción:</b>
 
-<br>
+${e.descripcion || "-"}
 
-${elemento.descripcion || "Sin datos"}
-
-
-
-<br><br>
-
-
-
-<b>Características</b>
-
-
-<ul>
-
-${
-
-(elemento.caracteristicas||[])
-
-.map(c=>`<li>${c}</li>`)
-
-.join("")
-
-}
-
-</ul>
-
-
-
-<b>Actuaciones</b>
-
-
-<ul>
-
-${
-
-(elemento.actuaciones||[])
-
-.map(a=>`
-
-<li>
-
-${a.fecha}
-
-<br>
-
-${a.accion}
-
-<br>
-
-${a.responsable}
-
-</li>
-
-`)
-
-.join("")
-
-}
-
-</ul>
-
-
-
-<button onclick="editarElemento(${elemento.id})">
-
-Editar
-
-</button>
-
-
-<button onclick="eliminarElemento(${elemento.id})">
-
-Eliminar
-
-</button>
-
-
-
-`);
-
-}
-
-
-
-
-// =====================================
-// ELIMINAR
-// =====================================
-
-
-function eliminarElemento(id){
-
-
-
-if(!confirm("¿Eliminar elemento?")){
-
-
-return;
-
-
-}
-
-
-
-elementos=
-
-elementos.filter(
-
-e=>e.id!==id
+`
 
 );
 
 
 
-
-
-localStorage.setItem(
-
-"elementosSGT",
-
-JSON.stringify(elementos)
-
-);
-
-
-
-
-
-cargarMapa();
-
-
-
 }
 
 
@@ -962,8 +544,9 @@ cargarMapa();
 
 
 
+
 // =====================================
-// BUSCADOR
+// BUSCAR
 // =====================================
 
 
@@ -971,54 +554,28 @@ function buscarElemento(texto){
 
 
 
-texto=
-
-texto.toLowerCase();
+texto=texto.toLowerCase();
 
 
 
-
-
-elementos.forEach(function(e){
-
+elementos.forEach(e=>{
 
 
 if(
 
 e.nombre.toLowerCase()
-
-.includes(texto)
-
-||
-
-e.codigo.toLowerCase()
-
-.includes(texto)
-
-||
-
-e.tipo.toLowerCase()
-
 .includes(texto)
 
 ){
 
 
-
 mapa.setView(
 
-[
-
-e.lat,
-
-e.lng
-
-],
+[e.lat,e.lng],
 
 18
 
 );
-
 
 
 }
@@ -1028,7 +585,6 @@ e.lng
 });
 
 
-
 }
 
 
@@ -1036,8 +592,9 @@ e.lng
 
 
 
+
 // =====================================
-// FILTRO POR TIPO
+// FILTRO
 // =====================================
 
 
@@ -1045,68 +602,50 @@ function filtrarTipo(tipo){
 
 
 
-cargarMapa();
-
+dibujarMapa();
 
 
 
 if(tipo==="Todos"){
 
-
 return;
 
-
 }
 
 
 
+elementos
 
-elementos.forEach(function(e){
+.filter(e=>e.tipo!==tipo)
 
-
-
-if(e.tipo!==tipo){
-
-
-
-mapa.eachLayer(function(layer){
-
-
-
-if(
-
-layer instanceof L.Marker
-
-&&
-
-layer.getLatLng().lat===e.lat
-
-&&
-
-layer.getLatLng().lng===e.lng
-
-){
-
-
-
-mapa.removeLayer(layer);
-
-
-
-}
-
+.forEach(e=>{
 
 
 });
 
 
-
 }
 
 
 
-});
 
 
 
-}
+// =====================================
+// ACTUALIZAR CADA 30 MINUTOS
+// =====================================
+
+
+setInterval(
+
+function(){
+
+
+cargarElementos();
+
+
+},
+
+1800000
+
+);
