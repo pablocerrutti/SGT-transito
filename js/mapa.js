@@ -4,7 +4,7 @@
 // =====================================
 
 
-// URL DE TU APPS SCRIPT
+// URL API
 
 const API_URL = "https://script.google.com/macros/s/AKfycbzYU8xREGRuJ3-8ZrK-dbYUZNzVBhPiIceVWU3OftmxvO6fNCBFcFwrnurmWofjkFxR/exec";
 
@@ -13,6 +13,10 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzYU8xREGRuJ3-8ZrK-dbYU
 let mapa;
 
 let elementos=[];
+
+let elementosOriginales=[];
+
+let filtroActual="Todos";
 
 let ubicacionSeleccionada=null;
 
@@ -55,8 +59,6 @@ attribution:"© OpenStreetMap"
 
 
 
-
-
 // =====================================
 // CARGAR DATOS
 // =====================================
@@ -78,16 +80,59 @@ API_URL+"?accion=elementos"
 )
 
 
-.then(r=>r.json())
+.then(r=>{
+
+
+if(!r.ok){
+
+throw new Error(
+"HTTP "+r.status
+);
+
+}
+
+
+return r.json();
+
+
+})
 
 
 .then(data=>{
 
 
+console.log(
+"DATOS SGT:",
+data
+);
+
+
+
+if(!Array.isArray(data)){
+
+
+console.error(
+"Respuesta inválida:",
+data
+);
+
+
+return;
+
+
+}
+
+
+
+elementosOriginales=data;
+
+
 elementos=data;
 
 
+
 dibujarMapa();
+
 
 
 })
@@ -96,7 +141,11 @@ dibujarMapa();
 .catch(error=>{
 
 
-console.log(error);
+console.error(
+"ERROR API:",
+error
+);
+
 
 
 alert(
@@ -161,6 +210,7 @@ crearMarcador(e);
 
 
 
+
 // =====================================
 // CLICK MAPA
 // =====================================
@@ -218,8 +268,9 @@ e.latlng.lng
 
 
 
+
 // =====================================
-// ABRIR FORMULARIO
+// FORMULARIO
 // =====================================
 
 
@@ -241,9 +292,6 @@ document.getElementById("modal")
 
 
 
-
-
-
 function cerrarNuevo(){
 
 
@@ -252,8 +300,6 @@ document.getElementById("modal")
 
 
 }
-
-
 
 
 
@@ -274,6 +320,7 @@ document.getElementById("actuacion").value="";
 
 
 }
+
 
 
 
@@ -329,13 +376,10 @@ document.getElementById("descripcion").value,
 
 
 caracteristicas:
-
 document.getElementById("caracteristicas").value,
 
 
-
 estado:"Activo",
-
 
 
 lat:
@@ -346,10 +390,9 @@ lng:
 ubicacionSeleccionada.lng,
 
 
-
 responsable:
 
-usuarioActual
+(typeof usuarioActual !== "undefined")
 
 ?
 
@@ -385,10 +428,37 @@ datos:elemento
 
 }
 
+)
+
+.then(r=>r.json())
+
+.then(resp=>{
+
+
+console.log(
+"GUARDADO:",
+resp
 );
 
 
+})
 
+.catch(err=>{
+
+
+console.error(
+"ERROR GUARDANDO:",
+err
+);
+
+
+});
+
+
+
+
+
+elementosOriginales.push(elemento);
 
 
 elementos.push(elemento);
@@ -472,6 +542,12 @@ icono="🚸";
 break;
 
 
+case "Parada de taxi":
+
+icono="🚕";
+
+break;
+
 
 }
 
@@ -497,11 +573,11 @@ marker.bindTooltip(
 
 `
 
-<b>${icono} ${e.tipo}</b>
+<b>${icono} ${e.tipo || ""}</b>
 
 <br>
 
-${e.nombre}
+${e.nombre || ""}
 
 `
 
@@ -515,17 +591,29 @@ marker.bindPopup(
 
 `
 
-<h3>${e.nombre}</h3>
+<h3>${e.nombre || "Elemento"}</h3>
+
 
 <b>Tipo:</b>
-${e.tipo}
+
+${e.tipo || "-"}
 
 <br><br>
+
 
 <b>Código:</b>
-${e.codigo}
+
+${e.codigo || "-"}
 
 <br><br>
+
+
+<b>Estado:</b>
+
+${e.estado || "-"}
+
+<br><br>
+
 
 <b>Descripción:</b>
 
@@ -545,8 +633,10 @@ ${e.descripcion || "-"}
 
 
 
+
+
 // =====================================
-// BUSCAR
+// BUSCAR ELEMENTO
 // =====================================
 
 
@@ -558,47 +648,34 @@ texto=texto.toLowerCase();
 
 
 
-elementos.forEach(e=>{
+elementos=elementosOriginales.filter(function(e){
 
 
-if(
 
-e.nombre.toLowerCase()
+return (
+
+(e.nombre || "")
+.toLowerCase()
 .includes(texto)
 
-){
+||
 
+(e.codigo || "")
+.toLowerCase()
+.includes(texto)
 
-mapa.setView(
+||
 
-[e.lat,e.lng],
+(e.tipo || "")
+.toLowerCase()
+.includes(texto)
 
-18
 
 );
 
 
-}
-
-
 
 });
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// FILTRO
-// =====================================
-
-
-function filtrarTipo(tipo){
 
 
 
@@ -606,19 +683,44 @@ dibujarMapa();
 
 
 
-if(tipo==="Todos"){
-
-return;
-
 }
 
 
 
-elementos
 
-.filter(e=>e.tipo!==tipo)
 
-.forEach(e=>{
+
+
+
+
+// =====================================
+// FILTRO POR TIPO
+// =====================================
+
+
+function filtrarTipo(tipo){
+
+
+
+filtroActual=tipo;
+
+
+
+if(tipo==="Todos"){
+
+
+elementos=elementosOriginales;
+
+
+}
+
+else{
+
+
+elementos=elementosOriginales.filter(function(e){
+
+
+return e.tipo===tipo;
 
 
 });
@@ -628,11 +730,21 @@ elementos
 
 
 
+dibujarMapa();
+
+
+
+}
+
+
+
+
+
 
 
 
 // =====================================
-// ACTUALIZAR CADA 30 MINUTOS
+// ACTUALIZAR DATOS
 // =====================================
 
 
