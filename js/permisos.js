@@ -1,10 +1,13 @@
 // =====================================
 // SGT - CONTROL DE PERMISOS
-// Dirección de Tránsito y Transportes
 // =====================================
 
 
-let usuarioActual = JSON.parse(
+function verificarRol(rolPermitido){
+
+
+
+let usuario = JSON.parse(
 
 localStorage.getItem("usuarioActual")
 
@@ -13,83 +16,14 @@ localStorage.getItem("usuarioActual")
 
 
 
-// CONTROL DE SESIÓN
 
-if(!usuarioActual){
-
-
-window.location="../login.html";
-
-
-}
-
-
-
-
-
-
-// =====================================
-// ROLES
-// =====================================
-
-
-function esAdministrador(){
-
-
-return usuarioActual &&
-usuarioActual.rol === "Administrador";
-
-
-}
-
-
-
-
-
-function esMovilidad(){
-
-
-return usuarioActual &&
-usuarioActual.rol === "Movilidad Urbana";
-
-
-}
-
-
-
-
-
-function esInspector(){
-
-
-return usuarioActual &&
-usuarioActual.rol === "Inspector";
-
-
-}
-
-
-
-
-
-
-
-
-// =====================================
-// ACCESO A MÓDULOS
-// =====================================
-
-
-function permitirModulo(modulo){
-
-
-
-if(!usuarioActual){
+if(!usuario){
 
 
 window.location="../login.html";
 
-return false;
+
+return;
 
 
 }
@@ -98,14 +32,12 @@ return false;
 
 
 
+// Administrador tiene acceso total
 
-// ADMINISTRADOR ACCEDE A TODO
-
-
-if(esAdministrador()){
+if(usuario.rol==="Administrador"){
 
 
-return true;
+return;
 
 
 }
@@ -114,85 +46,24 @@ return true;
 
 
 
+// Validar módulo
 
-
-switch(modulo){
-
-
-
-case "admin":
-
-
-
-alert("Acceso exclusivo de administración");
-
-window.location="../login.html";
-
-return false;
-
-
-
-
-
-
-case "movilidad":
-
-
-
-if(esMovilidad()){
-
-
-return true;
-
-
-}
+if(usuario.rol!==rolPermitido){
 
 
 
 alert(
 
-"No tiene permisos para Movilidad Urbana"
+"Acceso restringido"
 
 );
+
 
 
 window.location="../login.html";
 
 
-return false;
-
-
-
-
-
-
-
-
-case "inspector":
-
-
-
-if(esInspector()){
-
-
-return true;
-
-
 }
-
-
-
-alert(
-
-"Acceso exclusivo de inspectores"
-
-);
-
-
-window.location="../login.html";
-
-
-return false;
 
 
 
@@ -201,109 +72,43 @@ return false;
 
 
 
-return false;
-
-
-}
-
-
-
-
-
-
-
-
-
-// =====================================
-// PERMISOS DE MOVILIDAD
-// =====================================
-
-
-// Administrador y Movilidad pueden crear puntos
-
-
-function puedeCrearElementos(){
-
-
-
-return (
-
-esAdministrador()
-
-||
-
-esMovilidad()
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-// Administrador y Movilidad pueden registrar actuaciones
-
-
-function puedeRegistrarActuaciones(){
-
-
-
-return (
-
-esAdministrador()
-
-||
-
-esMovilidad()
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// MOSTRAR USUARIO
-// =====================================
 
 
 function cargarUsuario(){
 
 
 
-let elementos =
+let usuario = JSON.parse(
 
-document.querySelectorAll(".usuarioNombre");
+localStorage.getItem("usuarioActual")
 
-
-
-
-elementos.forEach(function(e){
+);
 
 
 
-e.innerHTML =
 
-usuarioActual.nombre +
-
-" | " +
-
-usuarioActual.rol;
+let zona=document.querySelector(".usuarioNombre");
 
 
 
-});
+if(zona && usuario){
+
+
+zona.innerHTML=
+
+
+`
+
+${usuario.nombre}
+
+<br>
+
+<small>${usuario.rol}</small>
+
+`;
+
+
+}
 
 
 
