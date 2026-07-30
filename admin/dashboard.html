@@ -4,14 +4,19 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SGT | Panel Administrador</title>
+
+<title>SGT | Administrador</title>
+
 
 <link rel="stylesheet" href="../css/admin.css">
 
+
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 
 </head>
 
@@ -19,22 +24,20 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 <body>
 
 
+
 <div class="sidebar">
+
 
 
 <div class="logo">
 
-
 <img src="../img/logo.png">
 
-
 <h2>SGT</h2>
-
 
 <p>
 Dirección de Tránsito y Transportes
 </p>
-
 
 </div>
 
@@ -42,7 +45,10 @@ Dirección de Tránsito y Transportes
 
 
 
+
+
 <ul>
+
 
 
 <li class="activo">
@@ -52,6 +58,7 @@ Dirección de Tránsito y Transportes
 Dashboard
 
 </li>
+
 
 
 
@@ -68,23 +75,11 @@ Usuarios
 
 
 
-<li onclick="location='roles.html'">
+<li onclick="location='../movilidad/mapa.html'">
 
-<i class="fa-solid fa-user-shield"></i>
+<i class="fa-solid fa-map"></i>
 
-Roles
-
-</li>
-
-
-
-
-
-<li onclick="location='../movilidad/dashboard.html'">
-
-<i class="fa-solid fa-road"></i>
-
-Movilidad Urbana
+Mapa Movilidad
 
 </li>
 
@@ -92,13 +87,26 @@ Movilidad Urbana
 
 
 
-<li onclick="location='../camaras/dashboard.html'">
+<li onclick="location='../movilidad/elementos.html'">
 
-<i class="fa-solid fa-video"></i>
+<i class="fa-solid fa-location-dot"></i>
 
-Cámaras e Incidencias
+Elementos
 
 </li>
+
+
+
+
+
+<li onclick="location='../movilidad/informes.html'">
+
+<i class="fa-solid fa-file-lines"></i>
+
+Informes
+
+</li>
+
 
 
 
@@ -109,10 +117,13 @@ Cámaras e Incidencias
 
 <i class="fa-solid fa-right-from-bracket"></i>
 
-Cerrar sesión
+
+Salir
 
 
 </li>
+
+
 
 
 
@@ -134,13 +145,10 @@ Cerrar sesión
 
 
 
-
-
 <header>
 
 
 <div>
-
 
 <h1>
 
@@ -151,7 +159,7 @@ Panel Administrador
 
 <p>
 
-Sistema de Gestión de Tránsito
+Gestión integral SGT
 
 </p>
 
@@ -162,9 +170,7 @@ Sistema de Gestión de Tránsito
 
 
 
-<div class="usuarioNombre">
-
-</div>
+<div class="usuarioNombre"></div>
 
 
 
@@ -176,9 +182,7 @@ Sistema de Gestión de Tránsito
 
 
 
-<section class="tarjetas">
-
-
+<div class="tarjetas">
 
 
 
@@ -188,237 +192,84 @@ Sistema de Gestión de Tránsito
 <i class="fa-solid fa-users"></i>
 
 
-<h3>
-
-Usuarios
-
-</h3>
-
-
-<p>
-
-Administrar cuentas del sistema.
-
-</p>
-
-
-<button onclick="location='usuarios.html'">
-
-Ingresar
-
-</button>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<i class="fa-solid fa-road"></i>
-
-
-<h3>
-
-Movilidad Urbana
-
-</h3>
-
-
-<p>
-
-Mapa e infraestructura vial.
-
-</p>
-
-
-<button onclick="location='../movilidad/dashboard.html'">
-
-Ingresar
-
-</button>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<i class="fa-solid fa-video"></i>
-
-
-<h3>
-
-Cámaras e Incidencias
-
-</h3>
-
-
-<p>
-
-Gestión de cámaras y eventos.
-
-</p>
-
-
-<button onclick="location='../camaras/dashboard.html'">
-
-Ingresar
-
-</button>
-
-
-</div>
-
-
-
-
-
-
-
-
-</section>
-
-
-
-
-
-
-
-<section>
-
-
 <h2>
 
-Estado del sistema
+Usuarios
 
 </h2>
 
 
+<p>
+
+Administración de cuentas
+
+</p>
 
 
-<table>
-
-
-<thead>
-
-<tr>
-
-<th>
-Módulo
-</th>
-
-
-<th>
-Estado
-</th>
-
-
-<th>
-Descripción
-</th>
-
-
-</tr>
-
-</thead>
+</div>
 
 
 
 
 
-<tbody>
 
 
-
-<tr>
-
-<td>
-Usuarios
-</td>
+<div class="card">
 
 
-<td>
-Activo
-</td>
+<i class="fa-solid fa-map-location-dot"></i>
 
 
-<td>
-Gestión administrativa
-</td>
+<h2>
+
+Movilidad
+
+</h2>
 
 
-</tr>
+<p>
+
+Infraestructura vial
+
+</p>
 
 
-
-
-
-<tr>
-
-<td>
-Movilidad Urbana
-</td>
-
-
-<td>
-Activo
-</td>
-
-
-<td>
-Mapa interactivo
-</td>
-
-
-</tr>
+</div>
 
 
 
 
 
-<tr>
-
-<td>
-Cámaras
-</td>
 
 
-<td>
-Pendiente
-</td>
+<div class="card">
 
 
-<td>
-Próximo módulo
-</td>
+<i class="fa-solid fa-file-circle-check"></i>
 
 
-</tr>
+<h2>
+
+Informes
+
+</h2>
 
 
+<p>
 
-</tbody>
+Inspecciones
+
+</p>
 
 
-</table>
+</div>
 
 
 
-</section>
+
+
+</div>
+
 
 
 
@@ -426,6 +277,8 @@ Próximo módulo
 
 
 </div>
+
+
 
 
 
@@ -435,10 +288,12 @@ Próximo módulo
 
 <script src="../js/permisos.js"></script>
 
+
 <script>
 
 
-permitirModulo("admin");
+
+verificarRol("Administrador");
 
 
 cargarUsuario();
@@ -449,7 +304,9 @@ cargarUsuario();
 function cerrarSesion(){
 
 
-localStorage.removeItem("usuarioActual");
+localStorage.removeItem(
+"usuarioActual"
+);
 
 
 window.location="../login.html";
@@ -458,7 +315,10 @@ window.location="../login.html";
 }
 
 
+
 </script>
+
+
 
 
 
