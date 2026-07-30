@@ -7,19 +7,16 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
 <title>SGT | Administrador</title>
 
 
 <link rel="stylesheet" href="../css/admin.css">
-
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 
 </head>
-
 
 
 <body>
@@ -50,18 +47,13 @@ Dirección de Tránsito y Transportes
 <ul>
 
 
-
-<li class="activo"
-onclick="ir('dashboard.html')">
+<li class="activo">
 
 <i class="fa-solid fa-house"></i>
 
 Dashboard
 
 </li>
-
-
-
 
 
 
@@ -79,9 +71,6 @@ Usuarios
 
 
 
-
-
-
 <li onclick="ir('../movilidad/mapa.html')">
 
 <i class="fa-solid fa-map"></i>
@@ -94,9 +83,6 @@ Mapa Movilidad
 
 
 
-
-
-
 <li onclick="ir('../movilidad/elementos.html')">
 
 <i class="fa-solid fa-location-dot"></i>
@@ -104,9 +90,6 @@ Mapa Movilidad
 Elementos
 
 </li>
-
-
-
 
 
 
@@ -125,24 +108,18 @@ Informes
 
 
 
-
-
 <li onclick="cerrarSesion()">
-
 
 <i class="fa-solid fa-right-from-bracket"></i>
 
-
 Salir
-
 
 </li>
 
 
 
-
-
 </ul>
+
 
 
 </div>
@@ -183,7 +160,6 @@ Gestión integral SGT
 
 
 
-
 <div class="usuarioNombre"></div>
 
 
@@ -196,11 +172,22 @@ Gestión integral SGT
 
 
 
+<button onclick="volverDashboard()" class="btn-volver">
+
+<i class="fa-solid fa-arrow-left"></i>
+
+Volver Dashboard
+
+</button>
+
+
+
+
+
+
 
 
 <div class="tarjetas">
-
-
 
 
 
@@ -233,8 +220,6 @@ Administración de cuentas
 
 
 
-
-
 <div class="card"
 onclick="ir('../movilidad/mapa.html')">
 
@@ -257,8 +242,6 @@ Infraestructura vial
 
 
 </div>
-
-
 
 
 
@@ -301,10 +284,8 @@ Inspecciones y reportes
 
 
 
+
 </div>
-
-
-
 
 
 
@@ -320,11 +301,6 @@ Inspecciones y reportes
 <script>
 
 
-// =====================================
-// VALIDACION ADMIN
-// =====================================
-
-
 verificarRol("Administrador");
 
 
@@ -334,16 +310,22 @@ cargarUsuario();
 
 
 
-
-// =====================================
-// NAVEGACION
-// =====================================
-
-
 function ir(pagina){
 
+window.location.href=pagina;
 
-window.location.href = pagina;
+}
+
+
+
+
+
+
+
+function volverDashboard(){
+
+
+window.location="dashboard.html";
 
 
 }
@@ -355,13 +337,7 @@ window.location.href = pagina;
 
 
 
-// =====================================
-// CERRAR SESION
-// =====================================
-
-
 function cerrarSesion(){
-
 
 
 localStorage.removeItem(
@@ -369,9 +345,7 @@ localStorage.removeItem(
 );
 
 
-
 window.location="../login.html";
-
 
 
 }
