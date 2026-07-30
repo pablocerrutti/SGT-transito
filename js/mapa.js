@@ -1,6 +1,6 @@
 // =====================================
 // SGT - MAPA MOVILIDAD URBANA
-// Google Sheets API
+// Google Sheets API + Inspecciones
 // =====================================
 
 
@@ -16,6 +16,8 @@ let elementos=[];
 
 let elementosOriginales=[];
 
+let inspecciones=[];
+
 let filtroActual="Todos";
 
 let ubicacionSeleccionada=null;
@@ -23,6 +25,7 @@ let ubicacionSeleccionada=null;
 let marcadorTemporal=null;
 
 let elementoEditando=null;
+
 
 
 
@@ -60,17 +63,26 @@ attribution:"© OpenStreetMap"
 
 
 // =====================================
-// CARGAR DATOS
+// CARGA INICIAL
 // =====================================
 
 
 cargarElementos();
 
+cargarInspecciones();
 
 
+
+
+
+
+// =====================================
+// CARGAR ELEMENTOS
+// =====================================
 
 
 function cargarElementos(){
+
 
 
 fetch(
@@ -78,6 +90,7 @@ fetch(
 API_URL+"?accion=elementos"
 
 )
+
 
 
 .then(r=>{
@@ -98,11 +111,12 @@ return r.json();
 })
 
 
+
 .then(data=>{
 
 
 console.log(
-"DATOS SGT:",
+"DATOS ELEMENTOS:",
 data
 );
 
@@ -112,7 +126,7 @@ if(!Array.isArray(data)){
 
 
 console.error(
-"Respuesta inválida:",
+"Respuesta inválida",
 data
 );
 
@@ -126,7 +140,6 @@ return;
 
 elementosOriginales=data;
 
-
 elementos=data;
 
 
@@ -138,6 +151,7 @@ dibujarMapa();
 })
 
 
+
 .catch(error=>{
 
 
@@ -145,7 +159,6 @@ console.error(
 "ERROR API:",
 error
 );
-
 
 
 alert(
@@ -157,6 +170,71 @@ alert(
 
 
 }
+
+
+
+
+
+
+
+// =====================================
+// CARGAR INSPECCIONES
+// =====================================
+
+
+function cargarInspecciones(){
+
+
+
+fetch(
+
+API_URL+"?accion=inspecciones"
+
+)
+
+
+
+.then(r=>r.json())
+
+
+
+.then(data=>{
+
+
+console.log(
+"DATOS INSPECCIONES:",
+data
+);
+
+
+
+if(Array.isArray(data)){
+
+
+inspecciones=data;
+
+
+}
+
+
+})
+
+
+
+.catch(error=>{
+
+
+console.error(
+"Error inspecciones:",
+error
+);
+
+
+});
+
+
+}
+
 
 
 
@@ -203,6 +281,7 @@ crearMarcador(e);
 
 
 }
+
 
 
 
@@ -269,6 +348,7 @@ e.latlng.lng
 
 
 
+
 // =====================================
 // FORMULARIO
 // =====================================
@@ -288,6 +368,7 @@ document.getElementById("modal")
 
 
 }
+
 
 
 
@@ -328,6 +409,7 @@ document.getElementById("actuacion").value="";
 
 
 
+
 // =====================================
 // GUARDAR ELEMENTO
 // =====================================
@@ -356,38 +438,48 @@ return;
 let elemento={
 
 
+
 id:Date.now(),
+
 
 
 codigo:
 document.getElementById("codigo").value,
 
 
+
 tipo:
 document.getElementById("tipo").value,
+
 
 
 nombre:
 document.getElementById("nombre").value,
 
 
+
 descripcion:
 document.getElementById("descripcion").value,
+
 
 
 caracteristicas:
 document.getElementById("caracteristicas").value,
 
 
+
 estado:"Activo",
+
 
 
 lat:
 ubicacionSeleccionada.lat,
 
 
+
 lng:
 ubicacionSeleccionada.lng,
+
 
 
 responsable:
@@ -460,7 +552,6 @@ err
 
 elementosOriginales.push(elemento);
 
-
 elementos.push(elemento);
 
 
@@ -474,9 +565,7 @@ cerrarNuevo();
 
 
 alert(
-
 "Elemento guardado"
-
 );
 
 
@@ -555,6 +644,7 @@ break;
 
 
 
+
 let marker=L.marker([
 
 Number(e.lat),
@@ -582,6 +672,84 @@ ${e.nombre || ""}
 `
 
 );
+
+
+
+
+
+let historial = inspecciones.filter(function(i){
+
+
+return String(i.elementoId) === String(e.id);
+
+
+});
+
+
+
+
+
+let textoInspecciones="";
+
+
+
+
+if(historial.length===0){
+
+
+textoInspecciones="Sin inspecciones registradas";
+
+
+}
+
+else{
+
+
+historial.forEach(function(i){
+
+
+
+textoInspecciones += `
+
+<hr>
+
+<b>Fecha:</b>
+
+${i.fecha || "-"}
+
+<br>
+
+<b>Estado:</b>
+
+${i.estado || "-"}
+
+<br>
+
+${i.observacion || ""}
+
+<br>
+
+
+${i.foto ? 
+
+`<a href="${i.foto}" target="_blank">
+
+📷 Ver foto
+
+</a>`
+
+:""}
+
+`;
+
+
+
+});
+
+
+}
+
+
 
 
 
@@ -619,6 +787,13 @@ ${e.estado || "-"}
 
 ${e.descripcion || "-"}
 
+
+<h4>📋 Inspecciones</h4>
+
+
+${textoInspecciones}
+
+
 `
 
 );
@@ -636,7 +811,7 @@ ${e.descripcion || "-"}
 
 
 // =====================================
-// BUSCAR ELEMENTO
+// BUSCAR
 // =====================================
 
 
@@ -694,7 +869,7 @@ dibujarMapa();
 
 
 // =====================================
-// FILTRO POR TIPO
+// FILTRO
 // =====================================
 
 
@@ -743,8 +918,9 @@ dibujarMapa();
 
 
 
+
 // =====================================
-// ACTUALIZAR DATOS
+// ACTUALIZACIÓN
 // =====================================
 
 
@@ -754,6 +930,8 @@ function(){
 
 
 cargarElementos();
+
+cargarInspecciones();
 
 
 },
