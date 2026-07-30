@@ -1,283 +1,397 @@
-<!DOCTYPE html>
-<html lang="es">
+// =====================================
+// SGT - CONTROL DE PERMISOS
+// Dirección de Tránsito y Transportes
+// =====================================
 
-<head>
 
-<meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+// =====================================
+// OBTENER USUARIO ACTUAL
+// =====================================
 
-<title>SGT | Panel Administrador</title>
 
-<link rel="stylesheet" href="../css/admin.css">
+function obtenerUsuario(){
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-</head>
+return JSON.parse(
 
-<body>
+localStorage.getItem("usuarioActual")
 
+);
 
-
-<div class="sidebar">
-
-<div class="logo">
-
-<img src="../img/logo.png">
-
-<h2>SGT</h2>
-
-<p>
-
-Dirección de Tránsito y Transportes
-
-</p>
-
-</div>
-
-
-
-
-
-<ul>
-
-<li class="activo"
-onclick="volverDashboard()">
-
-<i class="fa-solid fa-house"></i>
-
-Dashboard
-
-</li>
-
-
-
-
-
-<li onclick="ir('usuarios.html')">
-
-<i class="fa-solid fa-users"></i>
-
-Usuarios
-
-</li>
-
-
-
-
-
-<li onclick="ir('../movilidad/mapa.html')">
-
-<i class="fa-solid fa-map"></i>
-
-Mapa Movilidad
-
-</li>
-
-
-
-
-
-<li onclick="ir('../movilidad/elementos.html')">
-
-<i class="fa-solid fa-location-dot"></i>
-
-Elementos
-
-</li>
-
-
-
-
-
-<li onclick="ir('../movilidad/informes.html')">
-
-<i class="fa-solid fa-file-lines"></i>
-
-Informes
-
-</li>
-
-
-
-
-
-<li onclick="cerrarSesion()">
-
-<i class="fa-solid fa-right-from-bracket"></i>
-
-Salir
-
-</li>
-
-</ul>
-
-</div>
-
-
-
-
-
-
-
-<div class="contenido">
-
-
-
-<header>
-
-<div>
-
-<h1>
-
-Panel Administrador
-
-</h1>
-
-<p>
-
-Gestión Integral del Sistema SGT
-
-</p>
-
-</div>
-
-<div class="usuarioNombre"></div>
-
-</header>
-
-
-
-
-
-
-<div class="tarjetas">
-
-
-
-
-<div class="card"
-onclick="ir('usuarios.html')">
-
-<i class="fa-solid fa-users"></i>
-
-<h2>
-
-Usuarios
-
-</h2>
-
-<p>
-
-Administración de usuarios
-
-</p>
-
-</div>
-
-
-
-
-
-
-<div class="card"
-onclick="ir('../movilidad/mapa.html')">
-
-<i class="fa-solid fa-map-location-dot"></i>
-
-<h2>
-
-Mapa
-
-</h2>
-
-<p>
-
-Infraestructura vial
-
-</p>
-
-</div>
-
-
-
-
-
-
-<div class="card"
-onclick="ir('../movilidad/elementos.html')">
-
-<i class="fa-solid fa-location-dot"></i>
-
-<h2>
-
-Elementos
-
-</h2>
-
-<p>
-
-Inventario vial
-
-</p>
-
-</div>
-
-
-
-
-
-
-<div class="card"
-onclick="ir('../movilidad/informes.html')">
-
-<i class="fa-solid fa-file-circle-check"></i>
-
-<h2>
-
-Informes
-
-</h2>
-
-<p>
-
-Inspecciones y reportes
-
-</p>
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-
-
-<script src="../js/permisos.js"></script>
-
-<script>
-
-verificarRol("Administrador");
-
-cargarUsuario();
-
-function ir(ruta){
-
-window.location.href=ruta;
 
 }
 
-</script>
 
-</body>
 
-</html>
+
+
+
+// =====================================
+// VERIFICAR ROL
+// =====================================
+
+
+function verificarRol(rolPermitido){
+
+
+
+let usuario = obtenerUsuario();
+
+
+
+
+
+if(!usuario){
+
+
+window.location="../login.html";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+if(usuario.rol !== rolPermitido){
+
+
+
+alert(
+
+"Acceso no autorizado"
+
+);
+
+
+
+
+irDashboard();
+
+
+
+return;
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// PERMITIR MODULO
+// =====================================
+
+
+function permitirModulo(modulo){
+
+
+
+let usuario = obtenerUsuario();
+
+
+
+
+
+if(!usuario){
+
+
+window.location="../login.html";
+
+
+return;
+
+
+}
+
+
+
+
+
+// ADMINISTRADOR TODO
+
+
+if(usuario.rol==="Administrador"){
+
+
+return;
+
+
+}
+
+
+
+
+
+
+// MOVILIDAD
+
+
+if(
+
+usuario.rol==="Movilidad"
+
+&&
+
+modulo==="movilidad"
+
+){
+
+
+return;
+
+
+}
+
+
+
+
+
+// INSPECTOR FUTURO
+
+
+if(
+
+usuario.rol==="Inspector"
+
+&&
+
+modulo==="inspector"
+
+){
+
+
+return;
+
+
+}
+
+
+
+
+
+alert(
+
+"No tiene permisos para este módulo"
+
+);
+
+
+
+irDashboard();
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// DASHBOARD SEGUN ROL
+// =====================================
+
+
+function irDashboard(){
+
+
+
+let usuario = obtenerUsuario();
+
+
+
+
+
+if(!usuario){
+
+
+window.location="../login.html";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+switch(usuario.rol){
+
+
+
+case "Administrador":
+
+
+window.location="/admin/dashboard.html";
+
+
+break;
+
+
+
+
+case "Movilidad":
+
+
+window.location="/movilidad/dashboard.html";
+
+
+break;
+
+
+
+
+case "Inspector":
+
+
+window.location="/inspector/dashboard.html";
+
+
+break;
+
+
+
+
+default:
+
+
+window.location="../login.html";
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// VOLVER AL DASHBOARD
+// =====================================
+
+
+function volverDashboard(){
+
+
+irDashboard();
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// CERRAR SESION
+// =====================================
+
+
+function cerrarSesion(){
+
+
+
+localStorage.removeItem(
+
+"usuarioActual"
+
+);
+
+
+
+window.location="../login.html";
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// MOSTRAR USUARIO
+// =====================================
+
+
+function cargarUsuario(){
+
+
+
+let usuario=obtenerUsuario();
+
+
+
+let campo=document.querySelector(
+
+".usuarioNombre"
+
+);
+
+
+
+
+
+if(campo && usuario){
+
+
+
+campo.innerHTML=`
+
+<i class="fa-solid fa-user"></i>
+
+${usuario.nombre || usuario.usuario}
+
+<br>
+
+<small>
+
+${usuario.rol}
+
+</small>
+
+`;
+
+
+
+}
+
+
+
+}
