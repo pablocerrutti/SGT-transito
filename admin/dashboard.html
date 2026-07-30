@@ -21,6 +21,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 </head>
 
 
+
 <body>
 
 
@@ -45,17 +46,21 @@ Dirección de Tránsito y Transportes
 
 
 
+
 <ul>
 
 
 
-<li class="activo">
+<li class="activo"
+onclick="ir('dashboard.html')">
 
 <i class="fa-solid fa-house"></i>
 
 Dashboard
 
 </li>
+
+
 
 
 
@@ -69,6 +74,7 @@ Dashboard
 Usuarios
 
 </li>
+
 
 
 
@@ -90,6 +96,7 @@ Mapa Movilidad
 
 
 
+
 <li onclick="ir('../movilidad/elementos.html')">
 
 <i class="fa-solid fa-location-dot"></i>
@@ -97,6 +104,7 @@ Mapa Movilidad
 Elementos
 
 </li>
+
 
 
 
@@ -147,7 +155,6 @@ Salir
 
 
 
-
 <div class="contenido">
 
 
@@ -189,11 +196,16 @@ Gestión integral SGT
 
 
 
+
+
 <div class="tarjetas">
 
 
 
-<div class="card" onclick="ir('usuarios.html')">
+
+
+<div class="card"
+onclick="ir('usuarios.html')">
 
 
 <i class="fa-solid fa-users"></i>
@@ -222,7 +234,9 @@ Administración de cuentas
 
 
 
-<div class="card" onclick="ir('../movilidad/mapa.html')">
+
+<div class="card"
+onclick="ir('../movilidad/mapa.html')">
 
 
 <i class="fa-solid fa-map-location-dot"></i>
@@ -251,7 +265,9 @@ Infraestructura vial
 
 
 
-<div class="card" onclick="ir('../movilidad/informes.html')">
+
+<div class="card"
+onclick="ir('../movilidad/informes.html')">
 
 
 <i class="fa-solid fa-file-circle-check"></i>
@@ -266,7 +282,7 @@ Informes
 
 <p>
 
-Inspecciones
+Inspecciones y reportes
 
 </p>
 
@@ -295,12 +311,18 @@ Inspecciones
 
 
 
+
+
 <script src="../js/permisos.js"></script>
 
 
 
 <script>
 
+
+// =====================================
+// VALIDACION ADMIN
+// =====================================
 
 
 verificarRol("Administrador");
@@ -313,16 +335,29 @@ cargarUsuario();
 
 
 
+// =====================================
+// NAVEGACION
+// =====================================
+
+
 function ir(pagina){
 
 
-window.location.href=pagina;
+window.location.href = pagina;
 
 
 }
 
 
 
+
+
+
+
+
+// =====================================
+// CERRAR SESION
+// =====================================
 
 
 function cerrarSesion(){
