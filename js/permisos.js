@@ -9,15 +9,17 @@
 // OBTENER USUARIO ACTUAL
 // =====================================
 
-
 function obtenerUsuario(){
 
 
-return JSON.parse(
+let usuario = JSON.parse(
 
 localStorage.getItem("usuarioActual")
 
 );
+
+
+return usuario;
 
 
 }
@@ -27,13 +29,17 @@ localStorage.getItem("usuarioActual")
 
 
 // =====================================
-// DASHBOARD SEGUN ROL
+// VERIFICAR ROL DE PAGINA
 // =====================================
 
-function irDashboard(){
+
+function verificarRol(rolPermitido){
+
 
 
 let usuario = obtenerUsuario();
+
+
 
 
 
@@ -50,47 +56,25 @@ return;
 
 
 
-switch(usuario.rol){
 
 
 
-case "Administrador":
-
-
-window.location="dashboard.html";
-
-
-break;
+if(usuario.rol !== rolPermitido){
 
 
 
+alert(
 
-case "Movilidad":
+"Acceso no autorizado"
 
-
-window.location="../movilidad/dashboard.html";
-
-
-break;
+);
 
 
 
-
-case "Inspector":
-
-
-window.location="../inspector/dashboard.html";
+irDashboard();
 
 
-break;
-
-
-
-
-default:
-
-
-window.location="../login.html";
+return;
 
 
 }
@@ -98,6 +82,14 @@ window.location="../login.html";
 
 
 }
+
+
+
+
+
+
+
+
 
 // =====================================
 // PERMITIR MODULO
@@ -129,8 +121,8 @@ return;
 
 
 
-// ADMINISTRADOR TODO
 
+// ADMINISTRADOR TIENE ACCESO TOTAL
 
 if(usuario.rol==="Administrador"){
 
@@ -145,8 +137,8 @@ return;
 
 
 
-// MOVILIDAD
 
+// MOVILIDAD
 
 if(
 
@@ -168,8 +160,10 @@ return;
 
 
 
-// INSPECTOR FUTURO
 
+
+
+// INSPECTOR FUTURO
 
 if(
 
@@ -186,6 +180,8 @@ return;
 
 
 }
+
+
 
 
 
@@ -214,7 +210,7 @@ irDashboard();
 
 
 // =====================================
-// DASHBOARD SEGUN ROL
+// IR AL DASHBOARD SEGÚN ROL
 // =====================================
 
 
@@ -244,6 +240,7 @@ return;
 
 
 
+
 switch(usuario.rol){
 
 
@@ -251,10 +248,13 @@ switch(usuario.rol){
 case "Administrador":
 
 
-window.location="/admin/dashboard.html";
+
+window.location="../admin/dashboard.html";
 
 
 break;
+
+
 
 
 
@@ -262,10 +262,13 @@ break;
 case "Movilidad":
 
 
-window.location="/movilidad/dashboard.html";
+
+window.location="../movilidad/dashboard.html";
 
 
 break;
+
+
 
 
 
@@ -273,7 +276,8 @@ break;
 case "Inspector":
 
 
-window.location="/inspector/dashboard.html";
+
+window.location="../inspector/dashboard.html";
 
 
 break;
@@ -281,10 +285,14 @@ break;
 
 
 
+
+
 default:
 
 
+
 window.location="../login.html";
+
 
 
 }
@@ -302,7 +310,7 @@ window.location="../login.html";
 
 
 // =====================================
-// VOLVER AL DASHBOARD
+// BOTON VOLVER
 // =====================================
 
 
@@ -354,7 +362,7 @@ window.location="../login.html";
 
 
 // =====================================
-// MOSTRAR USUARIO
+// MOSTRAR USUARIO CONECTADO
 // =====================================
 
 
@@ -362,11 +370,11 @@ function cargarUsuario(){
 
 
 
-let usuario=obtenerUsuario();
+let usuario = obtenerUsuario();
 
 
 
-let campo=document.querySelector(
+let campo = document.querySelector(
 
 ".usuarioNombre"
 
