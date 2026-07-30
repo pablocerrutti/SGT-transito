@@ -1,61 +1,17 @@
 // =====================================
 // SGT - LOGIN
-// Dirección de Tránsito y Transportes
+// Google Sheets API
 // =====================================
 
 
-
-const usuarios = [
-
-
-{
-usuario:"Pcerrutti",
-clave:"SGT12345",
-rol:"Administrador",
-cambiarPassword:true
-},
-
-
-{
-usuario:"Mperez",
-clave:"SGT12345",
-rol:"Administrador",
-cambiarPassword:true
-},
-
-
-{
-usuario:"Gbentancur",
-clave:"SGT12345",
-rol:"Administrador",
-cambiarPassword:true
-},
-
-
-{
-usuario:"movilidad",
-clave:"123456",
-rol:"Movilidad Urbana",
-cambiarPassword:true
-},
-
-
-{
-usuario:"inspector",
-clave:"123456",
-rol:"Inspector",
-cambiarPassword:true
-}
-
-
-];
+const API_URL = "https://script.google.com/macros/s/AKfycbzYU8xREGRuJ3-8ZrK-dbYUZNzVBhPiIceVWU3OftmxvO6fNCBFcFwrnurmWofjkFxR/exec";
 
 
 
 
-
-
+// =====================================
 // LOGIN USUARIO
+// =====================================
 
 
 document
@@ -83,7 +39,10 @@ validarLogin(usuario,clave);
 
 
 
+
+// =====================================
 // LOGIN ADMIN
+// =====================================
 
 
 document
@@ -112,27 +71,77 @@ validarLogin(usuario,clave);
 
 
 
+
+
+// =====================================
+// VALIDAR LOGIN CONTRA SHEETS
+// =====================================
+
+
 function validarLogin(usuario,clave){
 
 
 
-let encontrado =
-usuarios.find(function(u){
+fetch(
+
+API_URL+"?accion=usuarios"
+
+)
+
+
+
+.then(r=>r.json())
+
+
+
+.then(usuarios=>{
+
+
+
+console.log(
+
+"USUARIOS SGT:",
+
+usuarios
+
+);
+
+
+
+
+
+
+let encontrado = usuarios.find(function(u){
+
 
 
 return (
 
-u.usuario.toLowerCase()
+
+
+String(u.usuario)
+.toLowerCase()
+
 ===
+
 usuario.toLowerCase()
+
+
 
 &&
 
-u.clave
+
+
+String(u.password)
+
 ===
+
 clave
 
+
+
 );
+
 
 
 });
@@ -141,15 +150,78 @@ clave
 
 
 
+
+
+
 if(!encontrado){
 
 
-alert("Usuario o contraseña incorrectos");
+
+alert(
+
+"Usuario o contraseña incorrectos"
+
+);
+
+
 
 return;
 
 
+
 }
+
+
+
+
+
+
+
+
+
+let usuarioSesion={
+
+
+
+id:
+
+encontrado.id,
+
+
+
+nombre:
+
+encontrado.nombre,
+
+
+
+usuario:
+
+encontrado.usuario,
+
+
+
+rol:
+
+encontrado.rol,
+
+
+
+password:
+
+encontrado.password,
+
+
+
+cambiarPassword:false
+
+
+
+};
+
+
+
+
 
 
 
@@ -159,7 +231,7 @@ localStorage.setItem(
 
 "usuarioActual",
 
-JSON.stringify(encontrado)
+JSON.stringify(usuarioSesion)
 
 );
 
@@ -167,16 +239,45 @@ JSON.stringify(encontrado)
 
 
 
-// OBLIGAR CAMBIO DE CONTRASEÑA
 
 
-if(encontrado.cambiarPassword===true){
 
 
-window.location="cambiar-password.html";
+entrarSistema(usuarioSesion);
 
 
-return;
+
+
+
+
+})
+
+
+
+.catch(error=>{
+
+
+
+console.error(
+
+"ERROR LOGIN:",
+
+error
+
+);
+
+
+
+alert(
+
+"No se pudo conectar con la base de datos"
+
+);
+
+
+
+});
+
 
 
 }
@@ -186,17 +287,13 @@ return;
 
 
 
-entrarSistema(encontrado);
-
-
-
-}
 
 
 
 
-
-
+// =====================================
+// REDIRECCION
+// =====================================
 
 
 function entrarSistema(usuario){
@@ -207,6 +304,16 @@ if(usuario.rol==="Administrador"){
 
 
 window.location="admin/dashboard.html";
+
+
+}
+
+
+
+else if(usuario.rol==="Movilidad"){
+
+
+window.location="movilidad/dashboard.html";
 
 
 }
@@ -227,6 +334,21 @@ else if(usuario.rol==="Inspector"){
 
 
 window.location="inspector/dashboard.html";
+
+
+}
+
+
+
+else{
+
+
+alert(
+
+"Rol no configurado: "+usuario.rol
+
+);
+
 
 
 }
