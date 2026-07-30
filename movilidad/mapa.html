@@ -92,6 +92,7 @@ cursor:pointer;
 
 
 
+
 .modal{
 
 display:none;
@@ -109,6 +110,8 @@ align-items:center;
 z-index:2000;
 
 }
+
+
 
 
 
@@ -134,6 +137,7 @@ border-radius:15px;
 
 
 
+
 .modal-contenido input,
 .modal-contenido select,
 .modal-contenido textarea{
@@ -151,6 +155,8 @@ border:1px solid #ccc;
 
 
 }
+
+
 
 
 
@@ -176,6 +182,8 @@ margin-right:10px;
 
 
 </head>
+
+
 
 
 
@@ -213,14 +221,12 @@ Dirección de Tránsito y Transportes
 
 <li onclick="location='dashboard.html'">
 
-
 <i class="fa-solid fa-house"></i>
-
 
 Dashboard
 
-
 </li>
+
 
 
 
@@ -280,6 +286,8 @@ Salir
 
 
 
+
+
 <div class="contenido">
 
 
@@ -316,16 +324,27 @@ Infraestructura vial geolocalizada
 
 
 
+
+
+
+
 <div class="barraMapa">
 
 
 <input 
+
 placeholder="Buscar elemento..."
+
 onkeyup="buscarElemento(this.value)">
 
 
 
-<select onchange="filtrarTipo(this.value)"
+
+
+<select 
+
+onchange="filtrarTipo(this.value)"
+
 id="filtro">
 
 
@@ -335,11 +354,13 @@ Todos
 
 </option>
 
+
 <option>
 
 Semáforo
 
 </option>
+
 
 <option>
 
@@ -347,11 +368,13 @@ Paso peatonal
 
 </option>
 
+
 <option>
 
 Radar
 
 </option>
+
 
 <option>
 
@@ -359,11 +382,13 @@ Cámara
 
 </option>
 
+
 <option>
 
 Lomo de burro
 
 </option>
+
 
 <option>
 
@@ -376,6 +401,8 @@ Otro
 
 
 
+
+
 <button onclick="abrirNuevo()">
 
 <i class="fa-solid fa-plus"></i>
@@ -385,7 +412,10 @@ Nuevo elemento
 </button>
 
 
+
 </div>
+
+
 
 
 
@@ -397,10 +427,19 @@ Nuevo elemento
 
 
 
+
+
+
+<!-- ========================= -->
+<!-- MODAL NUEVO ELEMENTO -->
+<!-- ========================= -->
+
+
 <div class="modal" id="modal">
 
 
 <div class="modal-contenido">
+
 
 
 <h2>
@@ -449,10 +488,10 @@ Nuevo elemento
 
 
 
-
-
 <input 
+
 id="codigo"
+
 placeholder="Código del elemento">
 
 
@@ -460,9 +499,10 @@ placeholder="Código del elemento">
 
 
 
-
 <input
+
 id="nombre"
+
 placeholder="Nombre o referencia">
 
 
@@ -470,9 +510,10 @@ placeholder="Nombre o referencia">
 
 
 
-
 <textarea
+
 id="descripcion"
+
 placeholder="Descripción">
 
 </textarea>
@@ -482,10 +523,11 @@ placeholder="Descripción">
 
 
 
-
 <textarea
+
 id="caracteristicas"
-placeholder="Características (una por línea)">
+
+placeholder="Características">
 
 </textarea>
 
@@ -494,13 +536,13 @@ placeholder="Características (una por línea)">
 
 
 
-
 <textarea
+
 id="actuacion"
+
 placeholder="Actuación inicial">
 
 </textarea>
-
 
 
 
@@ -513,8 +555,6 @@ placeholder="Actuación inicial">
 Guardar
 
 </button>
-
-
 
 
 
@@ -533,8 +573,146 @@ Cancelar
 
 </div>
 
+</div>
+
+
+
+
+
+
+
+
+
+<!-- ========================= -->
+<!-- MODAL INSPECCION -->
+<!-- ========================= -->
+
+
+<div class="modal" id="modalInspeccion">
+
+
+<div class="modal-contenido">
+
+
+
+<h2>
+
+Nueva inspección
+
+</h2>
+
+
+
+
+
+<input 
+
+type="hidden"
+
+id="inspeccionElementoId">
+
+
+
+
+
+
+<label>
+
+Estado
+
+</label>
+
+
+
+
+<select id="inspeccionEstado">
+
+
+<option>
+
+Bueno
+
+</option>
+
+
+<option>
+
+Observado
+
+</option>
+
+
+<option>
+
+Deteriorado
+
+</option>
+
+
+<option>
+
+Fuera de servicio
+
+</option>
+
+
+</select>
+
+
+
+
+
+
+
+<label>
+
+Observación
+
+</label>
+
+
+
+<textarea
+
+id="inspeccionObservacion"
+
+placeholder="Detalle de la situación">
+
+</textarea>
+
+
+
+
+
+
+
+
+<button onclick="guardarInspeccion()">
+
+Guardar inspección
+
+</button>
+
+
+
+
+
+
+<button onclick="cerrarInspeccion()">
+
+Cancelar
+
+</button>
+
+
+
+
+
 
 </div>
+
+</div>
+
 
 
 
@@ -556,6 +734,7 @@ Cancelar
 
 
 
+
 <script>
 
 
@@ -563,6 +742,7 @@ permitirModulo("movilidad");
 
 
 cargarUsuario();
+
 
 
 
@@ -585,6 +765,9 @@ window.location="../login.html";
 
 
 
+
+
 </body>
+
 
 </html>
