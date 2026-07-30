@@ -34,6 +34,8 @@ height:70vh;
 
 border-radius:15px;
 
+z-index:1;
+
 }
 
 
@@ -73,7 +75,8 @@ flex:1;
 
 
 
-.barraMapa button{
+.barraMapa button,
+.btn-volver{
 
 background:#0f6fae;
 
@@ -91,27 +94,11 @@ cursor:pointer;
 
 
 
-
-
 .btn-volver{
 
 margin-bottom:15px;
 
-padding:10px 20px;
-
-border:none;
-
-border-radius:8px;
-
-cursor:pointer;
-
-background:#0f6fae;
-
-color:white;
-
 }
-
-
 
 
 
@@ -132,8 +119,6 @@ align-items:center;
 z-index:2000;
 
 }
-
-
 
 
 
@@ -159,7 +144,6 @@ border-radius:15px;
 
 
 
-
 .modal-contenido input,
 .modal-contenido select,
 .modal-contenido textarea{
@@ -179,41 +163,14 @@ border:1px solid #ccc;
 }
 
 
-
-
-
-.modal-contenido button{
-
-
-padding:10px 20px;
-
-border:none;
-
-border-radius:8px;
-
-cursor:pointer;
-
-margin-right:10px;
-
-
-}
-
-
-
 </style>
 
 
 </head>
 
 
-
-
-
 <body>
-
-
-
-<div class="sidebar">
+  <div class="sidebar">
 
 
 
@@ -255,12 +212,9 @@ Dashboard
 
 <li class="activo">
 
-
 <i class="fa-solid fa-map"></i>
 
-
 Mapa Interactivo
-
 
 </li>
 
@@ -268,14 +222,11 @@ Mapa Interactivo
 
 
 
-<li onclick="location='elementos.html'">
-
+<li onclick="ir('elementos.html')">
 
 <i class="fa-solid fa-location-dot"></i>
 
-
 Elementos
-
 
 </li>
 
@@ -285,12 +236,9 @@ Elementos
 
 <li onclick="cerrarSesion()">
 
-
 <i class="fa-solid fa-right-from-bracket"></i>
 
-
 Salir
-
 
 </li>
 
@@ -341,19 +289,21 @@ Infraestructura vial geolocalizada
 <div class="usuarioNombre"></div>
 
 
+
 </header>
 
 
 
 
 
+
+
 <button 
-onclick="volverDashboard()" 
+onclick="volverDashboard()"
 class="btn-volver">
 
 
 <i class="fa-solid fa-arrow-left"></i>
-
 
 Volver Dashboard
 
@@ -367,10 +317,11 @@ Volver Dashboard
 
 
 
+
 <div class="barraMapa">
 
 
-<input 
+<input
 
 placeholder="Buscar elemento..."
 
@@ -380,11 +331,12 @@ onkeyup="buscarElemento(this.value)">
 
 
 
-<select 
+<select
 
-onchange="filtrarTipo(this.value)"
+id="filtro"
 
-id="filtro">
+onchange="filtrarTipo(this.value)">
+
 
 
 <option>
@@ -436,7 +388,10 @@ Otro
 </option>
 
 
+
 </select>
+
+
 
 
 
@@ -444,9 +399,11 @@ Otro
 
 <button onclick="abrirNuevo()">
 
+
 <i class="fa-solid fa-plus"></i>
 
 Nuevo elemento
+
 
 </button>
 
@@ -454,6 +411,12 @@ Nuevo elemento
 
 </div>
 
+
+
+
+
+
+<div id="mapa"></div>
 <!-- ========================= -->
 <!-- MODAL NUEVO ELEMENTO -->
 <!-- ========================= -->
@@ -465,13 +428,11 @@ Nuevo elemento
 <div class="modal-contenido">
 
 
-
 <h2>
 
 Nuevo elemento
 
 </h2>
-
 
 
 
@@ -511,63 +472,44 @@ Nuevo elemento
 
 
 
-
 <input 
-
 id="codigo"
-
 placeholder="Código del elemento">
 
 
 
 
 
-
 <input
-
 id="nombre"
-
 placeholder="Nombre o referencia">
 
 
 
 
 
-
 <textarea
-
 id="descripcion"
-
 placeholder="Descripción">
-
 </textarea>
 
 
 
 
 
-
 <textarea
-
 id="caracteristicas"
-
 placeholder="Características">
-
 </textarea>
-
 
 
 
 
 
 <textarea
-
 id="actuacion"
-
 placeholder="Actuación inicial">
-
 </textarea>
-
 
 
 
@@ -583,15 +525,11 @@ Guardar
 
 
 
-
 <button onclick="cerrarNuevo()">
 
 Cancelar
 
 </button>
-
-
-
 
 
 
@@ -618,7 +556,6 @@ Cancelar
 <div class="modal-contenido">
 
 
-
 <h2>
 
 Nueva inspección
@@ -630,11 +567,8 @@ Nueva inspección
 
 
 <input 
-
 type="hidden"
-
 id="inspeccionElementoId">
-
 
 
 
@@ -648,36 +582,16 @@ Estado
 
 
 
-
 <select id="inspeccionEstado">
 
 
-<option>
+<option>Bueno</option>
 
-Bueno
+<option>Observado</option>
 
-</option>
+<option>Deteriorado</option>
 
-
-<option>
-
-Observado
-
-</option>
-
-
-<option>
-
-Deteriorado
-
-</option>
-
-
-<option>
-
-Fuera de servicio
-
-</option>
+<option>Fuera de servicio</option>
 
 
 </select>
@@ -696,14 +610,11 @@ Observación
 
 
 
+
 <textarea
-
 id="inspeccionObservacion"
-
 placeholder="Detalle de la situación">
-
 </textarea>
-
 
 
 
@@ -718,14 +629,11 @@ Fotografía
 
 
 
+
 <input
-
 type="file"
-
 id="fotoInspeccion"
-
 accept="image/*"
-
 capture="environment">
 
 
@@ -754,8 +662,6 @@ Cancelar
 
 
 
-
-
 </div>
 
 </div>
@@ -767,6 +673,8 @@ Cancelar
 
 
 
+
+<!-- LIBRERIAS -->
 
 <script src="../js/permisos.js"></script>
 
@@ -774,6 +682,8 @@ Cancelar
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
+
+<!-- MAPA -->
 
 <script src="../js/mapa.js"></script>
 
@@ -785,14 +695,27 @@ Cancelar
 <script>
 
 
-// CONTROL DE ACCESO AL MODULO
+// CONTROL DE ACCESO
 
 permitirModulo("movilidad");
 
 
-// MOSTRAR USUARIO
+// CARGAR USUARIO
 
 cargarUsuario();
+
+
+
+
+
+// NAVEGACION
+
+function ir(pagina){
+
+window.location.href=pagina;
+
+}
+
 
 
 
@@ -800,14 +723,6 @@ cargarUsuario();
 
 
 
-
-
 </body>
 
-
 </html>
-
-
-
-
-<div id="mapa"></div>
