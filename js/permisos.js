@@ -1,206 +1,188 @@
 // =====================================
-// SGT CONTROL DE PERMISOS
+// SGT - CONTROL DE PERMISOS
 // =====================================
 
 
 
+// =====================================
+// OBTENER USUARIO
+// =====================================
+
+function obtenerUsuario(){
+
+    return JSON.parse(
+        localStorage.getItem("usuarioActual")
+    );
+
+}
+
+
+
+// =====================================
+// VERIFICAR ROL ESPECÍFICO
+// =====================================
+
 function verificarRol(rolPermitido){
 
+    let usuario = obtenerUsuario();
 
+    if(!usuario){
 
-let usuario = JSON.parse(
+        window.location="../login.html";
 
-localStorage.getItem("usuarioActual")
+        return;
 
-);
+    }
 
+    if(usuario.rol !== rolPermitido){
 
+        alert("Acceso no autorizado");
 
+        volverDashboard();
 
-
-if(!usuario){
-
-
-window.location="../login.html";
-
-
-return;
-
+    }
 
 }
 
 
 
-
-
-if(usuario.rol !== rolPermitido){
-
-
-
-alert(
-"Acceso no autorizado"
-);
-
-
-
-if(usuario.rol==="Administrador"){
-
-
-window.location="../admin/dashboard.html";
-
-
-}
-
-else{
-
-
-window.location="../movilidad/dashboard.html";
-
-
-}
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
+// =====================================
+// PERMITIR ACCESO A MODULO
+// =====================================
 
 function permitirModulo(modulo){
 
+    let usuario = obtenerUsuario();
 
+    if(!usuario){
 
-let usuario = JSON.parse(
+        window.location="../login.html";
 
-localStorage.getItem("usuarioActual")
+        return;
 
-);
+    }
 
+    // El administrador tiene acceso total
+    if(usuario.rol==="Administrador"){
 
+        return;
 
+    }
 
+    // Movilidad
+    if(
+        usuario.rol==="Movilidad"
+        &&
+        modulo==="movilidad"
+    ){
 
-if(!usuario){
+        return;
 
+    }
 
-window.location="../login.html";
+    // Inspector (preparado para cuando exista)
+    if(
+        usuario.rol==="Inspector"
+        &&
+        modulo==="inspector"
+    ){
 
+        return;
 
-return;
+    }
 
+    alert("No tiene permisos para este módulo");
 
-}
-
-
-
-
-
-// ADMIN TIENE TODO
-
-
-if(usuario.rol==="Administrador"){
-
-
-return;
-
-
-}
-
-
-
-
-
-
-// MOVILIDAD SOLO SU MODULO
-
-
-if(
-
-usuario.rol==="Movilidad"
-
-&&
-
-modulo==="movilidad"
-
-){
-
-
-return;
-
+    volverDashboard();
 
 }
 
 
 
+// =====================================
+// VOLVER AL DASHBOARD SEGÚN EL ROL
+// =====================================
 
+function volverDashboard(){
 
+    let usuario = obtenerUsuario();
 
+    if(!usuario){
 
-alert(
-"No tiene permisos para este módulo"
-);
+        window.location="../login.html";
 
+        return;
 
+    }
 
-window.history.back();
+    switch(usuario.rol){
 
+        case "Administrador":
 
+            window.location="../admin/dashboard.html";
+
+            break;
+
+        case "Movilidad":
+
+            window.location="../movilidad/dashboard.html";
+
+            break;
+
+        case "Inspector":
+
+            window.location="../inspector/dashboard.html";
+
+            break;
+
+        default:
+
+            window.location="../login.html";
+
+    }
 
 }
 
 
 
-
-
-
+// =====================================
+// CARGAR NOMBRE DEL USUARIO
+// =====================================
 
 function cargarUsuario(){
 
+    let usuario = obtenerUsuario();
 
+    let campo = document.querySelector(".usuarioNombre");
 
-let usuario = JSON.parse(
+    if(campo && usuario){
 
-localStorage.getItem("usuarioActual")
+        campo.innerHTML = `
 
-);
+            <i class="fa-solid fa-user"></i>
 
+            ${usuario.nombre}
 
+            <br>
 
-let campo=document.querySelector(
-".usuarioNombre"
-);
+            <small>${usuario.rol}</small>
 
+        `;
 
-
-
-
-if(campo && usuario){
-
-
-campo.innerHTML=`
-
-<i class="fa-solid fa-user"></i>
-
-${usuario.nombre}
-
-<br>
-
-<small>${usuario.rol}</small>
-
-`;
-
-
+    }
 
 }
 
 
+
+// =====================================
+// CERRAR SESIÓN
+// =====================================
+
+function cerrarSesion(){
+
+    localStorage.removeItem("usuarioActual");
+
+    window.location="../login.html";
 
 }
