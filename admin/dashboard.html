@@ -45,8 +45,6 @@ Dirección de Tránsito y Transportes
 
 
 
-
-
 <ul>
 
 
@@ -63,7 +61,8 @@ Dashboard
 
 
 
-<li onclick="location='usuarios.html'">
+
+<li onclick="ir('usuarios.html')">
 
 <i class="fa-solid fa-users"></i>
 
@@ -75,7 +74,9 @@ Usuarios
 
 
 
-<li onclick="location='../movilidad/mapa.html'">
+
+
+<li onclick="ir('../movilidad/mapa.html')">
 
 <i class="fa-solid fa-map"></i>
 
@@ -87,7 +88,9 @@ Mapa Movilidad
 
 
 
-<li onclick="location='../movilidad/elementos.html'">
+
+
+<li onclick="ir('../movilidad/elementos.html')">
 
 <i class="fa-solid fa-location-dot"></i>
 
@@ -99,13 +102,17 @@ Elementos
 
 
 
-<li onclick="location='../movilidad/informes.html'">
+
+
+<li onclick="ir('../movilidad/informes.html')">
 
 <i class="fa-solid fa-file-lines"></i>
 
 Informes
 
 </li>
+
+
 
 
 
@@ -130,8 +137,8 @@ Salir
 </ul>
 
 
-
 </div>
+
 
 
 
@@ -149,6 +156,7 @@ Salir
 
 
 <div>
+
 
 <h1>
 
@@ -169,7 +177,6 @@ Gestión integral SGT
 
 
 
-
 <div class="usuarioNombre"></div>
 
 
@@ -186,7 +193,7 @@ Gestión integral SGT
 
 
 
-<div class="card">
+<div class="card" onclick="ir('usuarios.html')">
 
 
 <i class="fa-solid fa-users"></i>
@@ -214,7 +221,8 @@ Administración de cuentas
 
 
 
-<div class="card">
+
+<div class="card" onclick="ir('../movilidad/mapa.html')">
 
 
 <i class="fa-solid fa-map-location-dot"></i>
@@ -242,7 +250,8 @@ Infraestructura vial
 
 
 
-<div class="card">
+
+<div class="card" onclick="ir('../movilidad/informes.html')">
 
 
 <i class="fa-solid fa-file-circle-check"></i>
@@ -289,6 +298,7 @@ Inspecciones
 <script src="../js/permisos.js"></script>
 
 
+
 <script>
 
 
@@ -301,7 +311,22 @@ cargarUsuario();
 
 
 
+
+
+function ir(pagina){
+
+
+window.location.href=pagina;
+
+
+}
+
+
+
+
+
 function cerrarSesion(){
+
 
 
 localStorage.removeItem(
@@ -309,7 +334,9 @@ localStorage.removeItem(
 );
 
 
+
 window.location="../login.html";
+
 
 
 }
@@ -317,8 +344,6 @@ window.location="../login.html";
 
 
 </script>
-
-
 
 
 
