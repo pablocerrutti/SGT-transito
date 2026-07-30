@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -16,6 +16,7 @@
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 
 
 <style>
@@ -77,6 +78,8 @@ border-radius:15px;
 
 font-weight:bold;
 
+display:inline-block;
+
 }
 
 
@@ -123,9 +126,38 @@ color:white;
 
 img{
 
-width:80px;
+width:90px;
 
 border-radius:8px;
+
+}
+
+
+
+.btn-pdf{
+
+
+background:#0f6fae;
+
+color:white;
+
+border:none;
+
+padding:8px 12px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+}
+
+
+
+.btn-pdf:hover{
+
+
+opacity:.8;
+
 
 }
 
@@ -139,6 +171,7 @@ border-radius:8px;
 
 
 <body>
+
 
 
 
@@ -156,11 +189,14 @@ border-radius:8px;
 
 
 <p>
+
 Dirección de Tránsito y Transportes
+
 </p>
 
 
 </div>
+
 
 
 
@@ -172,55 +208,79 @@ Dirección de Tránsito y Transportes
 
 <li onclick="location='dashboard.html'">
 
+
 <i class="fa-solid fa-house"></i>
+
 
 Dashboard
 
+
 </li>
+
+
 
 
 
 
 <li onclick="location='mapa.html'">
 
+
 <i class="fa-solid fa-map"></i>
+
 
 Mapa
 
+
 </li>
+
+
 
 
 
 
 <li onclick="location='elementos.html'">
 
+
 <i class="fa-solid fa-location-dot"></i>
+
 
 Elementos
 
+
 </li>
+
+
 
 
 
 
 <li class="activo">
 
+
 <i class="fa-solid fa-file-pdf"></i>
+
 
 Informes
 
+
 </li>
+
+
 
 
 
 
 <li onclick="cerrarSesion()">
 
+
 <i class="fa-solid fa-right-from-bracket"></i>
+
 
 Salir
 
+
 </li>
+
 
 
 
@@ -278,6 +338,7 @@ Historial de revisiones y evidencias
 
 
 
+
 <div class="tabla-container">
 
 
@@ -298,11 +359,13 @@ Fecha
 </th>
 
 
+
 <th>
 
 Elemento
 
 </th>
+
 
 
 <th>
@@ -312,11 +375,13 @@ Estado
 </th>
 
 
+
 <th>
 
 Observación
 
 </th>
+
 
 
 <th>
@@ -326,11 +391,21 @@ Inspector
 </th>
 
 
+
 <th>
 
 Foto
 
 </th>
+
+
+
+<th>
+
+Acción
+
+</th>
+
 
 
 </tr>
@@ -345,11 +420,13 @@ Foto
 
 <tr>
 
-<td colspan="6">
+
+<td colspan="7">
 
 Cargando...
 
 </td>
+
 
 </tr>
 
@@ -378,11 +455,12 @@ Cargando...
 
 
 
-
 <script src="../js/permisos.js"></script>
 
 
 <script src="../js/informes.js"></script>
+
+
 
 
 
@@ -394,6 +472,7 @@ permitirModulo("movilidad");
 
 
 cargarUsuario();
+
 
 
 
@@ -415,7 +494,7 @@ window.location="../login.html";
 
 
 
-</body>
 
+</body>
 
 </html>
