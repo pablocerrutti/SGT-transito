@@ -9,10 +9,13 @@
 
 <title>SGT | Administrador</title>
 
+
 <link rel="stylesheet" href="../css/admin.css">
+
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 
 </head>
 
@@ -22,6 +25,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 
 <div class="sidebar">
+
 
 
 <div class="logo">
@@ -43,6 +47,7 @@ Dirección de Tránsito y Transportes
 <ul>
 
 
+
 <li class="activo">
 
 <i class="fa-solid fa-house"></i>
@@ -50,6 +55,7 @@ Dirección de Tránsito y Transportes
 Dashboard
 
 </li>
+
 
 
 
@@ -103,6 +109,7 @@ Informes
 
 
 
+
 <li onclick="cerrarSesion()">
 
 <i class="fa-solid fa-right-from-bracket"></i>
@@ -113,7 +120,9 @@ Salir
 
 
 
+
 </ul>
+
 
 
 </div>
@@ -164,12 +173,14 @@ Gestión integral SGT
 
 
 
+
 <button 
-onclick="volverDashboard()"
+onclick="volverDashboard()" 
 class="btn-volver">
 
 
 <i class="fa-solid fa-arrow-left"></i>
+
 
 Volver Dashboard
 
@@ -217,6 +228,7 @@ Administración de cuentas
 
 
 
+
 <div class="card"
 onclick="ir('../movilidad/mapa.html')">
 
@@ -239,6 +251,7 @@ Infraestructura vial
 
 
 </div>
+
 
 
 
@@ -291,24 +304,34 @@ Inspecciones y reportes
 
 
 
+
 <script src="../js/permisos.js"></script>
+
 
 
 <script>
 
 
+// SOLO ADMINISTRADORES
+
 verificarRol("Administrador");
 
+
+// MOSTRAR USUARIO
 
 cargarUsuario();
 
 
 
+
+// NAVEGACION
+
 function ir(pagina){
 
-window.location.href=pagina;
+window.location.href = pagina;
 
 }
+
 
 
 </script>
