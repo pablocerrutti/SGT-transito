@@ -9,10 +9,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzYU8xREGRuJ3-8ZrK-dbYU
 
 
 
-// =====================================
 // LOGIN USUARIO
-// =====================================
-
 
 document
 .querySelector(".btnUsuario")
@@ -27,9 +24,7 @@ let clave =
 document.querySelectorAll("input")[1].value;
 
 
-
 validarLogin(usuario,clave);
-
 
 
 });
@@ -39,11 +34,7 @@ validarLogin(usuario,clave);
 
 
 
-
-// =====================================
 // LOGIN ADMIN
-// =====================================
-
 
 document
 .querySelector(".btnAdmin")
@@ -58,9 +49,7 @@ let clave =
 document.querySelectorAll("input")[3].value;
 
 
-
 validarLogin(usuario,clave);
-
 
 
 });
@@ -71,10 +60,8 @@ validarLogin(usuario,clave);
 
 
 
-
-
 // =====================================
-// VALIDAR LOGIN CONTRA SHEETS
+// VALIDAR CONTRA GOOGLE SHEETS
 // =====================================
 
 
@@ -99,11 +86,8 @@ API_URL+"?accion=usuarios"
 
 
 console.log(
-
-"USUARIOS SGT:",
-
+"USUARIOS:",
 usuarios
-
 );
 
 
@@ -117,11 +101,8 @@ let encontrado = usuarios.find(function(u){
 
 return (
 
-
-
 String(u.usuario)
 .toLowerCase()
-
 ===
 
 usuario.toLowerCase()
@@ -133,9 +114,7 @@ usuario.toLowerCase()
 
 
 String(u.password)
-
 ===
-
 clave
 
 
@@ -152,21 +131,15 @@ clave
 
 
 
-
 if(!encontrado){
 
 
-
 alert(
-
 "Usuario o contraseña incorrectos"
-
 );
 
 
-
 return;
-
 
 
 }
@@ -177,43 +150,27 @@ return;
 
 
 
-
-
-let usuarioSesion={
+let sesion={
 
 
 
 id:
-
 encontrado.id,
 
 
 
 nombre:
-
 encontrado.nombre,
 
 
 
 usuario:
-
 encontrado.usuario,
 
 
 
 rol:
-
-encontrado.rol,
-
-
-
-password:
-
-encontrado.password,
-
-
-
-cambiarPassword:false
+encontrado.rol
 
 
 
@@ -225,13 +182,11 @@ cambiarPassword:false
 
 
 
-
-
 localStorage.setItem(
 
 "usuarioActual",
 
-JSON.stringify(usuarioSesion)
+JSON.stringify(sesion)
 
 );
 
@@ -241,12 +196,7 @@ JSON.stringify(usuarioSesion)
 
 
 
-
-
-entrarSistema(usuarioSesion);
-
-
-
+entrarSistema(sesion);
 
 
 
@@ -254,26 +204,16 @@ entrarSistema(usuarioSesion);
 
 
 
+
 .catch(error=>{
 
 
-
-console.error(
-
-"ERROR LOGIN:",
-
-error
-
-);
-
+console.error(error);
 
 
 alert(
-
 "No se pudo conectar con la base de datos"
-
 );
-
 
 
 });
@@ -290,9 +230,8 @@ alert(
 
 
 
-
 // =====================================
-// REDIRECCION
+// REDIRECCION SEGUN ROL
 // =====================================
 
 
@@ -300,47 +239,35 @@ function entrarSistema(usuario){
 
 
 
-if(usuario.rol==="Administrador"){
+switch(usuario.rol){
+
+
+
+case "Administrador":
 
 
 window.location="admin/dashboard.html";
 
 
-}
+break;
 
 
 
-else if(usuario.rol==="Movilidad"){
 
 
-window.location="movilidad/dashboard.html";
-
-
-}
-
-
-
-else if(usuario.rol==="Movilidad Urbana"){
+case "Movilidad":
 
 
 window.location="movilidad/dashboard.html";
 
 
-}
+break;
 
 
 
-else if(usuario.rol==="Inspector"){
 
 
-window.location="inspector/dashboard.html";
-
-
-}
-
-
-
-else{
+default:
 
 
 alert(
