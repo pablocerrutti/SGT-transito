@@ -26,19 +26,14 @@ localStorage.getItem("usuarioActual")
 
 
 
-
 // =====================================
-// VERIFICAR ROL
+// DASHBOARD SEGUN ROL
 // =====================================
 
-
-function verificarRol(rolPermitido){
-
+function irDashboard(){
 
 
 let usuario = obtenerUsuario();
-
-
 
 
 
@@ -55,27 +50,47 @@ return;
 
 
 
+switch(usuario.rol){
 
 
 
-if(usuario.rol !== rolPermitido){
+case "Administrador":
 
 
+window.location="dashboard.html";
 
-alert(
 
-"Acceso no autorizado"
-
-);
+break;
 
 
 
 
-irDashboard();
+case "Movilidad":
+
+
+window.location="../movilidad/dashboard.html";
+
+
+break;
 
 
 
-return;
+
+case "Inspector":
+
+
+window.location="../inspector/dashboard.html";
+
+
+break;
+
+
+
+
+default:
+
+
+window.location="../login.html";
 
 
 }
@@ -83,13 +98,6 @@ return;
 
 
 }
-
-
-
-
-
-
-
 
 // =====================================
 // PERMITIR MODULO
