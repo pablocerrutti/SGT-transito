@@ -1,6 +1,7 @@
 // =====================================
-// SGT - CONTROL DE PERMISOS
+// SGT CONTROL DE PERMISOS
 // =====================================
+
 
 
 function verificarRol(rolPermitido){
@@ -32,7 +33,78 @@ return;
 
 
 
-// Administrador tiene acceso total
+if(usuario.rol !== rolPermitido){
+
+
+
+alert(
+"Acceso no autorizado"
+);
+
+
+
+if(usuario.rol==="Administrador"){
+
+
+window.location="../admin/dashboard.html";
+
+
+}
+
+else{
+
+
+window.location="../movilidad/dashboard.html";
+
+
+}
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+function permitirModulo(modulo){
+
+
+
+let usuario = JSON.parse(
+
+localStorage.getItem("usuarioActual")
+
+);
+
+
+
+
+
+if(!usuario){
+
+
+window.location="../login.html";
+
+
+return;
+
+
+}
+
+
+
+
+
+// ADMIN TIENE TODO
+
 
 if(usuario.rol==="Administrador"){
 
@@ -46,28 +118,44 @@ return;
 
 
 
-// Validar módulo
 
-if(usuario.rol!==rolPermitido){
+// MOVILIDAD SOLO SU MODULO
+
+
+if(
+
+usuario.rol==="Movilidad"
+
+&&
+
+modulo==="movilidad"
+
+){
+
+
+return;
+
+
+}
+
+
+
+
 
 
 
 alert(
-
-"Acceso restringido"
-
+"No tiene permisos para este módulo"
 );
 
 
 
-window.location="../login.html";
-
-
-}
+window.history.back();
 
 
 
 }
+
 
 
 
@@ -86,18 +174,20 @@ localStorage.getItem("usuarioActual")
 
 
 
-
-let zona=document.querySelector(".usuarioNombre");
-
-
-
-if(zona && usuario){
+let campo=document.querySelector(
+".usuarioNombre"
+);
 
 
-zona.innerHTML=
 
 
-`
+
+if(campo && usuario){
+
+
+campo.innerHTML=`
+
+<i class="fa-solid fa-user"></i>
 
 ${usuario.nombre}
 
@@ -106,6 +196,7 @@ ${usuario.nombre}
 <small>${usuario.rol}</small>
 
 `;
+
 
 
 }
