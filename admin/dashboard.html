@@ -9,12 +9,10 @@
 
 <title>SGT | Administrador</title>
 
-
 <link rel="stylesheet" href="../css/admin.css">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
 
 </head>
 
@@ -24,7 +22,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 
 <div class="sidebar">
-
 
 
 <div class="logo">
@@ -38,7 +35,6 @@ Dirección de Tránsito y Transportes
 </p>
 
 </div>
-
 
 
 
@@ -58,7 +54,6 @@ Dashboard
 
 
 
-
 <li onclick="ir('usuarios.html')">
 
 <i class="fa-solid fa-users"></i>
@@ -71,7 +66,7 @@ Usuarios
 
 
 
-<li onclick="ir('../admin/mapa.html')">
+<li onclick="ir('../movilidad/mapa.html')">
 
 <i class="fa-solid fa-map"></i>
 
@@ -121,7 +116,6 @@ Salir
 </ul>
 
 
-
 </div>
 
 
@@ -140,7 +134,6 @@ Salir
 
 
 <div>
-
 
 <h1>
 
@@ -171,14 +164,18 @@ Gestión integral SGT
 
 
 
+<button 
+onclick="volverDashboard()"
+class="btn-volver">
 
-<button onclick="volverDashboard()" class="btn-volver">
 
 <i class="fa-solid fa-arrow-left"></i>
 
 Volver Dashboard
 
+
 </button>
+
 
 
 
@@ -284,7 +281,6 @@ Inspecciones y reportes
 
 
 
-
 </div>
 
 
@@ -294,8 +290,8 @@ Inspecciones y reportes
 
 
 
-<script src="../js/permisos.js"></script>
 
+<script src="../js/permisos.js"></script>
 
 
 <script>
@@ -308,48 +304,11 @@ cargarUsuario();
 
 
 
-
-
 function ir(pagina){
 
 window.location.href=pagina;
 
 }
-
-
-
-
-
-
-
-function volverDashboard(){
-
-
-window.location="dashboard.html";
-
-
-}
-
-
-
-
-
-
-
-
-function cerrarSesion(){
-
-
-localStorage.removeItem(
-"usuarioActual"
-);
-
-
-window.location="../login.html";
-
-
-}
-
 
 
 </script>
