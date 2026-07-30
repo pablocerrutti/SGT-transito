@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 
-
 <head>
 
 
@@ -11,13 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-
-<title>
-
-SGT | Movilidad
-
-</title>
-
+<title>SGT | Movilidad</title>
 
 
 <link rel="stylesheet" href="../css/admin.css">
@@ -27,10 +20,7 @@ SGT | Movilidad
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 
-
 </head>
-
-
 
 
 
@@ -39,10 +29,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 
 
-
 <div class="sidebar">
-
-
 
 
 
@@ -52,16 +39,12 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 <img src="../img/logo.png">
 
 
-<h2>
-
-SGT
-
-</h2>
+<h2>SGT</h2>
 
 
 <p>
 
-Movilidad Urbana
+Dirección de Tránsito y Transportes
 
 </p>
 
@@ -74,11 +57,7 @@ Movilidad Urbana
 
 
 
-
-
 <ul>
-
-
 
 
 
@@ -98,13 +77,13 @@ Dashboard
 
 
 
-<li onclick="location='mapa.html'">
+<li onclick="ir('mapa.html')">
 
 
 <i class="fa-solid fa-map"></i>
 
 
-Mapa
+Mapa Movilidad
 
 
 </li>
@@ -114,8 +93,7 @@ Mapa
 
 
 
-
-<li onclick="location='elementos.html'">
+<li onclick="ir('elementos.html')">
 
 
 <i class="fa-solid fa-location-dot"></i>
@@ -131,8 +109,7 @@ Elementos
 
 
 
-
-<li onclick="location='informes.html'">
+<li onclick="ir('informes.html')">
 
 
 <i class="fa-solid fa-file-lines"></i>
@@ -156,9 +133,7 @@ Informes
 <i class="fa-solid fa-right-from-bracket"></i>
 
 
-
 Salir
-
 
 
 </li>
@@ -167,8 +142,8 @@ Salir
 
 
 
-
 </ul>
+
 
 
 
@@ -200,7 +175,6 @@ Panel Movilidad Urbana
 </h1>
 
 
-
 <p>
 
 Gestión de infraestructura vial
@@ -212,15 +186,28 @@ Gestión de infraestructura vial
 
 
 
-
-
 <div class="usuarioNombre"></div>
-
 
 
 
 </header>
 
+
+
+
+
+
+
+<button onclick="volverDashboard()" class="btn-volver">
+
+
+<i class="fa-solid fa-arrow-left"></i>
+
+
+Volver Dashboard
+
+
+</button>
 
 
 
@@ -237,8 +224,7 @@ Gestión de infraestructura vial
 
 
 <div class="card"
-
-onclick="location='mapa.html'">
+onclick="ir('mapa.html')">
 
 
 <i class="fa-solid fa-map-location-dot"></i>
@@ -266,10 +252,8 @@ Elementos georreferenciados
 
 
 
-
 <div class="card"
-
-onclick="location='elementos.html'">
+onclick="ir('elementos.html')">
 
 
 <i class="fa-solid fa-road"></i>
@@ -284,7 +268,7 @@ Elementos
 
 <p>
 
-Inventario vial
+Infraestructura urbana
 
 </p>
 
@@ -298,11 +282,10 @@ Inventario vial
 
 
 <div class="card"
+onclick="ir('informes.html')">
 
-onclick="location='informes.html'">
 
-
-<i class="fa-solid fa-file-lines"></i>
+<i class="fa-solid fa-file-circle-check"></i>
 
 
 <h2>
@@ -326,8 +309,10 @@ Inspecciones realizadas
 
 
 
-
 </div>
+
+
+
 
 
 
@@ -346,14 +331,43 @@ Inspecciones realizadas
 <script src="../js/permisos.js"></script>
 
 
-<script>
 
+<script>
 
 
 verificarRol("Movilidad");
 
 
 cargarUsuario();
+
+
+
+
+
+
+function ir(pagina){
+
+
+window.location.href=pagina;
+
+
+}
+
+
+
+
+
+
+
+function volverDashboard(){
+
+
+window.location="dashboard.html";
+
+
+}
+
+
 
 
 
@@ -367,7 +381,6 @@ localStorage.removeItem(
 );
 
 
-
 window.location="../login.html";
 
 
@@ -375,8 +388,8 @@ window.location="../login.html";
 
 
 
-</script>
 
+</script>
 
 
 
