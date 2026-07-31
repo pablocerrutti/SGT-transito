@@ -1,5 +1,6 @@
 // =====================================
 // SGT - MAPA MOVILIDAD
+// mapa.js
 // =====================================
 
 
@@ -10,21 +11,12 @@ const API =
 
 let mapa;
 
-let marcadores=[];
+let elementos = [];
 
-let elementos=[];
+let tipos = [];
 
-let zonas=[];
+let marcadores = [];
 
-
-let camadaElementos = L.layerGroup();
-
-let camadaZonas = new L.FeatureGroup();
-
-
-let poligonoTemporal=null;
-
-let drawControl;
 
 
 
@@ -34,11 +26,26 @@ let drawControl;
 // =====================================
 
 
-window.onload=function(){
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
 
     iniciarMapa();
 
-};
+
+    cargarTipos();
+
+
+    cargarElementos();
+
+
+    verificarPermisos();
+
+
+});
+
+
 
 
 
@@ -53,265 +60,30 @@ window.onload=function(){
 function iniciarMapa(){
 
 
-
-    mapa=L.map("mapa").setView(
-
-        [-34.0956,-56.2148],
-
+    mapa =
+    L.map("mapa")
+    .setView(
+        [
+        -34.095,
+        -56.214
+        ],
         14
-
     );
-
-
 
 
 
     L.tileLayer(
 
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 
-        {
+    {
 
-            attribution:"© OpenStreetMap"
-
-        }
-
-    ).addTo(mapa);
-
-
-
-
-
-
-    camadaElementos.addTo(mapa);
-
-
-    camadaZonas.addTo(mapa);
-
-
-
-
-
-
-
-    drawControl=new L.Control.Draw({
-
-
-        draw:{
-
-
-            polygon:{
-
-
-                allowIntersection:false,
-
-
-                showArea:true,
-
-
-                shapeOptions:{
-
-
-                    color:"#2196F3",
-
-
-                    weight:3,
-
-
-                    fillOpacity:0.35
-
-
-                }
-
-
-            },
-
-
-            polyline:false,
-
-            rectangle:false,
-
-            circle:false,
-
-            circlemarker:false,
-
-            marker:false
-
-
-        },
-
-
-
-        edit:{
-
-
-            featureGroup:camadaZonas
-
-
-        }
-
-
-
-    });
-
-
-
-
-
-    mapa.addControl(drawControl);
-
-
-
-
-
-
-    // EVENTO DIBUJO
-
-    mapa.on(
-
-        L.Draw.Event.CREATED,
-
-        zonaCreada
-
-    );
-
-
-
-
-
-    mapa.on(
-
-        L.Draw.Event.EDITED,
-
-        zonaEditada
-
-    );
-
-
-
-
-
-    mapa.on(
-
-        L.Draw.Event.DELETED,
-
-        zonaEliminada
-
-    );
-
-
-
-
-
-
-
-    cargarElementos();
-
-
-    cargarZonas();
-
-
-
-}
-// =====================================
-// ACTIVAR DIBUJO DE ZONA
-// =====================================
-
-
-function activarDibujoZona(){
-
-
-    let herramienta = new L.Draw.Polygon(
-
-        mapa,
-
-        {
-
-            allowIntersection:false,
-
-
-            showArea:true,
-
-
-            shapeOptions:{
-
-
-                color:"#2196F3",
-
-                weight:3,
-
-                fillOpacity:0.35
-
-
-            }
-
-
-        }
-
-    );
-
-
-    herramienta.enable();
-
-
-}
-
-
-
-
-
-
-// =====================================
-// CUANDO SE CREA POLIGONO
-// =====================================
-
-
-function zonaCreada(e){
-
-
-
-    if(poligonoTemporal){
-
-
-        mapa.removeLayer(poligonoTemporal);
-
+    maxZoom:19
 
     }
 
-
-
-
-    poligonoTemporal=e.layer;
-
-
-
-    poligonoTemporal.setStyle({
-
-
-        color:"#2196F3",
-
-        fillColor:"#2196F3",
-
-        fillOpacity:0.35
-
-
-    });
-
-
-
-
-
-    mapa.addLayer(poligonoTemporal);
-
-
-
-
-
-    document.getElementById(
-
-        "modalZona"
-
-    ).style.display="flex";
+    )
+    .addTo(mapa);
 
 
 
@@ -323,915 +95,85 @@ function zonaCreada(e){
 
 
 
-
 // =====================================
-// CERRAR MODAL ZONA
+// CARGAR TIPOS
 // =====================================
 
 
-function cerrarZona(){
+async function cargarTipos(){
+
+
+try{
+
+
+let respuesta =
+await fetch(
+API+"?accion=tipos"
+);
 
 
 
-    document.getElementById(
-
-        "modalZona"
-
-    ).style.display="none";
+tipos =
+await respuesta.json();
 
 
 
+let select =
+document.getElementById(
+"filtroTipo"
+);
 
 
-    if(poligonoTemporal){
+
+tipos.forEach(tipo=>{
 
 
-        mapa.removeLayer(poligonoTemporal);
+if(!tipo.tipo)
+return;
 
 
-        poligonoTemporal=null;
+
+let opcion =
+document.createElement(
+"option"
+);
 
 
-    }
 
+opcion.value =
+tipo.id;
+
+
+
+opcion.textContent =
+tipo.tipo;
+
+
+
+select.appendChild(
+opcion
+);
+
+
+
+});
+
+
+
+}
+catch(error){
+
+
+console.error(
+"Error tipos:",
+error
+);
 
 
 }
 
 
-
-
-
-
-
-
-
-// =====================================
-// GUARDAR ZONA
-// =====================================
-
-
-function guardarZona(){
-
-
-
-    if(!poligonoTemporal){
-
-
-        alert(
-
-            "Primero dibuje una zona"
-
-        );
-
-
-        return;
-
-
-    }
-
-
-
-
-
-    let nombre=document.getElementById(
-
-        "zonaNombre"
-
-    ).value.trim();
-
-
-
-
-
-    let tipo=document.getElementById(
-
-        "zonaTipo"
-
-    ).value;
-
-
-
-
-
-    let color=document.getElementById(
-
-        "zonaColor"
-
-    ).value;
-
-
-
-
-
-
-    if(nombre===""){
-
-
-        alert(
-
-            "Ingrese nombre de zona"
-
-        );
-
-
-        return;
-
-
-    }
-
-
-
-
-
-
-    poligonoTemporal.setStyle({
-
-
-        color:color,
-
-        fillColor:color,
-
-        fillOpacity:0.35,
-
-        weight:3
-
-
-    });
-
-
-
-
-
-    poligonoTemporal.bindPopup(
-
-
-        "<b>"+nombre+"</b><br>"+tipo
-
-
-    );
-
-
-
-
-
-
-    camadaZonas.addLayer(
-
-        poligonoTemporal
-
-    );
-
-
-
-
-
-
-
-    let coordenadas=[];
-
-
-
-
-
-    poligonoTemporal
-
-    .getLatLngs()[0]
-
-    .forEach(function(p){
-
-
-
-        coordenadas.push({
-
-
-            lat:p.lat,
-
-
-            lng:p.lng
-
-
-
-        });
-
-
-
-    });
-
-
-
-
-
-
-
-    let zona={
-
-
-
-        nombre:nombre,
-
-
-        tipo:tipo,
-
-
-        color:color,
-
-
-        coordenadas:coordenadas
-
-
-
-    };
-
-
-
-
-
-
-
-    guardarZonaServidor(zona);
-
-
-
-
-
-
-    document.getElementById(
-
-        "modalZona"
-
-    ).style.display="none";
-
-
-
-
-
-
-
-    document.getElementById(
-
-        "zonaNombre"
-
-    ).value="";
-
-
-
-
-    poligonoTemporal=null;
-
-
-
 }
-// =====================================
-// GUARDAR ZONA EN GOOGLE SHEETS
-// =====================================
-
-
-async function guardarZonaServidor(zona){
-
-
-    try{
-
-
-        let respuesta = await fetch(API,{
-
-
-            method:"POST",
-
-
-            headers:{
-
-
-                "Content-Type":"application/json"
-
-
-            },
-
-
-            body:JSON.stringify({
-
-
-                accion:"guardarZona",
-
-
-                nombre:zona.nombre,
-
-
-                tipo:zona.tipo,
-
-
-                color:zona.color,
-
-
-                coordenadas:JSON.stringify(
-
-                    zona.coordenadas
-
-                )
-
-
-            })
-
-
-
-        });
-
-
-
-
-
-
-        let resultado = await respuesta.json();
-
-
-
-
-
-
-        if(resultado.ok){
-
-
-
-            console.log(
-
-                "Zona guardada"
-
-            );
-
-
-
-            cargarZonas();
-
-
-
-        }
-
-        else{
-
-
-            alert(
-
-                "No se pudo guardar la zona"
-
-            );
-
-
-        }
-
-
-
-
-
-    }
-
-    catch(error){
-
-
-
-        console.error(error);
-
-
-
-        alert(
-
-            "Error conectando con servidor"
-
-        );
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-
-// =====================================
-// CARGAR ZONAS DESDE SHEETS
-// =====================================
-
-
-async function cargarZonas(){
-
-
-
-    try{
-
-
-
-        camadaZonas.clearLayers();
-
-
-
-
-
-        let respuesta = await fetch(
-
-            API+"?accion=zonas"
-
-        );
-
-
-
-
-
-        let lista = await respuesta.json();
-
-
-
-
-
-        if(!Array.isArray(lista)){
-
-
-            return;
-
-
-        }
-
-
-
-
-
-        zonas=lista;
-
-
-
-
-
-        lista.forEach(function(zona){
-
-
-
-            dibujarZona(zona);
-
-
-
-        });
-
-
-
-
-
-    }
-
-    catch(error){
-
-
-        console.error(
-
-            "Error cargando zonas",
-
-            error
-
-        );
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =====================================
-// DIBUJAR ZONA DESDE DATOS
-// =====================================
-
-
-function dibujarZona(zona){
-
-
-
-    let coordenadas=[];
-
-
-
-
-
-    try{
-
-
-
-        if(typeof zona.coordenadas==="string"){
-
-
-            coordenadas=
-
-            JSON.parse(
-
-                zona.coordenadas
-
-            );
-
-
-        }
-
-        else{
-
-
-            coordenadas=zona.coordenadas;
-
-
-        }
-
-
-
-
-
-    }
-
-    catch(e){
-
-
-
-        console.error(
-
-            "Error coordenadas zona",
-
-            e
-
-        );
-
-
-        return;
-
-
-    }
-
-
-
-
-
-
-
-    let puntos=[];
-
-
-
-
-
-    coordenadas.forEach(function(p){
-
-
-
-        puntos.push([
-
-
-            Number(p.lat),
-
-
-            Number(p.lng)
-
-
-
-        ]);
-
-
-
-    });
-
-
-
-
-
-
-
-
-    let poligono=L.polygon(
-
-
-        puntos,
-
-
-        {
-
-
-            color:
-
-            zona.color || "#2196F3",
-
-
-
-            fillColor:
-
-            zona.color || "#2196F3",
-
-
-
-            fillOpacity:0.35,
-
-
-
-            weight:3
-
-
-
-        }
-
-
-
-    );
-
-
-
-
-
-
-
-    poligono.bindPopup(
-
-
-        "<b>"+
-
-        zona.nombre+
-
-        "</b><br>"+
-
-        zona.tipo
-
-
-    );
-
-
-
-
-
-
-    camadaZonas.addLayer(
-
-        poligono
-
-    );
-
-
-
-}
-// =====================================
-// LIMPIAR ZONAS
-// =====================================
-
-
-function limpiarZonas(){
-
-
-    camadaZonas.clearLayers();
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// ACTUALIZAR ZONAS
-// =====================================
-
-
-function actualizarZonas(){
-
-
-    limpiarZonas();
-
-
-    cargarZonas();
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// IR A UNA ZONA
-// =====================================
-
-
-function irAZona(nombre){
-
-
-
-    camadaZonas.eachLayer(function(layer){
-
-
-
-        let popup=layer.getPopup();
-
-
-
-        if(!popup){
-
-            return;
-
-        }
-
-
-
-
-
-        let contenido=popup.getContent();
-
-
-
-
-
-        if(contenido.includes(nombre)){
-
-
-
-            mapa.fitBounds(
-
-                layer.getBounds()
-
-            );
-
-
-
-            layer.openPopup();
-
-
-
-        }
-
-
-
-
-
-    });
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =====================================
-// OBTENER COORDENADAS
-// =====================================
-
-
-function obtenerCoordenadas(layer){
-
-
-
-    let puntos=[];
-
-
-
-
-
-    layer.getLatLngs()[0]
-
-    .forEach(function(p){
-
-
-
-        puntos.push({
-
-
-
-            lat:p.lat,
-
-
-
-            lng:p.lng
-
-
-
-        });
-
-
-
-    });
-
-
-
-
-
-    return puntos;
-
-
-
-}
-
-
-
-
-
-
-
-
-// =====================================
-// EVENTO EDITAR ZONA
-// =====================================
-
-
-function zonaEditada(e){
-
-
-
-    e.layers.eachLayer(function(layer){
-
-
-
-        let nuevasCoordenadas=
-
-        obtenerCoordenadas(layer);
-
-
-
-
-
-        console.log(
-
-            "Zona modificada",
-
-            nuevasCoordenadas
-
-        );
-
-
-
-
-
-        // Aquí luego agregamos
-
-        // actualización en Sheets
-
-
-
-    });
-
-
-
-}
-
-
-
-
-
-
-
-
-// =====================================
-// EVENTO ELIMINAR ZONA
-// =====================================
-
-
-function zonaEliminada(e){
-
-
-
-    e.layers.eachLayer(function(layer){
-
-
-
-        console.log(
-
-            "Zona eliminada"
-
-        );
-
-
-
-        // Aquí luego agregamos
-
-        // eliminación en Sheets
-
-
-
-    });
-
-
-
-}
-
 
 
 
@@ -1248,52 +190,141 @@ async function cargarElementos(){
 
 
 
-    try{
+try{
+
+
+let respuesta =
+await fetch(
+API+"?accion=elementos"
+);
 
 
 
-        let respuesta=await fetch(
-
-            API+"?accion=elementos"
-
-        );
+elementos =
+await respuesta.json();
 
 
 
-        let datos=await respuesta.json();
+mostrarElementos(
+elementos
+);
+
+
+
+}
+catch(error){
+
+
+console.error(
+"Error elementos:",
+error
+);
+
+
+}
+
+
+
+}
 
 
 
 
-        elementos=datos;
 
 
 
-        console.log(
-
-            "Elementos cargados",
-
-            elementos
-
-        );
+// =====================================
+// MOSTRAR MARCADORES
+// =====================================
 
 
-
-    }
-
-    catch(error){
+function mostrarElementos(lista){
 
 
-        console.error(
 
-            "Error elementos",
-
-            error
-
-        );
+limpiarMarcadores();
 
 
-    }
+
+lista.forEach(elemento=>{
+
+
+if(
+!elemento.lat ||
+!elemento.lng
+)
+return;
+
+
+
+let marcador =
+L.marker(
+[
+Number(elemento.lat),
+Number(elemento.lng)
+]
+);
+
+
+
+marcador
+.addTo(mapa);
+
+
+
+marcador
+.bindPopup(
+
+`
+
+<div class="popup">
+
+
+<h3>
+${elemento.tipo}
+</h3>
+
+
+<p>
+<b>Código:</b>
+${elemento.codigo}
+</p>
+
+
+<p>
+${elemento.nombre || ""}
+</p>
+
+
+<p>
+<b>Estado:</b>
+${elemento.estado || ""}
+</p>
+
+
+
+<button onclick="verElemento('${elemento.id}')">
+
+Ver detalle
+
+</button>
+
+
+</div>
+
+`
+
+);
+
+
+
+marcadores.push(
+marcador
+);
+
+
+
+});
 
 
 }
@@ -1306,28 +337,76 @@ async function cargarElementos(){
 
 
 // =====================================
-// BUSCAR ELEMENTOS
+// LIMPIAR MARCADORES
 // =====================================
 
 
-function buscarElemento(texto){
+function limpiarMarcadores(){
+
+
+marcadores.forEach(
+m=>
+mapa.removeLayer(m)
+);
 
 
 
-    texto=texto.toLowerCase();
+marcadores=[];
+
+
+}
 
 
 
 
 
-    console.log(
 
-        "Buscando:",
 
-        texto
+// =====================================
+// FILTRO
+// =====================================
 
-    );
 
+function filtrarTipo(){
+
+
+let valor =
+document.getElementById(
+"filtroTipo"
+)
+.value;
+
+
+
+if(
+valor==="todos"
+){
+
+
+mostrarElementos(
+elementos
+);
+
+
+return;
+
+}
+
+
+
+let filtrados =
+elementos.filter(
+
+e=>
+e.tipoId == valor
+
+);
+
+
+
+mostrarElementos(
+filtrados
+);
 
 
 }
@@ -1340,22 +419,182 @@ function buscarElemento(texto){
 
 
 // =====================================
-// FILTRO TIPO
+// VER ELEMENTO
 // =====================================
 
 
-function filtrarTipo(tipo){
+function verElemento(id){
 
 
 
-    console.log(
+localStorage.setItem(
 
-        "Filtro:",
+"elementoSeleccionado",
 
-        tipo
+JSON.stringify(
 
-    );
+elementos.find(
+e=>e.id==id
+)
 
+)
+
+);
+
+
+
+window.location.href =
+"elemento.html";
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// NUEVO ELEMENTO
+// =====================================
+
+
+function nuevoElemento(){
+
+
+window.location.href =
+"elemento.html?nuevo=true";
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// PERMISOS
+// =====================================
+
+
+function verificarPermisos(){
+
+
+
+let usuario =
+JSON.parse(
+localStorage.getItem(
+"usuario"
+)
+);
+
+
+
+let boton =
+document.getElementById(
+"btnNuevo"
+);
+
+
+
+if(!usuario){
+
+
+return;
+
+
+}
+
+
+
+if(
+usuario.rol ===
+"Administrador"
+){
+
+
+boton.style.display =
+"block";
+
+
+return;
+
+
+}
+
+
+
+
+if(
+usuario.rol ===
+"Movilidad"
+){
+
+
+boton.style.display =
+"block";
+
+
+return;
+
+
+}
+
+
+
+boton.style.display =
+"none";
+
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// VOLVER
+// =====================================
+
+
+function volverDashboard(){
+
+
+let usuario =
+JSON.parse(
+localStorage.getItem(
+"usuario"
+)
+);
+
+
+
+if(
+usuario &&
+usuario.rol==="Administrador"
+){
+
+
+window.location.href =
+"../admin/dashboard.html";
+
+
+}
+else{
+
+
+window.location.href =
+"dashboard.html";
+
+
+}
 
 
 }
