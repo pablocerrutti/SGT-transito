@@ -22,7 +22,6 @@ let usuarioActual = null;
 window.onload=function(){
 
 
-
 usuarioActual = JSON.parse(
 
 localStorage.getItem("usuarioActual")
@@ -49,14 +48,14 @@ return;
 
 
 
-let nombre=document.querySelector(".usuarioNombre");
+let nombre = document.querySelector(".usuarioNombre");
 
 
 
 if(nombre){
 
 
-nombre.innerHTML = usuarioActual.nombre;
+nombre.innerHTML = usuarioActual.Nombre || usuarioActual.nombre;
 
 
 }
@@ -64,6 +63,7 @@ nombre.innerHTML = usuarioActual.nombre;
 
 
 };
+
 
 
 
@@ -102,7 +102,9 @@ let repetir = document
 if(nueva==="" || repetir===""){
 
 
-alert("Complete ambos campos");
+alert(
+"Complete todos los campos"
+);
 
 
 return;
@@ -116,10 +118,12 @@ return;
 
 
 
-if(nueva!==repetir){
+if(nueva !== repetir){
 
 
-alert("Las contraseñas no coinciden");
+alert(
+"Las contraseñas no coinciden"
+);
 
 
 return;
@@ -156,8 +160,6 @@ try{
 
 
 
-
-
 let respuesta = await fetch(
 
 API_CAMBIO,
@@ -171,19 +173,21 @@ method:"POST",
 headers:{
 
 
-"Content-Type":"application/json"
+"Content-Type":
+"application/x-www-form-urlencoded"
 
 
 },
 
 
-body:JSON.stringify({
+body:new URLSearchParams({
 
 
 accion:"cambiarPassword",
 
 
-usuario:usuarioActual.usuario,
+usuario:
+usuarioActual.Usuario || usuarioActual.usuario,
 
 
 password:nueva
@@ -210,10 +214,7 @@ let resultado = await respuesta.json();
 
 
 
-
-
 console.log(resultado);
-
 
 
 
@@ -226,10 +227,17 @@ if(resultado.ok){
 
 
 
-usuarioActual.password=nueva;
+usuarioActual.Password = nueva;
 
 
-usuarioActual.cambiarClave=false;
+usuarioActual.Password = nueva;
+
+
+usuarioActual.DebeCambiar = false;
+
+
+usuarioActual.cambiarClave = false;
+
 
 
 
@@ -258,9 +266,10 @@ alert(
 
 
 
+
 redireccionarRol(
 
-usuarioActual.rol
+usuarioActual.Rol || usuarioActual.rol
 
 );
 
@@ -273,16 +282,17 @@ usuarioActual.rol
 else{
 
 
+
 alert(
 
-resultado.mensaje || 
+resultado.mensaje ||
 "No se pudo cambiar la contraseña"
 
 );
 
 
-}
 
+}
 
 
 
@@ -380,6 +390,32 @@ window.location="login.html";
 
 }
 
+
+
+}
+
+
+
+
+
+
+
+// =====================================
+// CERRAR SESION
+// =====================================
+
+
+function cerrarSesion(){
+
+
+
+localStorage.removeItem(
+"usuarioActual"
+);
+
+
+
+window.location="login.html";
 
 
 }
