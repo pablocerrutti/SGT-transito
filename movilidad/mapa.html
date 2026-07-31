@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="es">
 
 <head>
@@ -7,583 +8,111 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SGT | Mapa Movilidad Urbana</title>
 
-<link rel="stylesheet" href="../css/admin.css">
+<title>SGT | Mapa Movilidad</title>
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet/dist/leaflet.css">
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+<link rel="stylesheet" href="../css/estilos.css">
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link rel="stylesheet" href="../css/mapa.css">
 
-<style>
 
-#mapa{
+<!-- LEAFLET -->
 
-width:100%;
+<link 
+rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"
+/>
 
-height:70vh;
-
-border-radius:15px;
-
-border:1px solid #cfd8dc;
-
-}
-
-.barraMapa{
-
-display:flex;
-
-gap:10px;
-
-margin-bottom:15px;
-
-flex-wrap:wrap;
-
-align-items:center;
-
-}
-
-.barraMapa input,
-.barraMapa select{
-
-padding:10px;
-
-border-radius:8px;
-
-border:1px solid #cfd8dc;
-
-}
-
-.barraMapa input{
-
-flex:1;
-
-min-width:220px;
-
-}
-
-.barraMapa button,
-.btn-volver{
-
-background:#0f6fae;
-
-color:#fff;
-
-border:none;
-
-padding:10px 18px;
-
-border-radius:8px;
-
-cursor:pointer;
-
-}
-
-.barraMapa button:hover,
-.btn-volver:hover{
-
-background:#0b5b90;
-
-}
-
-.btn-volver{
-
-margin-bottom:15px;
-
-}
-
-.modal{
-
-display:none;
-
-position:fixed;
-
-inset:0;
-
-background:rgba(0,0,0,.55);
-
-justify-content:center;
-
-align-items:center;
-
-z-index:9999;
-
-}
-
-.modal-contenido{
-
-background:#fff;
-
-width:430px;
-
-max-width:95%;
-
-padding:25px;
-
-border-radius:12px;
-
-max-height:90vh;
-
-overflow:auto;
-
-}
-
-.modal-contenido input,
-.modal-contenido textarea,
-.modal-contenido select{
-
-width:100%;
-
-padding:10px;
-
-margin-bottom:12px;
-
-border:1px solid #ccc;
-
-border-radius:8px;
-
-box-sizing:border-box;
-
-}
-
-.modal-contenido button{
-
-padding:10px 18px;
-
-margin-right:10px;
-
-border:none;
-
-border-radius:8px;
-
-cursor:pointer;
-
-}
-
-</style>
 
 </head>
 
+
+
 <body>
 
-<div class="sidebar">
 
-    <div class="logo">
+<header class="topbar">
 
-        <img src="../img/logo.png">
 
-        <h2>SGT</h2>
+<div>
 
-        <p>Dirección de Tránsito y Transportes</p>
+<h1>
+SGT
+</h1>
 
-    </div>
+<p>
+Mapa Operativo Movilidad
+</p>
 
-    <ul>
-
-        <li onclick="volverDashboard()">
-
-            <i class="fa-solid fa-house"></i>
-
-            Dashboard
-
-        </li>
-
-        <li class="activo">
-
-            <i class="fa-solid fa-map"></i>
-
-            Mapa Interactivo
-
-        </li>
-
-        <li onclick="ir('elementos.html')">
-
-            <i class="fa-solid fa-location-dot"></i>
-
-            Elementos
-
-        </li>
-
-        <li onclick="cerrarSesion()">
-
-            <i class="fa-solid fa-right-from-bracket"></i>
-
-            Salir
-
-        </li>
-
-    </ul>
 
 </div>
 
 
 
+<div>
 
+<button 
+onclick="nuevoElemento()"
+id="btnNuevo">
 
-<div class="contenido">
+Nuevo elemento
 
-    <header>
+</button>
 
-        <div>
 
-            <h1>
+<button 
+onclick="volverDashboard()">
 
-                Mapa de Movilidad Urbana
+Volver
 
-            </h1>
+</button>
 
-            <p>
-
-                Infraestructura vial geolocalizada
-
-            </p>
-
-        </div>
-
-        <div class="usuarioNombre"></div>
-
-    </header>
-
-
-
-
-
-    <button
-        class="btn-volver"
-        onclick="volverDashboard()">
-
-        <i class="fa-solid fa-arrow-left"></i>
-
-        Volver Dashboard
-
-    </button>
-
-
-
-
-
-    <div class="barraMapa">
-
-        <input
-
-            type="text"
-
-            placeholder="Buscar elemento..."
-
-            onkeyup="buscarElemento(this.value)">
-
-
-
-
-        <select
-
-            id="filtro"
-
-            onchange="filtrarTipo(this.value)">
-
-            <option value="Todos">Todos</option>
-
-            <option value="Semáforo">Semáforo</option>
-
-            <option value="Paso peatonal">Paso peatonal</option>
-
-            <option value="Radar">Radar</option>
-
-            <option value="Cámara">Cámara</option>
-
-            <option value="Lomo de burro">Lomo de burro</option>
-
-            <option value="Otro">Otro</option>
-
-        </select>
-
-
-
-
-
-        <button onclick="abrirNuevo()">
-
-            <i class="fa-solid fa-plus"></i>
-
-            Nuevo elemento
-
-        </button>
-
-
-
-
-
-        <button onclick="activarDibujoZona()">
-
-            <i class="fa-solid fa-draw-polygon"></i>
-
-            Nueva Zona
-
-        </button>
-
-    </div>
-
-
-
-
-
-    <div id="mapa"></div>
-
-<!-- ========================= -->
-<!-- MODAL NUEVO ELEMENTO -->
-<!-- ========================= -->
-
-<div class="modal" id="modal">
-
-    <div class="modal-contenido">
-
-        <h2>Nuevo elemento</h2>
-
-        <select id="tipo">
-
-            <option>Semáforo</option>
-            <option>Paso peatonal</option>
-            <option>Parada de taxi</option>
-            <option>Carga y descarga</option>
-            <option>Cordón reservado</option>
-            <option>Lomo de burro</option>
-            <option>Radar</option>
-            <option>Cámara</option>
-            <option>Cartel PARE</option>
-            <option>Señal vertical</option>
-            <option>Señal horizontal</option>
-            <option>Reductor de velocidad</option>
-            <option>Otro</option>
-
-        </select>
-
-        <input
-        id="codigo"
-        placeholder="Código del elemento">
-
-        <input
-        id="nombre"
-        placeholder="Nombre o referencia">
-
-        <textarea
-        id="descripcion"
-        placeholder="Descripción"></textarea>
-
-        <textarea
-        id="caracteristicas"
-        placeholder="Características"></textarea>
-
-        <textarea
-        id="actuacion"
-        placeholder="Actuación inicial"></textarea>
-
-        <button onclick="guardarElemento()">
-
-            Guardar
-
-        </button>
-
-        <button onclick="cerrarNuevo()">
-
-            Cancelar
-
-        </button>
-
-    </div>
 
 </div>
 
 
-
-
-
-<!-- ========================= -->
-<!-- MODAL INSPECCIÓN -->
-<!-- ========================= -->
-
-<div class="modal" id="modalInspeccion">
-
-    <div class="modal-contenido">
-
-        <h2>Nueva inspección</h2>
-
-        <input
-        type="hidden"
-        id="inspeccionElementoId">
-
-        <label>Estado</label>
-
-        <select id="inspeccionEstado">
-
-            <option>Bueno</option>
-            <option>Observado</option>
-            <option>Deteriorado</option>
-            <option>Fuera de servicio</option>
-
-        </select>
-
-        <label>Observación</label>
-
-        <textarea
-        id="inspeccionObservacion"
-        placeholder="Detalle de la situación"></textarea>
-
-        <label>Fotografía</label>
-
-        <input
-        type="file"
-        id="fotoInspeccion"
-        accept="image/*"
-        capture="environment">
-
-        <button onclick="guardarInspeccion()">
-
-            Guardar inspección
-
-        </button>
-
-        <button onclick="cerrarInspeccion()">
-
-            Cancelar
-
-        </button>
-
-    </div>
-
-</div>
+</header>
 
 
 
 
 
-<!-- ========================= -->
-<!-- MODAL NUEVA ZONA -->
-<!-- ========================= -->
+<section class="filtros">
 
-<div class="modal" id="modalZona">
 
-    <div class="modal-contenido">
+<select id="filtroTipo"
+onchange="filtrarTipo()">
 
-        <h2>Nueva Zona</h2>
 
-        <input
-        id="zonaNombre"
-        placeholder="Nombre de la zona">
+<option value="todos">
+Todos los elementos
+</option>
 
-        <select id="zonaTipo">
 
-            <option>Estacionamiento Tarifado</option>
-            <option>Zona Azul</option>
-            <option>Parada de Taxi</option>
-            <option>Carga y Descarga</option>
-            <option>Feria Vecinal</option>
-            <option>Otro</option>
+</select>
 
-        </select>
 
-        <label>Color de la zona</label>
+</section>
 
-        <input
-        type="color"
-        id="zonaColor"
-        value="#2196F3">
 
-        <button onclick="guardarZona()">
 
-            Guardar Zona
 
-        </button>
 
-        <button onclick="cerrarZona()">
+<div id="mapa"></div>
 
-            Cancelar
 
-        </button>
 
-    </div>
 
-</div>
-<!-- ========================= -->
-<!-- LIBRERÍAS -->
-<!-- ========================= -->
 
-<script src="../js/permisos.js"></script>
+<!-- LEAFLET -->
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
 <script src="../js/mapa.js"></script>
 
-<script>
 
-// ==============================
-// CONTROL DE ACCESO
-// ==============================
-
-permitirModulo("movilidad");
-
-// ==============================
-// CARGAR USUARIO
-// ==============================
-
-cargarUsuario();
-
-// ==============================
-// NAVEGACIÓN
-// ==============================
-
-function ir(pagina){
-
-    window.location.href = pagina;
-
-}
-
-function volverDashboard(){
-
-    let usuario = JSON.parse(localStorage.getItem("usuarioActual"));
-
-    if(!usuario){
-
-        window.location="../login.html";
-        return;
-
-    }
-
-    if(usuario.rol==="Administrador"){
-
-        window.location="../admin/dashboard.html";
-
-    }
-
-    else if(usuario.rol==="Movilidad"){
-
-        window.location="dashboard.html";
-
-    }
-
-    else if(usuario.rol==="Inspector"){
-
-        window.location="../inspector/dashboard.html";
-
-    }
-
-}
-
-function cerrarSesion(){
-
-    localStorage.removeItem("usuarioActual");
-
-    window.location="../login.html";
-
-}
-
-</script>
 
 </body>
 
