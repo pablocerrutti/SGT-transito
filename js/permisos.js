@@ -3,7 +3,6 @@
 // =====================================
 
 
-
 // =====================================
 // OBTENER USUARIO ACTUAL
 // =====================================
@@ -11,13 +10,11 @@
 function obtenerUsuarioActual(){
 
 
-    let usuario =
-    localStorage.getItem(
-        "usuarioActual"
-    );
+    let datos =
+    localStorage.getItem("usuarioActual");
 
 
-    if(!usuario){
+    if(!datos){
 
         return null;
 
@@ -27,14 +24,22 @@ function obtenerUsuarioActual(){
 
     try{
 
-        return JSON.parse(usuario);
+
+        return JSON.parse(datos);
+
 
     }
-    catch(e){
+    catch(error){
 
-        console.error(e);
+
+        console.error(
+            "Error leyendo usuario",
+            error
+        );
+
 
         return null;
+
 
     }
 
@@ -47,9 +52,8 @@ function obtenerUsuarioActual(){
 
 
 
-
 // =====================================
-// OBTENER ROL
+// OBTENER ROL ACTUAL
 // =====================================
 
 function obtenerRolActual(){
@@ -68,11 +72,14 @@ function obtenerRolActual(){
 
 
 
-    return usuario.rol || usuario.Rol;
+    return (
+        usuario.rol ||
+        usuario.Rol ||
+        ""
+    );
 
 
 }
-
 
 
 
@@ -107,23 +114,21 @@ function verificarRol(rolPermitido){
 
 
 
-
     let rol =
-    usuario.rol || usuario.Rol;
+    obtenerRolActual();
 
 
 
 
 
-    // SUPER ADMIN ACCESO TOTAL
+
+    // ADMINISTRADOR TOTAL
 
     if(
         rol==="SuperAdministrador"
     ){
 
-
         return true;
-
 
     }
 
@@ -132,17 +137,13 @@ function verificarRol(rolPermitido){
 
 
 
-    // SUPERVISOR ACCESO ADMIN
+    // SUPERVISOR
 
     if(
         rol==="Supervisor"
-        &&
-        rolPermitido!=="SuperAdministrador"
     ){
 
-
         return true;
-
 
     }
 
@@ -151,18 +152,15 @@ function verificarRol(rolPermitido){
 
 
 
-    // ROL EXACTO
+    // ROL ESPECIFICO
 
     if(
         rol===rolPermitido
     ){
 
-
         return true;
 
-
     }
-
 
 
 
@@ -179,6 +177,7 @@ function verificarRol(rolPermitido){
 
 
     return false;
+
 
 
 }
@@ -199,13 +198,12 @@ function permitirModulo(modulo){
 
 
 
-    let rol =
-    obtenerRolActual();
+    let usuario =
+    obtenerUsuarioActual();
 
 
 
-
-    if(!rol){
+    if(!usuario){
 
 
         window.location.href="../login.html";
@@ -219,18 +217,22 @@ function permitirModulo(modulo){
 
 
 
+    let rol =
+    obtenerRolActual();
 
 
-    // ADMINISTRADORES
+
+
+
+
+    // ADMINISTRADORES PUEDEN TODO
 
     if(
         rol==="SuperAdministrador" ||
         rol==="Supervisor"
     ){
 
-
         return true;
-
 
     }
 
@@ -239,18 +241,14 @@ function permitirModulo(modulo){
 
 
 
-
-
-    // MOVILIDAD
+    // MODULO MOVILIDAD
 
     if(
         modulo==="movilidad" &&
         rol==="Movilidad"
     ){
 
-
         return true;
-
 
     }
 
@@ -259,17 +257,14 @@ function permitirModulo(modulo){
 
 
 
-
-    // INSPECTOR
+    // MODULO INSPECTOR
 
     if(
         modulo==="inspector" &&
         rol==="Inspector"
     ){
 
-
         return true;
-
 
     }
 
@@ -281,11 +276,6 @@ function permitirModulo(modulo){
     alert(
         "No tiene permisos para este módulo"
     );
-
-
-
-    window.history.back();
-
 
 
     return false;
@@ -325,19 +315,23 @@ function cargarUsuario(){
 
 
     let nombre =
-    usuario.nombre || usuario.Nombre || "";
+    usuario.nombre ||
+    usuario.Nombre ||
+    "";
 
 
 
     let rol =
-    usuario.rol || usuario.Rol || "";
+    usuario.rol ||
+    usuario.Rol ||
+    "";
 
 
 
 
 
 
-    let elementos =
+    let campos =
     document.querySelectorAll(
         ".usuarioNombre"
     );
@@ -346,19 +340,20 @@ function cargarUsuario(){
 
 
 
-
-    elementos.forEach(function(e){
-
+    campos.forEach(function(elemento){
 
 
-        e.innerHTML =
-        `
+        elemento.innerHTML = `
+
         <i class="fa-solid fa-user"></i>
-        ${nombre}
-        <br>
-        <small>${rol}</small>
-        `;
 
+        ${nombre}
+
+        <br>
+
+        <small>${rol}</small>
+
+        `;
 
 
     });
@@ -368,16 +363,44 @@ function cargarUsuario(){
 }
 
 
+
+
+
+
+
+
+
 // =====================================
-// VOLVER DASHBOARD SEGUN ROL
+// VOLVER DASHBOARD
 // =====================================
 
 function volverDashboard(){
 
 
+    volverSegunRol();
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// VOLVER SEGUN ROL
+// =====================================
+
+function volverSegunRol(){
+
+
 
     let rol =
     obtenerRolActual();
+
 
 
 
@@ -388,90 +411,89 @@ function volverDashboard(){
 
         case "SuperAdministrador":
 
+
         case "Supervisor":
 
-            window.location="../admin/dashboard.html";
+
+
+            window.location.href=
+            "../admin/dashboard.html";
+
 
         break;
+
+
 
 
 
 
         case "Movilidad":
 
-            window.location="../movilidad/dashboard.html";
+
+
+            window.location.href=
+            "../movilidad/dashboard.html";
+
 
         break;
+
+
 
 
 
 
         case "Inspector":
 
-            window.location="../inspector/dashboard.html";
+
+
+            window.location.href=
+            "../inspector/dashboard.html";
+
 
         break;
 
 
 
 
+
+
         default:
 
-            window.location="../login.html";
+
+
+            window.location.href=
+            "../login.html";
+
 
 
     }
+
 
 
 }
+
+
+
+
+
+
+
+
+
 // =====================================
-// PERMITIR CAMBIO DE MODULO
+// CERRAR SESION
 // =====================================
 
-function permitirModulo(modulo){
-
-    let usuario = obtenerUsuarioActual();
-
-    if(!usuario){
-
-        window.location="../login.html";
-        return false;
-
-    }
+function cerrarSesion(){
 
 
-    let rol = usuario.rol || usuario.Rol;
-
-
-    // ADMINISTRADOR Y SUPERVISOR PUEDEN VER TODO
-
-    if(
-        rol==="SuperAdministrador" ||
-        rol==="Supervisor"
-    ){
-
-        return true;
-
-    }
-
-
-    // MOVILIDAD
-
-    if(
-        modulo==="movilidad" &&
-        rol==="Movilidad"
-    ){
-
-        return true;
-
-    }
-
-
-    alert(
-        "No tiene permisos para este módulo"
+    localStorage.removeItem(
+        "usuarioActual"
     );
 
 
-    return false;
+    window.location.href=
+    "../login.html";
+
 
 }
