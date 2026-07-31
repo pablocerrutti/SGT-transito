@@ -9,9 +9,6 @@ const API_USUARIOS =
 
 
 
-
-
-
 // =====================================
 // INGRESAR
 // =====================================
@@ -20,69 +17,29 @@ const API_USUARIOS =
 async function ingresar(){
 
 
+let usuario = document.getElementById("usuario").value.trim();
 
-let usuario = document.getElementById(
-
-"usuario"
-
-).value.trim();
+let password = document.getElementById("password").value.trim();
 
 
 
+if(usuario==="" || password===""){
 
 
-let password = document.getElementById(
-
-"password"
-
-).value.trim();
-
-
-
-
-
-
-
-if(
-
-usuario===""
-
-||
-
-password===""
-
-){
-
-
-
-alert(
-
-"Ingrese usuario y contraseña"
-
-);
-
-
+alert("Ingrese usuario y contraseña");
 
 return;
-
 
 
 }
 
 
 
-
-
-
-
 try{
 
 
-
 let respuesta = await fetch(
-
 API_USUARIOS + "?accion=usuarios"
-
 );
 
 
@@ -91,6 +48,7 @@ let usuarios = await respuesta.json();
 
 
 
+console.log("Usuarios recibidos:",usuarios);
 
 
 
@@ -98,17 +56,13 @@ let usuarios = await respuesta.json();
 let encontrado = usuarios.find(function(u){
 
 
-
 return (
 
-u.usuario === usuario
+String(u.usuario).trim() === usuario &&
 
-&&
-
-u.password === password
+String(u.password).trim() === password
 
 );
-
 
 
 });
@@ -117,23 +71,12 @@ u.password === password
 
 
 
-
-
-
 if(!encontrado){
 
 
-
-alert(
-
-"Usuario o contraseña incorrectos"
-
-);
-
-
+alert("Usuario o contraseña incorrectos");
 
 return;
-
 
 
 }
@@ -143,47 +86,9 @@ return;
 
 
 
-
-
-// =====================================
-// VALIDAR ESTADO
-// =====================================
-
-
-
-if(
-
-encontrado.estado !== "Activo"
-
-){
-
-
-
-alert(
-
-"Usuario inactivo. Contacte al administrador."
-
-);
-
-
-
-return;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =====================================
+// ================================
 // GUARDAR SESION
-// =====================================
+// ================================
 
 
 localStorage.setItem(
@@ -197,184 +102,123 @@ JSON.stringify(encontrado)
 
 
 
+console.log(
+"Sesion guardada:",
+localStorage.getItem("usuarioActual")
+);
 
 
 
 
 
-// =====================================
-// CAMBIO OBLIGATORIO DE CLAVE
-// =====================================
+
+// ================================
+// CAMBIO DE CLAVE
+// ================================
 
 
 if(
 
-encontrado.cambiarClave === true
+encontrado.cambiarClave===true ||
 
-||
-
-encontrado.cambiarClave === "true"
+String(encontrado.cambiarClave)==="true"
 
 ){
 
 
-
-window.location="cambiar-password.html";
-
+window.location.href="cambiar-password.html";
 
 return;
 
 
-
 }
 
 
 
 
 
+// ================================
+// REDIRECCION
+// ================================
 
 
-
-
-// =====================================
-// ENTRAR AL SISTEMA
-// =====================================
-
-
-redireccionarRol(
-
-encontrado.rol
-
-);
-
-
-
-
-
-}
-
-catch(error){
-
-
-
-console.error(error);
-
-
-
-alert(
-
-"Error conectando con el servidor"
-
-);
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =====================================
-// REDIRECCION POR ROL
-// =====================================
-
-
-function redireccionarRol(rol){
-
-
-
-switch(rol){
+switch(encontrado.rol){
 
 
 
 case "SuperAdministrador":
 
 
-
-window.location="admin/dashboard.html";
+window.location.href="admin/dashboard.html";
 
 
 break;
-
-
-
-
 
 
 
 case "Supervisor":
 
 
-
-window.location="admin/dashboard.html";
+window.location.href="admin/dashboard.html";
 
 
 break;
-
-
-
-
 
 
 
 case "Movilidad":
 
 
-
-window.location="movilidad/dashboard.html";
+window.location.href="movilidad/dashboard.html";
 
 
 break;
-
-
-
-
 
 
 
 case "Inspector":
 
 
-
-window.location="inspectores/dashboard.html";
+window.location.href="inspector/dashboard.html";
 
 
 break;
 
 
 
-
-
-
-
 default:
 
 
-
 alert(
-
-"Rol no configurado"
-
+"Rol no configurado: "+encontrado.rol
 );
 
 
+}
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(error);
+
+
+alert(
+"Error conectando con el servidor"
+);
+
 
 }
 
 
 
 }
-
-
 
 
 
@@ -390,17 +234,12 @@ alert(
 function cerrarSesion(){
 
 
-
 localStorage.removeItem(
-
 "usuarioActual"
-
 );
 
 
-
-window.location="login.html";
-
+window.location.href="login.html";
 
 
 }
@@ -410,11 +249,8 @@ window.location="login.html";
 
 
 
-
-
-
 // =====================================
-// ENTER PARA INGRESAR
+// ENTER
 // =====================================
 
 
@@ -425,17 +261,13 @@ document.addEventListener(
 function(e){
 
 
-
 if(e.key==="Enter"){
-
 
 
 ingresar();
 
 
-
 }
-
 
 
 }
