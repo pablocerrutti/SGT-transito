@@ -13,7 +13,6 @@ let usuarioActual = null;
 
 
 
-
 // =====================================
 // INICIO
 // =====================================
@@ -29,6 +28,8 @@ localStorage.getItem("usuarioActual")
 );
 
 
+
+console.log("USUARIO SESION:", usuarioActual);
 
 
 
@@ -47,7 +48,6 @@ return;
 
 
 
-
 let nombre = document.querySelector(".usuarioNombre");
 
 
@@ -55,7 +55,11 @@ let nombre = document.querySelector(".usuarioNombre");
 if(nombre){
 
 
-nombre.innerHTML = usuarioActual.Nombre || usuarioActual.nombre;
+nombre.innerHTML =
+usuarioActual.Nombre ||
+usuarioActual.nombre ||
+usuarioActual.Usuario ||
+usuarioActual.usuario;
 
 
 }
@@ -88,7 +92,6 @@ let nueva = document
 
 
 
-
 let repetir = document
 .getElementById("repetirPassword")
 .value
@@ -98,21 +101,16 @@ let repetir = document
 
 
 
-
 if(nueva==="" || repetir===""){
 
 
-alert(
-"Complete todos los campos"
-);
+alert("Complete todos los campos");
 
 
 return;
 
 
 }
-
-
 
 
 
@@ -121,9 +119,22 @@ return;
 if(nueva !== repetir){
 
 
-alert(
-"Las contraseñas no coinciden"
-);
+alert("Las contraseñas no coinciden");
+
+
+return;
+
+
+}
+
+
+
+
+
+if(nueva.length < 6){
+
+
+alert("La contraseña debe tener mínimo 6 caracteres");
 
 
 return;
@@ -137,11 +148,34 @@ return;
 
 
 
-if(nueva.length < 6){
+// OBTENER USUARIO CORRECTO
+
+let usuarioEnviar =
+
+usuarioActual.Usuario ||
+
+usuarioActual.usuario;
+
+
+
+
+
+console.log(
+"USUARIO ENVIADO:",
+usuarioEnviar
+);
+
+
+
+
+
+
+
+if(!usuarioEnviar){
 
 
 alert(
-"La contraseña debe tener mínimo 6 caracteres"
+"No se encontró usuario en la sesión"
 );
 
 
@@ -174,7 +208,7 @@ headers:{
 
 
 "Content-Type":
-"application/x-www-form-urlencoded"
+"application/x-www-form-urlencoded;charset=UTF-8"
 
 
 },
@@ -186,12 +220,10 @@ body:new URLSearchParams({
 accion:"cambiarPassword",
 
 
-usuario:
-usuarioActual.Usuario || usuarioActual.usuario,
+usuario:usuarioEnviar,
 
 
 password:nueva
-
 
 
 })
@@ -200,8 +232,8 @@ password:nueva
 }
 
 
-);
 
+);
 
 
 
@@ -214,7 +246,11 @@ let resultado = await respuesta.json();
 
 
 
-console.log(resultado);
+console.log(
+"RESPUESTA CAMBIO:",
+resultado
+);
+
 
 
 
@@ -227,16 +263,37 @@ if(resultado.ok){
 
 
 
-usuarioActual.Password = nueva;
+// actualizar sesión local
 
 
-usuarioActual.Password = nueva;
+if(usuarioActual.Password){
+
+usuarioActual.Password=nueva;
+
+}
+else{
+
+usuarioActual.password=nueva;
+
+}
 
 
-usuarioActual.DebeCambiar = false;
 
 
-usuarioActual.cambiarClave = false;
+
+if(usuarioActual.DebeCambiar !== undefined){
+
+usuarioActual.DebeCambiar=false;
+
+}
+
+
+
+if(usuarioActual.cambiarClave !== undefined){
+
+usuarioActual.cambiarClave=false;
+
+}
 
 
 
@@ -257,9 +314,7 @@ JSON.stringify(usuarioActual)
 
 
 alert(
-
 "Contraseña actualizada correctamente"
-
 );
 
 
@@ -269,10 +324,10 @@ alert(
 
 redireccionarRol(
 
-usuarioActual.Rol || usuarioActual.rol
+usuarioActual.Rol ||
+usuarioActual.rol
 
 );
-
 
 
 
@@ -282,14 +337,13 @@ usuarioActual.Rol || usuarioActual.rol
 else{
 
 
-
 alert(
 
 resultado.mensaje ||
+
 "No se pudo cambiar la contraseña"
 
 );
-
 
 
 }
@@ -303,17 +357,15 @@ resultado.mensaje ||
 catch(error){
 
 
-
-console.error(error);
-
+console.error(
+"ERROR:",
+error
+);
 
 
 alert(
-
 "Error comunicando con servidor"
-
 );
-
 
 
 }
@@ -336,6 +388,13 @@ alert(
 
 
 function redireccionarRol(rol){
+
+
+
+console.log(
+"ROL:",
+rol
+);
 
 
 
@@ -400,13 +459,14 @@ window.location="login.html";
 
 
 
+
+
 // =====================================
 // CERRAR SESION
 // =====================================
 
 
 function cerrarSesion(){
-
 
 
 localStorage.removeItem(
