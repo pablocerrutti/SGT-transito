@@ -7,20 +7,36 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+
 <title>SGT | Mapa Movilidad Urbana</title>
+
+
 
 <link rel="stylesheet" href="../css/admin.css">
 
+
+
+<!-- LEAFLET UNICO -->
+
 <link rel="stylesheet"
-href="https://unpkg.com/leaflet/dist/leaflet.css">
+href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+
+
+
+<!-- LEAFLET DRAW UNICO -->
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
 
+
+
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+
+
 <style>
+
 
 #mapa{
 
@@ -33,6 +49,9 @@ border-radius:15px;
 border:1px solid #cfd8dc;
 
 }
+
+
+
 
 .barraMapa{
 
@@ -48,6 +67,8 @@ align-items:center;
 
 }
 
+
+
 .barraMapa input,
 .barraMapa select{
 
@@ -59,6 +80,8 @@ border:1px solid #cfd8dc;
 
 }
 
+
+
 .barraMapa input{
 
 flex:1;
@@ -67,12 +90,16 @@ min-width:220px;
 
 }
 
+
+
+
 .barraMapa button,
 .btn-volver{
 
+
 background:#0f6fae;
 
-color:#fff;
+color:white;
 
 border:none;
 
@@ -82,22 +109,36 @@ border-radius:8px;
 
 cursor:pointer;
 
+
 }
+
+
 
 .barraMapa button:hover,
 .btn-volver:hover{
 
+
 background:#0b5b90;
 
+
 }
+
+
 
 .btn-volver{
 
+
 margin-bottom:15px;
+
 
 }
 
+
+
+
+
 .modal{
+
 
 display:none;
 
@@ -113,11 +154,17 @@ align-items:center;
 
 z-index:9999;
 
+
 }
+
+
+
+
 
 .modal-contenido{
 
-background:#fff;
+
+background:white;
 
 width:430px;
 
@@ -131,11 +178,17 @@ max-height:90vh;
 
 overflow:auto;
 
+
 }
+
+
+
+
 
 .modal-contenido input,
 .modal-contenido textarea,
 .modal-contenido select{
+
 
 width:100%;
 
@@ -149,9 +202,15 @@ border-radius:8px;
 
 box-sizing:border-box;
 
+
 }
 
+
+
+
+
 .modal-contenido button{
+
 
 padding:10px 18px;
 
@@ -163,63 +222,116 @@ border-radius:8px;
 
 cursor:pointer;
 
+
 }
+
+
 
 </style>
 
+
 </head>
+
+
 
 <body>
 
+
+
 <div class="sidebar">
 
-    <div class="logo">
 
-        <img src="../img/logo.png">
 
-        <h2>SGT</h2>
+<div class="logo">
 
-        <p>Dirección de Tránsito y Transportes</p>
 
-    </div>
+<img src="../img/logo.png">
 
-    <ul>
 
-        <li onclick="volverDashboard()">
+<h2>SGT</h2>
 
-            <i class="fa-solid fa-house"></i>
 
-            Dashboard
+<p>
+Dirección de Tránsito y Transportes
+</p>
 
-        </li>
-
-        <li class="activo">
-
-            <i class="fa-solid fa-map"></i>
-
-            Mapa Interactivo
-
-        </li>
-
-        <li onclick="ir('elementos.html')">
-
-            <i class="fa-solid fa-location-dot"></i>
-
-            Elementos
-
-        </li>
-
-        <li onclick="cerrarSesion()">
-
-            <i class="fa-solid fa-right-from-bracket"></i>
-
-            Salir
-
-        </li>
-
-    </ul>
 
 </div>
+
+
+
+
+
+<ul>
+
+
+<li onclick="volverDashboard()">
+
+
+
+<i class="fa-solid fa-house"></i>
+
+
+Dashboard
+
+
+</li>
+
+
+
+
+
+<li class="activo">
+
+
+<i class="fa-solid fa-map"></i>
+
+
+Mapa Interactivo
+
+
+</li>
+
+
+
+
+
+<li onclick="ir('elementos.html')">
+
+
+<i class="fa-solid fa-location-dot"></i>
+
+
+Elementos
+
+
+</li>
+
+
+
+
+
+<li onclick="cerrarSesion()">
+
+
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+
+Salir
+
+
+</li>
+
+
+
+</ul>
+
+
+
+</div>
+
+
 
 
 
@@ -227,116 +339,190 @@ cursor:pointer;
 
 <div class="contenido">
 
-    <header>
 
-        <div>
 
-            <h1>
+<header>
 
-                Mapa de Movilidad Urbana
 
-            </h1>
+<div>
 
-            <p>
 
-                Infraestructura vial geolocalizada
+<h1>
 
-            </p>
+Mapa de Movilidad Urbana
 
-        </div>
+</h1>
 
-        <div class="usuarioNombre"></div>
 
-    </header>
 
+<p>
 
+Infraestructura vial geolocalizada
 
+</p>
 
 
-    <button
-        class="btn-volver"
-        onclick="volverDashboard()">
+</div>
 
-        <i class="fa-solid fa-arrow-left"></i>
 
-        Volver Dashboard
 
-    </button>
+<div class="usuarioNombre"></div>
 
 
+</header>
 
 
 
-    <div class="barraMapa">
 
-        <input
 
-            type="text"
+<button
+class="btn-volver"
+onclick="volverDashboard()">
 
-            placeholder="Buscar elemento..."
 
-            onkeyup="buscarElemento(this.value)">
 
+<i class="fa-solid fa-arrow-left"></i>
 
 
+Volver Dashboard
 
-        <select
 
-            id="filtro"
 
-            onchange="filtrarTipo(this.value)">
+</button>
 
-            <option value="Todos">Todos</option>
 
-            <option value="Semáforo">Semáforo</option>
 
-            <option value="Paso peatonal">Paso peatonal</option>
 
-            <option value="Radar">Radar</option>
 
-            <option value="Cámara">Cámara</option>
+<div class="barraMapa">
 
-            <option value="Lomo de burro">Lomo de burro</option>
 
-            <option value="Otro">Otro</option>
 
-        </select>
+<input
 
+type="text"
 
+placeholder="Buscar elemento..."
 
+onkeyup="buscarElemento(this.value)"
 
+>
 
-        <button onclick="abrirNuevo()">
 
-            <i class="fa-solid fa-plus"></i>
 
-            Nuevo elemento
 
-        </button>
+<select
 
+id="filtro"
 
+onchange="filtrarTipo(this.value)">
 
 
 
-        <button onclick="activarDibujoZona()">
+<option value="Todos">
 
-            <i class="fa-solid fa-draw-polygon"></i>
+Todos
 
-            Nueva Zona
+</option>
 
-        </button>
 
-    </div>
 
+<option value="Semáforo">
 
+Semáforo
 
+</option>
 
 
-    <div id="mapa"></div>
 
-<!-- ========================= -->
+<option value="Paso peatonal">
+
+Paso peatonal
+
+</option>
+
+
+
+<option value="Radar">
+
+Radar
+
+</option>
+
+
+
+<option value="Cámara">
+
+Cámara
+
+</option>
+
+
+
+<option value="Lomo de burro">
+
+Lomo de burro
+
+</option>
+
+
+
+<option value="Otro">
+
+Otro
+
+</option>
+
+
+
+</select>
+
+
+
+
+
+<button onclick="abrirNuevo()">
+
+
+
+<i class="fa-solid fa-plus"></i>
+
+
+Nuevo elemento
+
+
+
+</button>
+
+
+
+
+
+<button onclick="activarDibujoZona()">
+
+
+
+<i class="fa-solid fa-draw-polygon"></i>
+
+
+Nueva Zona
+
+
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+<div id="mapa"></div>
+<!-- =========================================== -->
 <!-- MODAL NUEVO ELEMENTO -->
-<!-- ========================= -->
+<!-- =========================================== -->
 
 <div class="modal" id="modal">
 
@@ -344,55 +530,76 @@ cursor:pointer;
 
         <h2>Nuevo elemento</h2>
 
+        <label>Tipo</label>
+
         <select id="tipo">
 
             <option>Semáforo</option>
             <option>Paso peatonal</option>
-            <option>Parada de taxi</option>
-            <option>Carga y descarga</option>
-            <option>Cordón reservado</option>
-            <option>Lomo de burro</option>
             <option>Radar</option>
             <option>Cámara</option>
+            <option>Lomo de burro</option>
             <option>Cartel PARE</option>
-            <option>Señal vertical</option>
-            <option>Señal horizontal</option>
-            <option>Reductor de velocidad</option>
+            <option>Señal Vertical</option>
+            <option>Señal Horizontal</option>
+            <option>Parada de Ómnibus</option>
             <option>Otro</option>
 
         </select>
 
+        <label>Código</label>
+
         <input
         id="codigo"
-        placeholder="Código del elemento">
+        placeholder="Código">
+
+        <label>Nombre</label>
 
         <input
         id="nombre"
-        placeholder="Nombre o referencia">
+        placeholder="Nombre">
+
+        <label>Descripción</label>
 
         <textarea
         id="descripcion"
+        rows="3"
         placeholder="Descripción"></textarea>
+
+        <label>Características</label>
 
         <textarea
         id="caracteristicas"
+        rows="3"
         placeholder="Características"></textarea>
 
-        <textarea
-        id="actuacion"
-        placeholder="Actuación inicial"></textarea>
+        <label>Estado</label>
 
-        <button onclick="guardarElemento()">
+        <select id="estado">
 
-            Guardar
+            <option>Activo</option>
+            <option>En reparación</option>
+            <option>Fuera de servicio</option>
 
-        </button>
+        </select>
 
-        <button onclick="cerrarNuevo()">
+        <div style="margin-top:15px;display:flex;gap:10px;">
 
-            Cancelar
+            <button onclick="guardarElemento()">
 
-        </button>
+                <i class="fa-solid fa-floppy-disk"></i>
+
+                Guardar
+
+            </button>
+
+            <button onclick="cerrarNuevo()">
+
+                Cancelar
+
+            </button>
+
+        </div>
 
     </div>
 
@@ -402,9 +609,9 @@ cursor:pointer;
 
 
 
-<!-- ========================= -->
-<!-- MODAL INSPECCIÓN -->
-<!-- ========================= -->
+<!-- =========================================== -->
+<!-- MODAL INSPECCION -->
+<!-- =========================================== -->
 
 <div class="modal" id="modalInspeccion">
 
@@ -421,7 +628,7 @@ cursor:pointer;
         <select id="inspeccionEstado">
 
             <option>Bueno</option>
-            <option>Observado</option>
+            <option>Regular</option>
             <option>Deteriorado</option>
             <option>Fuera de servicio</option>
 
@@ -431,7 +638,7 @@ cursor:pointer;
 
         <textarea
         id="inspeccionObservacion"
-        placeholder="Detalle de la situación"></textarea>
+        rows="4"></textarea>
 
         <label>Fotografía</label>
 
@@ -441,17 +648,21 @@ cursor:pointer;
         accept="image/*"
         capture="environment">
 
-        <button onclick="guardarInspeccion()">
+        <div style="margin-top:15px;display:flex;gap:10px;">
 
-            Guardar inspección
+            <button onclick="guardarInspeccion()">
 
-        </button>
+                Guardar inspección
 
-        <button onclick="cerrarInspeccion()">
+            </button>
 
-            Cancelar
+            <button onclick="cerrarInspeccion()">
 
-        </button>
+                Cancelar
+
+            </button>
+
+        </div>
 
     </div>
 
@@ -459,116 +670,199 @@ cursor:pointer;
 
 
 
-<!-- ========================= -->
+
+
+<!-- =========================================== -->
 <!-- MODAL NUEVA ZONA -->
-<!-- ========================= -->
+<!-- =========================================== -->
 
 <div class="modal" id="modalZona">
 
     <div class="modal-contenido">
 
-        <h2>Nueva Zona</h2>
+        <h2>Nueva zona</h2>
+
+        <label>Nombre</label>
 
         <input
         id="zonaNombre"
         placeholder="Nombre de la zona">
 
+        <label>Tipo</label>
+
         <select id="zonaTipo">
 
-            <option>Estacionamiento Tarifado</option>
             <option>Zona Azul</option>
-            <option>Parada de Taxi</option>
+            <option>Estacionamiento</option>
+            <option>Parada Taxi</option>
             <option>Carga y Descarga</option>
-            <option>Feria Vecinal</option>
+            <option>Feria</option>
             <option>Otro</option>
 
         </select>
 
-        <label>Color de la zona</label>
+        <label>Color</label>
 
         <input
         type="color"
         id="zonaColor"
         value="#2196F3">
 
-        <button onclick="guardarZona()">
+        <div style="margin-top:15px;display:flex;gap:10px;">
 
-            Guardar Zona
+            <button onclick="guardarZona()">
 
-        </button>
+                Guardar zona
 
-        <button onclick="cerrarZona()">
+            </button>
 
-            Cancelar
+            <button onclick="cerrarZona()">
 
-        </button>
+                Cancelar
+
+            </button>
+
+        </div>
 
     </div>
 
 </div>
-<!-- ========================= -->
-<!-- LIBRERÍAS -->
-<!-- ========================= -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<!-- =========================================== -->
+<!-- LIBRERIAS -->
+<!-- =========================================== -->
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- PERMISOS -->
 
-<script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+<script src="./js/permisos.js"></script>
 
+<!-- MAPA -->
 
-<script src="js/permisos.js"></script>
+<script src="./js/mapa.js"></script>
 
-<script src="js/mapa.js"></script>
+<script>
 
-// ==============================
+// =====================================
 // CARGAR USUARIO
-// ==============================
+// =====================================
 
-cargarUsuario();
+window.addEventListener("load", function(){
 
-// ==============================
-// NAVEGACIÓN
-// ==============================
+    if(typeof cargarUsuario==="function"){
 
-function ir(pagina){
+        cargarUsuario();
 
-    window.location.href = pagina;
+    }
+
+});
+
+
+// =====================================
+// ABRIR MODAL NUEVO
+// =====================================
+
+function abrirNuevo(){
+
+    document.getElementById("modal").style.display="flex";
 
 }
 
+
+
+// =====================================
+// CERRAR MODAL NUEVO
+// =====================================
+
+function cerrarNuevo(){
+
+    document.getElementById("modal").style.display="none";
+
+}
+
+
+
+// =====================================
+// CERRAR MODAL INSPECCION
+// =====================================
+
+function cerrarInspeccion(){
+
+    document.getElementById("modalInspeccion").style.display="none";
+
+}
+
+
+
+// =====================================
+// NAVEGACION
+// =====================================
+
+function ir(pagina){
+
+    window.location.href=pagina;
+
+}
+
+
+
+// =====================================
+// VOLVER SEGUN ROL
+// =====================================
+
 function volverDashboard(){
 
-    let usuario = JSON.parse(localStorage.getItem("usuarioActual"));
+    let usuario = JSON.parse(
+
+        localStorage.getItem("usuarioActual")
+
+    );
 
     if(!usuario){
 
         window.location="../login.html";
+
         return;
 
     }
 
-    if(usuario.rol==="Administrador"){
+    switch(usuario.rol){
 
-        window.location="../admin/dashboard.html";
+        case "SuperAdministrador":
 
-    }
+        case "Administrador":
 
-    else if(usuario.rol==="Movilidad"){
+            window.location="../admin/dashboard.html";
 
-        window.location="dashboard.html";
+        break;
 
-    }
+        case "Movilidad":
 
-    else if(usuario.rol==="Inspector"){
+            window.location="dashboard.html";
 
-        window.location="../inspector/dashboard.html";
+        break;
+
+        case "Inspector":
+
+            window.location="../inspector/dashboard.html";
+
+        break;
+
+        default:
+
+            window.location="../login.html";
 
     }
 
 }
+
+
+
+// =====================================
+// CERRAR SESION
+// =====================================
 
 function cerrarSesion(){
 
@@ -579,7 +873,3 @@ function cerrarSesion(){
 }
 
 </script>
-
-</body>
-
-</html>
