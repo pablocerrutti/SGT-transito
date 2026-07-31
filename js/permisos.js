@@ -3,10 +3,16 @@
 // =====================================
 
 
+
+// =====================================
+// OBTENER USUARIO ACTUAL
+// =====================================
+
 function obtenerUsuarioActual(){
 
 
-    let usuario = localStorage.getItem(
+    let usuario =
+    localStorage.getItem(
         "usuarioActual"
     );
 
@@ -18,18 +24,17 @@ function obtenerUsuarioActual(){
     }
 
 
+
     try{
 
-
         return JSON.parse(usuario);
-
 
     }
     catch(e){
 
+        console.error(e);
 
         return null;
-
 
     }
 
@@ -40,16 +45,52 @@ function obtenerUsuarioActual(){
 
 
 
+
+
+
+// =====================================
+// OBTENER ROL
+// =====================================
+
+function obtenerRolActual(){
+
+
+    let usuario =
+    obtenerUsuarioActual();
+
+
+
+    if(!usuario){
+
+        return null;
+
+    }
+
+
+
+    return usuario.rol || usuario.Rol;
+
+
+}
+
+
+
+
+
+
+
+
+
 // =====================================
 // VERIFICAR ROL
 // =====================================
-
 
 function verificarRol(rolPermitido){
 
 
 
-    let usuario = obtenerUsuarioActual();
+    let usuario =
+    obtenerUsuarioActual();
 
 
 
@@ -67,13 +108,18 @@ function verificarRol(rolPermitido){
 
 
 
-    let rol = usuario.rol;
+    let rol =
+    usuario.rol || usuario.Rol;
 
 
 
-    // SUPER ADMIN TIENE ACCESO TOTAL
 
-    if(rol==="SuperAdministrador"){
+
+    // SUPER ADMIN ACCESO TOTAL
+
+    if(
+        rol==="SuperAdministrador"
+    ){
 
 
         return true;
@@ -85,10 +131,12 @@ function verificarRol(rolPermitido){
 
 
 
-    // SUPERVISOR
+
+    // SUPERVISOR ACCESO ADMIN
 
     if(
-        rol==="Supervisor" &&
+        rol==="Supervisor"
+        &&
         rolPermitido!=="SuperAdministrador"
     ){
 
@@ -102,9 +150,12 @@ function verificarRol(rolPermitido){
 
 
 
+
     // ROL EXACTO
 
-    if(rol===rolPermitido){
+    if(
+        rol===rolPermitido
+    ){
 
 
         return true;
@@ -122,6 +173,7 @@ function verificarRol(rolPermitido){
     );
 
 
+
     window.history.back();
 
 
@@ -137,16 +189,129 @@ function verificarRol(rolPermitido){
 
 
 
+
+
+// =====================================
+// PERMITIR MODULO
+// =====================================
+
+function permitirModulo(modulo){
+
+
+
+    let rol =
+    obtenerRolActual();
+
+
+
+
+    if(!rol){
+
+
+        window.location.href="../login.html";
+
+        return false;
+
+
+    }
+
+
+
+
+
+
+
+    // ADMINISTRADORES
+
+    if(
+        rol==="SuperAdministrador" ||
+        rol==="Supervisor"
+    ){
+
+
+        return true;
+
+
+    }
+
+
+
+
+
+
+
+
+    // MOVILIDAD
+
+    if(
+        modulo==="movilidad" &&
+        rol==="Movilidad"
+    ){
+
+
+        return true;
+
+
+    }
+
+
+
+
+
+
+
+    // INSPECTOR
+
+    if(
+        modulo==="inspector" &&
+        rol==="Inspector"
+    ){
+
+
+        return true;
+
+
+    }
+
+
+
+
+
+
+    alert(
+        "No tiene permisos para este módulo"
+    );
+
+
+
+    window.history.back();
+
+
+
+    return false;
+
+
+
+}
+
+
+
+
+
+
+
+
+
 // =====================================
 // MOSTRAR USUARIO
 // =====================================
-
 
 function cargarUsuario(){
 
 
 
-    let usuario = obtenerUsuarioActual();
+    let usuario =
+    obtenerUsuarioActual();
 
 
 
@@ -158,6 +323,20 @@ function cargarUsuario(){
 
 
 
+
+    let nombre =
+    usuario.nombre || usuario.Nombre || "";
+
+
+
+    let rol =
+    usuario.rol || usuario.Rol || "";
+
+
+
+
+
+
     let elementos =
     document.querySelectorAll(
         ".usuarioNombre"
@@ -165,20 +344,89 @@ function cargarUsuario(){
 
 
 
+
+
+
     elementos.forEach(function(e){
+
 
 
         e.innerHTML =
         `
         <i class="fa-solid fa-user"></i>
-        ${usuario.nombre}
+        ${nombre}
         <br>
-        <small>${usuario.rol}</small>
+        <small>${rol}</small>
         `;
+
 
 
     });
 
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// VOLVER DASHBOARD SEGUN ROL
+// =====================================
+
+function volverDashboard(){
+
+
+
+    let rol =
+    obtenerRolActual();
+
+
+
+
+    switch(rol){
+
+
+
+        case "SuperAdministrador":
+
+        case "Supervisor":
+
+            window.location="../admin/dashboard.html";
+
+        break;
+
+
+
+
+        case "Movilidad":
+
+            window.location="../movilidad/dashboard.html";
+
+        break;
+
+
+
+
+        case "Inspector":
+
+            window.location="../inspector/dashboard.html";
+
+        break;
+
+
+
+
+        default:
+
+            window.location="../login.html";
+
+
+    }
 
 
 }
