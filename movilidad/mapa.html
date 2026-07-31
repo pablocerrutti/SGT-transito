@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="es">
 
 <head>
@@ -8,226 +9,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>SGT | Mapa Movilidad Urbana</title>
+<title>SGT | Mapa Movilidad</title>
 
 
 
-<link rel="stylesheet" href="../css/admin.css">
+<!-- LEAFLET -->
 
+<link 
+rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"
+/>
 
 
-<!-- LEAFLET UNICO -->
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<!-- ESTILOS SISTEMA -->
 
+<link rel="stylesheet" href="css/estilos.css">
 
+<link rel="stylesheet" href="css/mapa.css">
 
-<!-- LEAFLET DRAW UNICO -->
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
-
-
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
-
-
-<style>
-
-
-#mapa{
-
-width:100%;
-
-height:70vh;
-
-border-radius:15px;
-
-border:1px solid #cfd8dc;
-
-}
-
-
-
-
-.barraMapa{
-
-display:flex;
-
-gap:10px;
-
-margin-bottom:15px;
-
-flex-wrap:wrap;
-
-align-items:center;
-
-}
-
-
-
-.barraMapa input,
-.barraMapa select{
-
-padding:10px;
-
-border-radius:8px;
-
-border:1px solid #cfd8dc;
-
-}
-
-
-
-.barraMapa input{
-
-flex:1;
-
-min-width:220px;
-
-}
-
-
-
-
-.barraMapa button,
-.btn-volver{
-
-
-background:#0f6fae;
-
-color:white;
-
-border:none;
-
-padding:10px 18px;
-
-border-radius:8px;
-
-cursor:pointer;
-
-
-}
-
-
-
-.barraMapa button:hover,
-.btn-volver:hover{
-
-
-background:#0b5b90;
-
-
-}
-
-
-
-.btn-volver{
-
-
-margin-bottom:15px;
-
-
-}
-
-
-
-
-
-.modal{
-
-
-display:none;
-
-position:fixed;
-
-inset:0;
-
-background:rgba(0,0,0,.55);
-
-justify-content:center;
-
-align-items:center;
-
-z-index:9999;
-
-
-}
-
-
-
-
-
-.modal-contenido{
-
-
-background:white;
-
-width:430px;
-
-max-width:95%;
-
-padding:25px;
-
-border-radius:12px;
-
-max-height:90vh;
-
-overflow:auto;
-
-
-}
-
-
-
-
-
-.modal-contenido input,
-.modal-contenido textarea,
-.modal-contenido select{
-
-
-width:100%;
-
-padding:10px;
-
-margin-bottom:12px;
-
-border:1px solid #ccc;
-
-border-radius:8px;
-
-box-sizing:border-box;
-
-
-}
-
-
-
-
-
-.modal-contenido button{
-
-
-padding:10px 18px;
-
-margin-right:10px;
-
-border:none;
-
-border-radius:8px;
-
-cursor:pointer;
-
-
-}
-
-
-
-</style>
 
 
 </head>
@@ -238,135 +38,37 @@ cursor:pointer;
 
 
 
-<div class="sidebar">
+<!-- ==========================
+     CABECERA
+=========================== -->
 
 
-
-<div class="logo">
-
-
-<img src="../img/logo.png">
-
-
-<h2>SGT</h2>
-
-
-<p>
-Dirección de Tránsito y Transportes
-</p>
-
-
-</div>
-
-
-
-
-
-<ul>
-
-
-<li onclick="volverDashboard()">
-
-
-
-<i class="fa-solid fa-house"></i>
-
-
-Dashboard
-
-
-</li>
-
-
-
-
-
-<li class="activo">
-
-
-<i class="fa-solid fa-map"></i>
-
-
-Mapa Interactivo
-
-
-</li>
-
-
-
-
-
-<li onclick="ir('elementos.html')">
-
-
-<i class="fa-solid fa-location-dot"></i>
-
-
-Elementos
-
-
-</li>
-
-
-
-
-
-<li onclick="cerrarSesion()">
-
-
-
-<i class="fa-solid fa-right-from-bracket"></i>
-
-
-Salir
-
-
-</li>
-
-
-
-</ul>
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="contenido">
-
-
-
-<header>
+<header class="topbar">
 
 
 <div>
 
-
 <h1>
-
-Mapa de Movilidad Urbana
-
+SGT
 </h1>
 
 
-
 <p>
-
-Infraestructura vial geolocalizada
-
+Sistema de Gestión Territorial
 </p>
-
 
 </div>
 
 
 
-<div class="usuarioNombre"></div>
+<button 
+onclick="volverDashboard()"
+class="btn-volver">
+
+Volver Dashboard
+
+</button>
+
 
 
 </header>
@@ -375,501 +77,132 @@ Infraestructura vial geolocalizada
 
 
 
-<button
-class="btn-volver"
-onclick="volverDashboard()">
+<!-- ==========================
+     PANEL FILTROS
+=========================== -->
 
 
-
-<i class="fa-solid fa-arrow-left"></i>
-
-
-Volver Dashboard
+<section class="panel-filtros">
 
 
-
-</button>
-
-
-
-
-
-<div class="barraMapa">
-
-
-
-<input
-
-type="text"
-
-placeholder="Buscar elemento..."
-
-onkeyup="buscarElemento(this.value)"
-
->
-
-
-
-
-<select
-
-id="filtro"
-
-onchange="filtrarTipo(this.value)">
-
-
-
-<option value="Todos">
+<button onclick="filtrarTipo('todos')">
 
 Todos
 
-</option>
+</button>
 
 
 
-<option value="Semáforo">
+<button onclick="filtrarTipo('Semáforo')">
 
-Semáforo
-
-</option>
-
-
-
-<option value="Paso peatonal">
-
-Paso peatonal
-
-</option>
-
-
-
-<option value="Radar">
-
-Radar
-
-</option>
-
-
-
-<option value="Cámara">
-
-Cámara
-
-</option>
-
-
-
-<option value="Lomo de burro">
-
-Lomo de burro
-
-</option>
-
-
-
-<option value="Otro">
-
-Otro
-
-</option>
-
-
-
-</select>
-
-
-
-
-
-<button onclick="abrirNuevo()">
-
-
-
-<i class="fa-solid fa-plus"></i>
-
-
-Nuevo elemento
-
-
+Semáforos
 
 </button>
 
 
 
+<button onclick="filtrarTipo('Señal')">
 
-
-<button onclick="activarDibujoZona()">
-
-
-
-<i class="fa-solid fa-draw-polygon"></i>
-
-
-Nueva Zona
-
-
+Señales
 
 </button>
 
 
 
-</div>
+<button onclick="miUbicacion()">
+
+Mi ubicación
+
+</button>
+
+
+</section>
 
 
 
+
+
+
+<!-- ==========================
+          MAPA
+=========================== -->
 
 
 <div id="mapa"></div>
-<!-- =========================================== -->
-<!-- MODAL NUEVO ELEMENTO -->
-<!-- =========================================== -->
 
-<div class="modal" id="modal">
 
-    <div class="modal-contenido">
 
-        <h2>Nuevo elemento</h2>
 
-        <label>Tipo</label>
 
-        <select id="tipo">
 
-            <option>Semáforo</option>
-            <option>Paso peatonal</option>
-            <option>Radar</option>
-            <option>Cámara</option>
-            <option>Lomo de burro</option>
-            <option>Cartel PARE</option>
-            <option>Señal Vertical</option>
-            <option>Señal Horizontal</option>
-            <option>Parada de Ómnibus</option>
-            <option>Otro</option>
+<!-- ==========================
+       LEAFLET JS
+=========================== -->
 
-        </select>
 
-        <label>Código</label>
+<script 
+src="https://unpkg.com/leaflet/dist/leaflet.js">
+</script>
 
-        <input
-        id="codigo"
-        placeholder="Código">
 
-        <label>Nombre</label>
 
-        <input
-        id="nombre"
-        placeholder="Nombre">
 
-        <label>Descripción</label>
+<!-- MAPA JS -->
 
-        <textarea
-        id="descripcion"
-        rows="3"
-        placeholder="Descripción"></textarea>
+<script src="js/mapa.js"></script>
 
-        <label>Características</label>
 
-        <textarea
-        id="caracteristicas"
-        rows="3"
-        placeholder="Características"></textarea>
 
-        <label>Estado</label>
 
-        <select id="estado">
-
-            <option>Activo</option>
-            <option>En reparación</option>
-            <option>Fuera de servicio</option>
-
-        </select>
-
-        <div style="margin-top:15px;display:flex;gap:10px;">
-
-            <button onclick="guardarElemento()">
-
-                <i class="fa-solid fa-floppy-disk"></i>
-
-                Guardar
-
-            </button>
-
-            <button onclick="cerrarNuevo()">
-
-                Cancelar
-
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-
-
-<!-- =========================================== -->
-<!-- MODAL INSPECCION -->
-<!-- =========================================== -->
-
-<div class="modal" id="modalInspeccion">
-
-    <div class="modal-contenido">
-
-        <h2>Nueva inspección</h2>
-
-        <input
-        type="hidden"
-        id="inspeccionElementoId">
-
-        <label>Estado</label>
-
-        <select id="inspeccionEstado">
-
-            <option>Bueno</option>
-            <option>Regular</option>
-            <option>Deteriorado</option>
-            <option>Fuera de servicio</option>
-
-        </select>
-
-        <label>Observación</label>
-
-        <textarea
-        id="inspeccionObservacion"
-        rows="4"></textarea>
-
-        <label>Fotografía</label>
-
-        <input
-        type="file"
-        id="fotoInspeccion"
-        accept="image/*"
-        capture="environment">
-
-        <div style="margin-top:15px;display:flex;gap:10px;">
-
-            <button onclick="guardarInspeccion()">
-
-                Guardar inspección
-
-            </button>
-
-            <button onclick="cerrarInspeccion()">
-
-                Cancelar
-
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-
-
-<!-- =========================================== -->
-<!-- MODAL NUEVA ZONA -->
-<!-- =========================================== -->
-
-<div class="modal" id="modalZona">
-
-    <div class="modal-contenido">
-
-        <h2>Nueva zona</h2>
-
-        <label>Nombre</label>
-
-        <input
-        id="zonaNombre"
-        placeholder="Nombre de la zona">
-
-        <label>Tipo</label>
-
-        <select id="zonaTipo">
-
-            <option>Zona Azul</option>
-            <option>Estacionamiento</option>
-            <option>Parada Taxi</option>
-            <option>Carga y Descarga</option>
-            <option>Feria</option>
-            <option>Otro</option>
-
-        </select>
-
-        <label>Color</label>
-
-        <input
-        type="color"
-        id="zonaColor"
-        value="#2196F3">
-
-        <div style="margin-top:15px;display:flex;gap:10px;">
-
-            <button onclick="guardarZona()">
-
-                Guardar zona
-
-            </button>
-
-            <button onclick="cerrarZona()">
-
-                Cancelar
-
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-<!-- =========================================== -->
-<!-- LIBRERIAS -->
-<!-- =========================================== -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-
-<!-- PERMISOS -->
-
-<script src="./js/permisos.js"></script>
-
-<!-- MAPA -->
-
-<script src="./js/mapa.js"></script>
 
 <script>
 
-// =====================================
-// CARGAR USUARIO
-// =====================================
 
-window.addEventListener("load", function(){
+// =================================
+// VOLVER SEGÚN ROL
+// =================================
 
-    if(typeof cargarUsuario==="function"){
-
-        cargarUsuario();
-
-    }
-
-});
-
-
-// =====================================
-// ABRIR MODAL NUEVO
-// =====================================
-
-function abrirNuevo(){
-
-    document.getElementById("modal").style.display="flex";
-
-}
-
-
-
-// =====================================
-// CERRAR MODAL NUEVO
-// =====================================
-
-function cerrarNuevo(){
-
-    document.getElementById("modal").style.display="none";
-
-}
-
-
-
-// =====================================
-// CERRAR MODAL INSPECCION
-// =====================================
-
-function cerrarInspeccion(){
-
-    document.getElementById("modalInspeccion").style.display="none";
-
-}
-
-
-
-// =====================================
-// NAVEGACION
-// =====================================
-
-function ir(pagina){
-
-    window.location.href=pagina;
-
-}
-
-
-
-// =====================================
-// VOLVER SEGUN ROL
-// =====================================
 
 function volverDashboard(){
 
-    let usuario = JSON.parse(
 
-        localStorage.getItem("usuarioActual")
+let usuario =
+JSON.parse(
+localStorage.getItem("usuario")
+);
 
-    );
 
-    if(!usuario){
 
-        window.location="../login.html";
+if(
+usuario &&
+usuario.rol==="Administrador"
+){
 
-        return;
+window.location.href =
+"admin.html";
 
-    }
 
-    switch(usuario.rol){
+}
 
-        case "SuperAdministrador":
+else{
 
-        case "Administrador":
 
-            window.location="../admin/dashboard.html";
+window.location.href =
+"movilidad.html";
 
-        break;
-
-        case "Movilidad":
-
-            window.location="dashboard.html";
-
-        break;
-
-        case "Inspector":
-
-            window.location="../inspector/dashboard.html";
-
-        break;
-
-        default:
-
-            window.location="../login.html";
-
-    }
 
 }
 
 
 
-// =====================================
-// CERRAR SESION
-// =====================================
-
-function cerrarSesion(){
-
-    localStorage.removeItem("usuarioActual");
-
-    window.location="../login.html";
-
 }
+
 
 </script>
+
+
+
+
+</body>
+
+</html>
