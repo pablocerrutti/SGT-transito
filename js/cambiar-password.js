@@ -8,28 +8,28 @@ const API_CAMBIO =
 
 
 
+let usuarioActual = null;
+
+
 
 
 
 // =====================================
-// CARGAR USUARIO
+// INICIO
 // =====================================
-
-
-let usuarioActual=null;
-
 
 
 window.onload=function(){
 
 
-usuarioActual=JSON.parse(
 
-localStorage.getItem(
-"usuarioActual"
-)
+usuarioActual = JSON.parse(
+
+localStorage.getItem("usuarioActual")
 
 );
+
+
 
 
 
@@ -46,18 +46,17 @@ return;
 
 
 
-let nombre=document.getElementById(
-"nombreUsuario"
-);
+
+
+
+let nombre=document.querySelector(".usuarioNombre");
 
 
 
 if(nombre){
 
 
-nombre.innerHTML=
-
-usuarioActual.nombre;
+nombre.innerHTML = usuarioActual.nombre;
 
 
 }
@@ -73,30 +72,27 @@ usuarioActual.nombre;
 
 
 
-
 // =====================================
-// CAMBIAR CLAVE
+// CAMBIAR PASSWORD
 // =====================================
 
 
-async function cambiarClave(){
+async function cambiarPassword(){
 
 
 
-let nueva=document.getElementById(
-
-"nuevaClave"
-
-).value.trim();
-
+let nueva = document
+.getElementById("nuevaPassword")
+.value
+.trim();
 
 
 
-let repetir=document.getElementById(
 
-"repetirClave"
-
-).value.trim();
+let repetir = document
+.getElementById("repetirPassword")
+.value
+.trim();
 
 
 
@@ -106,19 +102,14 @@ let repetir=document.getElementById(
 if(nueva==="" || repetir===""){
 
 
-
-alert(
-
-"Complete los campos"
-
-);
-
+alert("Complete ambos campos");
 
 
 return;
 
 
 }
+
 
 
 
@@ -128,13 +119,7 @@ return;
 if(nueva!==repetir){
 
 
-
-alert(
-
-"Las contraseñas no coinciden"
-
-);
-
+alert("Las contraseñas no coinciden");
 
 
 return;
@@ -148,23 +133,18 @@ return;
 
 
 
-if(nueva.length<6){
-
+if(nueva.length < 6){
 
 
 alert(
-
-"La clave debe tener mínimo 6 caracteres"
-
+"La contraseña debe tener mínimo 6 caracteres"
 );
-
 
 
 return;
 
 
 }
-
 
 
 
@@ -176,7 +156,9 @@ try{
 
 
 
-let respuesta=await fetch(
+
+
+let respuesta = await fetch(
 
 API_CAMBIO,
 
@@ -198,13 +180,10 @@ headers:{
 body:JSON.stringify({
 
 
-
-accion:"cambiarClave",
-
+accion:"cambiarPassword",
 
 
 usuario:usuarioActual.usuario,
-
 
 
 password:nueva
@@ -216,6 +195,7 @@ password:nueva
 
 }
 
+
 );
 
 
@@ -224,9 +204,15 @@ password:nueva
 
 
 
-let resultado=
+let resultado = await respuesta.json();
 
-await respuesta.json();
+
+
+
+
+
+
+console.log(resultado);
 
 
 
@@ -238,12 +224,13 @@ if(resultado.ok){
 
 
 
-// actualizar sesión
 
 
 usuarioActual.password=nueva;
 
+
 usuarioActual.cambiarClave=false;
+
 
 
 
@@ -261,13 +248,11 @@ JSON.stringify(usuarioActual)
 
 
 
-
 alert(
 
 "Contraseña actualizada correctamente"
 
 );
-
 
 
 
@@ -283,22 +268,23 @@ usuarioActual.rol
 
 
 
-
 }
 
 else{
 
 
-
 alert(
 
+resultado.mensaje || 
 "No se pudo cambiar la contraseña"
 
 );
 
 
-
 }
+
+
+
 
 
 
@@ -335,7 +321,7 @@ alert(
 
 
 // =====================================
-// REDIRECCION
+// REDIRECCION POR ROL
 // =====================================
 
 
@@ -350,12 +336,11 @@ switch(rol){
 case "SuperAdministrador":
 
 
-
 case "Supervisor":
 
 
-
 window.location="admin/dashboard.html";
+
 
 break;
 
@@ -366,8 +351,8 @@ break;
 case "Movilidad":
 
 
-
 window.location="movilidad/dashboard.html";
+
 
 break;
 
@@ -378,8 +363,8 @@ break;
 case "Inspector":
 
 
+window.location="inspector/dashboard.html";
 
-window.location="inspectores/dashboard.html";
 
 break;
 
@@ -390,9 +375,7 @@ break;
 default:
 
 
-
 window.location="login.html";
-
 
 
 }
