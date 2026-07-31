@@ -7,7 +7,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SGT | Administrador</title>
+<title>SGT | Panel Administrador</title>
 
 
 <link rel="stylesheet" href="../css/admin.css">
@@ -23,9 +23,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 <body>
 
 
-
 <div class="sidebar">
-
 
 
 <div class="logo">
@@ -43,10 +41,7 @@ Dirección de Tránsito y Transportes
 
 
 
-
-
 <ul>
-
 
 
 <li class="activo">
@@ -59,19 +54,13 @@ Dashboard
 
 
 
-
-
-<li 
-id="menuUsuarios"
-onclick="ir('usuarios.html')">
+<li onclick="ir('usuarios.html')">
 
 <i class="fa-solid fa-users"></i>
 
 Usuarios
 
 </li>
-
-
 
 
 
@@ -85,8 +74,6 @@ Mapa Movilidad
 
 
 
-
-
 <li onclick="ir('../movilidad/elementos.html')">
 
 <i class="fa-solid fa-location-dot"></i>
@@ -94,8 +81,6 @@ Mapa Movilidad
 Elementos
 
 </li>
-
-
 
 
 
@@ -109,10 +94,6 @@ Informes
 
 
 
-
-
-
-
 <li onclick="cerrarSesion()">
 
 <i class="fa-solid fa-right-from-bracket"></i>
@@ -123,9 +104,7 @@ Salir
 
 
 
-
 </ul>
-
 
 
 </div>
@@ -135,11 +114,7 @@ Salir
 
 
 
-
-
-
 <div class="contenido">
-
 
 
 <header>
@@ -156,7 +131,7 @@ Panel Administrador
 
 <p>
 
-Gestión integral SGT
+Gestión integral del Sistema SGT
 
 </p>
 
@@ -165,9 +140,9 @@ Gestión integral SGT
 
 
 
+<div class="usuarioNombre" id="usuarioNombre">
 
-<div class="usuarioNombre"></div>
-
+</div>
 
 
 </header>
@@ -176,26 +151,17 @@ Gestión integral SGT
 
 
 
-
-
-
-
 <button 
-
-onclick="volverDashboard()" 
-
-class="btn-volver">
+class="btn-volver"
+onclick="volverDashboard()">
 
 
 <i class="fa-solid fa-arrow-left"></i>
-
 
 Volver Dashboard
 
 
 </button>
-
-
 
 
 
@@ -209,18 +175,11 @@ Volver Dashboard
 
 
 
-<div 
-
-class="card"
-
-id="cardUsuarios"
-
+<div class="card"
 onclick="ir('usuarios.html')">
 
 
-
 <i class="fa-solid fa-users"></i>
-
 
 
 <h2>
@@ -230,13 +189,11 @@ Usuarios
 </h2>
 
 
-
 <p>
 
-Administración de cuentas
+Crear, modificar y administrar usuarios
 
 </p>
-
 
 
 </div>
@@ -246,33 +203,53 @@ Administración de cuentas
 
 
 
-
-
-
 <div class="card"
-
 onclick="ir('../movilidad/mapa.html')">
-
 
 
 <i class="fa-solid fa-map-location-dot"></i>
 
 
-
 <h2>
 
-Movilidad
+Mapa
 
 </h2>
 
 
-
 <p>
 
-Infraestructura vial
+Visualización geográfica
 
 </p>
 
+
+</div>
+
+
+
+
+
+
+<div class="card"
+onclick="ir('../movilidad/elementos.html')">
+
+
+<i class="fa-solid fa-road"></i>
+
+
+<h2>
+
+Elementos
+
+</h2>
+
+
+<p>
+
+Infraestructura urbana
+
+</p>
 
 
 </div>
@@ -283,16 +260,11 @@ Infraestructura vial
 
 
 
-
-
 <div class="card"
-
 onclick="ir('../movilidad/informes.html')">
 
 
-
-<i class="fa-solid fa-file-circle-check"></i>
-
+<i class="fa-solid fa-file-pdf"></i>
 
 
 <h2>
@@ -302,28 +274,14 @@ Informes
 </h2>
 
 
-
 <p>
 
-Inspecciones y reportes
+Reportes del sistema
 
 </p>
 
 
-
 </div>
-
-
-
-
-
-
-</div>
-
-
-
-
-
 
 
 
@@ -332,8 +290,7 @@ Inspecciones y reportes
 
 
 
-
-
+</div>
 
 
 
@@ -343,201 +300,51 @@ Inspecciones y reportes
 <script src="../js/permisos.js"></script>
 
 
-
-
-
 <script>
 
 
+// validar acceso
 
-// =====================================
-// CONTROL DE ACCESO
-// =====================================
-
-
-let usuarioActual = obtenerUsuario();
+verificarRol("SuperAdministrador");
 
 
 
-
-if(!usuarioActual){
-
-
-window.location="../login.html";
-
-
-}
-
-
-
-
-
-if(
-
-usuarioActual.rol !== "SuperAdministrador"
-
-&&
-
-usuarioActual.rol !== "Supervisor"
-
-){
-
-
-
-volverSegunRol();
-
-
-
-}
-
-
-
-
-
-
-
-
-// =====================================
-// MOSTRAR USUARIO
-// =====================================
-
+// mostrar usuario
 
 cargarUsuario();
 
 
 
 
+// navegación
 
+function ir(ruta){
 
-
-
-// =====================================
-// OCULTAR ADMINISTRACION A SUPERVISOR
-// =====================================
-
-
-function controlarPermisos(){
-
-
-
-if(
-
-usuarioActual.rol==="Supervisor"
-
-){
-
-
-
-let menu=document.getElementById(
-
-"menuUsuarios"
-
-);
-
-
-
-let tarjeta=document.getElementById(
-
-"cardUsuarios"
-
-);
-
-
-
-if(menu){
-
-menu.style.display="none";
+window.location.href=ruta;
 
 }
 
 
-
-if(tarjeta){
-
-tarjeta.style.display="none";
-
-}
-
-
-
-}
-
-
-
-}
-
-
-
-
-controlarPermisos();
-
-
-
-
-
-
-
-
-
-// =====================================
-// NAVEGACION
-// =====================================
-
-
-function ir(pagina){
-
-
-window.location.href=pagina;
-
-
-}
-
-
-
-
-
-
-
-// =====================================
-// VOLVER SEGUN ROL
-// =====================================
 
 
 function volverDashboard(){
 
-
-
-volverSegunRol();
-
-
+window.location.href="dashboard.html";
 
 }
 
 
-
-
-
-
-
-// =====================================
-// CERRAR SESION
-// =====================================
 
 
 function cerrarSesion(){
 
 
-
 localStorage.removeItem(
-
 "usuarioActual"
-
 );
 
 
-
-window.location="../login.html";
-
+window.location.href="../login.html";
 
 
 }
@@ -545,7 +352,6 @@ window.location="../login.html";
 
 
 </script>
-
 
 
 </body>
