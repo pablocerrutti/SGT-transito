@@ -444,7 +444,7 @@ e=>e.id==id
 
 
 window.location.href =
-"elemento.html";
+"ficha-elemento.html";
 
 
 }
