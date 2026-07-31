@@ -1,30 +1,22 @@
-*{
+/* =====================================
+   SGT - MAPA MOVILIDAD
+   mapa.css
+===================================== */
 
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:"Segoe UI",Arial,sans-serif;
-
-}
 
 
 body{
 
-display:flex;
+margin:0;
 
-height:100vh;
+padding:0;
 
-background:#eef4f8;
+background:#050b12;
 
-}
-
-
-
-.sidebar{
-
-width:270px;
-
-background:#083b63;
+font-family:
+"Segoe UI",
+Arial,
+sans-serif;
 
 color:white;
 
@@ -32,352 +24,389 @@ color:white;
 
 
 
-.logo{
 
-padding:30px;
 
-text-align:center;
+/* =====================================
+   CABECERA
+===================================== */
 
-border-bottom:1px solid rgba(255,255,255,.15);
+
+.topbar{
+
+height:70px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:0 20px;
+
+background:
+linear-gradient(
+90deg,
+#071522,
+#102a43
+);
+
+border-bottom:
+
+1px solid #1e88e5;
+
 
 }
 
 
-.logo img{
 
-width:90px;
+.topbar h1{
+
+margin:0;
+
+font-size:28px;
+
+letter-spacing:3px;
+
+color:#00e5ff;
 
 }
 
 
-.logo p{
+
+.topbar p{
+
+margin:0;
 
 font-size:13px;
 
-opacity:.8;
-
-margin-top:10px;
-
-}
-
-
-
-.sidebar ul{
-
-list-style:none;
-
-margin-top:20px;
-
-}
-
-
-
-.sidebar li{
-
-padding:18px 30px;
-
-cursor:pointer;
-
-}
-
-
-
-.sidebar li:hover,
-.sidebar .activo{
-
-background:#0f6fae;
-
-}
-
-
-
-.sidebar i{
-
-width:30px;
+color:#b0bec5;
 
 }
 
 
 
 
-.contenido{
-
-flex:1;
-
-padding:35px;
-
-}
 
 
+/* =====================================
+   BOTON VOLVER
+===================================== */
 
 
-header{
+.btn-volver{
 
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-margin-bottom:35px;
-
-}
-
-
-
-header span{
-
-background:#0f6fae;
-
-color:white;
-
-padding:10px 20px;
-
-border-radius:30px;
-
-}
-
-
-
-.tarjetas{
-
-display:grid;
-
-grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-
-gap:25px;
-
-}
-
-
-
-.card{
-
-background:white;
-
-padding:30px;
-
-border-radius:15px;
-
-text-align:center;
-
-box-shadow:0 8px 20px rgba(0,0,0,.08);
-
-}
-
-
-
-.card i{
-
-font-size:45px;
-
-color:#0f6fae;
-
-margin-bottom:20px;
-
-}
-
-
-
-.card h2{
-
-font-size:40px;
-
-color:#083b63;
-
-margin-top:15px;
-
-}
-
-
-
-
-.accesoMapa{
-
-margin-top:50px;
-
-text-align:center;
-
-}
-
-
-
-.accesoMapa button{
-
-padding:18px 40px;
-
-background:#16a34a;
+background:#0d47a1;
 
 border:none;
 
 color:white;
 
-font-size:18px;
+padding:
 
-border-radius:10px;
+10px 18px;
+
+
+border-radius:6px;
 
 cursor:pointer;
 
+font-weight:bold;
+
+}
+
+
+
+.btn-volver:hover{
+
+background:#1565c0;
+
 }
 
 
-.accesoMapa button:hover{
 
-background:#12803a;
 
-}
-.contenidoMapa{
 
-flex:1;
+
+/* =====================================
+   PANEL FILTROS
+===================================== */
+
+
+.panel-filtros{
 
 display:flex;
 
-flex-direction:column;
+gap:10px;
 
-padding:20px;
+padding:12px;
 
-}
+background:#081018;
 
+border-bottom:
 
-.barraMapa{
+1px solid #263238;
 
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-margin-bottom:15px;
+flex-wrap:wrap;
 
 }
 
 
-.barraMapa button{
 
-background:#16a34a;
+.panel-filtros button{
+
+background:#102a43;
+
+border:
+
+1px solid #00bcd4;
 
 color:white;
 
-border:none;
+padding:
 
-padding:12px 25px;
+8px 15px;
 
-border-radius:8px;
+
+border-radius:5px;
 
 cursor:pointer;
 
-font-size:16px;
+}
+
+
+
+.panel-filtros button:hover{
+
+background:#00acc1;
+
+color:#000;
 
 }
+
+
+
+
+
+
+
+/* =====================================
+       MAPA
+===================================== */
 
 
 #mapa{
 
-flex:1;
-
-min-height:600px;
-
-border-radius:15px;
-
-box-shadow:0 8px 20px rgba(0,0,0,.15);
-
-}
-
-
-/* MODAL */
-
-.modal{
-
-position:fixed;
-
-inset:0;
-
-background:rgba(0,0,0,.5);
-
-display:none;
-
-justify-content:center;
-
-align-items:center;
-
-z-index:1000;
-
-}
-
-
-.modal-contenido{
-
-background:white;
-
-width:450px;
-
-padding:30px;
-
-border-radius:15px;
-
-}
-
-
-.modal-contenido input,
-.modal-contenido select,
-.modal-contenido textarea{
-
 width:100%;
 
-padding:12px;
+height:
 
-margin-bottom:15px;
+calc(100vh - 130px);
+
+
+z-index:1;
+
+}
+
+
+
+
+
+
+/* =====================================
+   POPUP LEAFLET
+===================================== */
+
+
+.leaflet-popup-content-wrapper{
+
+background:#101820;
+
+color:white;
 
 border-radius:8px;
 
-border:1px solid #ccc;
+}
+
+
+
+.leaflet-popup-tip{
+
+background:#101820;
 
 }
 
 
-.modal-contenido textarea{
 
-height:100px;
+.popup h3{
+
+margin-top:0;
+
+color:#00e5ff;
 
 }
 
 
-.modal-footer{
 
-display:flex;
+.popup button{
 
-justify-content:flex-end;
+
+background:#00acc1;
+
+border:none;
+
+padding:
+
+8px 15px;
+
+
+border-radius:5px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+}
+
+
+
+
+
+
+/* =====================================
+   MARCADORES PERSONALIZADOS
+===================================== */
+
+
+.marcador-custom{
+
+background:none;
+
+border:none;
+
+}
+
+
+
+.pin{
+
+
+width:22px;
+
+height:22px;
+
+border-radius:50%;
+
+border:
+
+3px solid white;
+
+
+box-shadow:
+
+0 0 10px black;
+
+
+}
+
+
+
+
+
+.pin.green{
+
+
+background:#00c853;
+
+box-shadow:
+
+0 0 15px #00c853;
+
+
+}
+
+
+
+
+.pin.blue{
+
+
+background:#2979ff;
+
+box-shadow:
+
+0 0 15px #2979ff;
+
+
+}
+
+
+
+
+
+.pin.gray{
+
+
+background:#757575;
+
+box-shadow:
+
+0 0 15px #757575;
+
+
+}
+
+
+
+
+
+
+/* =====================================
+      RESPONSIVE MOVIL
+===================================== */
+
+
+@media(max-width:600px){
+
+
+
+.topbar{
+
+height:auto;
+
+padding:12px;
+
+flex-direction:column;
 
 gap:10px;
 
 }
 
 
-.btnGuardar{
 
-background:#16a34a;
+.topbar h1{
 
-color:white;
-
-border:none;
-
-padding:12px 20px;
-
-border-radius:8px;
+font-size:24px;
 
 }
 
 
-.btnCancelar{
 
-background:#6b7280;
+.panel-filtros button{
 
-color:white;
+flex:1;
 
-border:none;
+}
 
-padding:12px 20px;
 
-border-radius:8px;
+
+#mapa{
+
+height:
+
+calc(100vh - 170px);
+
+}
+
+
 
 }
