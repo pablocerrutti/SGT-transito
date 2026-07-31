@@ -1,0 +1,348 @@
+/* =====================================
+   SGT - MAPA MOVILIDAD
+   mapa.css
+===================================== */
+
+
+
+body{
+
+margin:0;
+
+padding:0;
+
+background:#081018;
+
+font-family:
+Arial,
+sans-serif;
+
+color:white;
+
+overflow:hidden;
+
+}
+
+
+
+
+/* =====================================
+   CABECERA
+===================================== */
+
+
+.topbar{
+
+
+height:70px;
+
+background:#101820;
+
+border-bottom:
+2px solid #00bcd4;
+
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:0 20px;
+
+
+box-sizing:border-box;
+
+
+}
+
+
+
+.topbar h1{
+
+margin:0;
+
+color:#00e5ff;
+
+font-size:28px;
+
+letter-spacing:3px;
+
+}
+
+
+
+.topbar p{
+
+margin:0;
+
+font-size:13px;
+
+color:#b0bec5;
+
+}
+
+
+
+
+
+.topbar button{
+
+
+background:#00695c;
+
+border:0;
+
+color:white;
+
+padding:
+
+10px 16px;
+
+
+margin-left:8px;
+
+border-radius:5px;
+
+cursor:pointer;
+
+
+font-weight:bold;
+
+
+}
+
+
+
+.topbar button:hover{
+
+background:#009688;
+
+}
+
+
+
+
+
+
+/* =====================================
+   FILTROS
+===================================== */
+
+
+.filtros{
+
+
+height:50px;
+
+background:#0b151f;
+
+display:flex;
+
+align-items:center;
+
+padding:0 15px;
+
+border-bottom:
+1px solid #263238;
+
+
+}
+
+
+
+.filtros select{
+
+
+background:#101820;
+
+color:white;
+
+border:
+
+1px solid #00bcd4;
+
+
+padding:
+
+8px 15px;
+
+
+border-radius:5px;
+
+
+}
+
+
+
+
+
+
+/* =====================================
+   MAPA
+===================================== */
+
+
+#mapa{
+
+
+height:
+
+calc(100vh - 120px);
+
+
+width:100%;
+
+
+}
+
+
+
+
+
+/* =====================================
+   POPUP
+===================================== */
+
+
+.leaflet-popup-content-wrapper{
+
+
+background:#101820;
+
+color:white;
+
+
+border-radius:8px;
+
+
+}
+
+
+
+.leaflet-popup-tip{
+
+
+background:#101820;
+
+
+}
+
+
+
+.popup h3{
+
+
+color:#00e5ff;
+
+
+margin-top:0;
+
+
+}
+
+
+
+.popup button{
+
+
+background:#00bcd4;
+
+border:0;
+
+padding:
+
+8px 12px;
+
+
+cursor:pointer;
+
+
+font-weight:bold;
+
+
+}
+
+
+
+
+
+
+/* =====================================
+   MARCADORES
+===================================== */
+
+
+.marcador{
+
+
+width:22px;
+
+height:22px;
+
+border-radius:50%;
+
+
+background:#00e5ff;
+
+
+border:
+
+3px solid white;
+
+
+box-shadow:
+
+0 0 12px #00e5ff;
+
+
+}
+
+
+
+
+/* =====================================
+   MOVIL
+===================================== */
+
+
+@media(max-width:600px){
+
+
+.topbar{
+
+
+height:auto;
+
+padding:10px;
+
+
+flex-direction:column;
+
+gap:10px;
+
+
+}
+
+
+.topbar button{
+
+
+padding:8px;
+
+}
+
+
+#mapa{
+
+
+height:
+
+calc(100vh - 150px);
+
+
+}
+
+
+
+}
