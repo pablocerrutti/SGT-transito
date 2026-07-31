@@ -368,12 +368,6 @@ function cargarUsuario(){
 }
 
 
-
-
-
-
-
-
 // =====================================
 // VOLVER DASHBOARD SEGUN ROL
 // =====================================
@@ -428,5 +422,56 @@ function volverDashboard(){
 
     }
 
+
+}
+// =====================================
+// PERMITIR CAMBIO DE MODULO
+// =====================================
+
+function permitirModulo(modulo){
+
+    let usuario = obtenerUsuarioActual();
+
+    if(!usuario){
+
+        window.location="../login.html";
+        return false;
+
+    }
+
+
+    let rol = usuario.rol || usuario.Rol;
+
+
+    // ADMINISTRADOR Y SUPERVISOR PUEDEN VER TODO
+
+    if(
+        rol==="SuperAdministrador" ||
+        rol==="Supervisor"
+    ){
+
+        return true;
+
+    }
+
+
+    // MOVILIDAD
+
+    if(
+        modulo==="movilidad" &&
+        rol==="Movilidad"
+    ){
+
+        return true;
+
+    }
+
+
+    alert(
+        "No tiene permisos para este módulo"
+    );
+
+
+    return false;
 
 }
