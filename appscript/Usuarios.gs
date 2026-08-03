@@ -1,23 +1,28 @@
 /********************************************************
  SGT
+ SISTEMA DE GESTIÓN DE TRÁNSITO
  USUARIOS
 ********************************************************/
 
-function login(datos) {
+//======================================================
+// LOGIN
+//======================================================
+
+function login(e) {
+
+  const usuario = String(e.parameter.usuario || "").trim();
+  const password = String(e.parameter.password || "").trim();
 
   const sh = hoja("Usuarios");
+  const datos = sh.getDataRange().getValues();
 
-  const valores = sh.getDataRange().getValues();
+  for (let i = 1; i < datos.length; i++) {
 
-  for (let i = 1; i < valores.length; i++) {
-
-    const usuario = String(valores[i][1]).trim();
-    const password = String(valores[i][2]).trim();
-    const activo = String(valores[i][5]).trim().toUpperCase();
+    const activo = String(datos[i][5]).trim().toUpperCase();
 
     if (
-      usuario === datos.usuario &&
-      password === datos.password &&
+      String(datos[i][1]).trim() === usuario &&
+      String(datos[i][2]).trim() === password &&
       activo === "SI"
     ) {
 
@@ -27,10 +32,10 @@ function login(datos) {
 
         usuario: {
 
-          id: valores[i][0],
-          usuario: valores[i][1],
-          nombre: valores[i][3],
-          rol: valores[i][4]
+          id: datos[i][0],
+          usuario: datos[i][1],
+          nombre: datos[i][3],
+          rol: datos[i][4]
 
         }
 
@@ -50,7 +55,9 @@ function login(datos) {
 
 }
 
-/************************************************/
+//======================================================
+// OBTENER USUARIOS
+//======================================================
 
 function obtenerUsuarios() {
 
@@ -84,55 +91,73 @@ function obtenerUsuarios() {
 
 }
 
-/************************************************/
+//======================================================
+// GUARDAR USUARIO
+//======================================================
 
 function guardarUsuario(d) {
 
   const sh = hoja("Usuarios");
 
+  const id = generarID("USR");
+
   sh.appendRow([
 
-    generarID("US"),
-
+    id,
     d.usuario,
-
     d.password,
-
     d.nombre,
-
     d.rol,
-
     "SI",
-
     ahora()
 
   ]);
 
   return {
 
-    ok: true
+    ok: true,
+
+    mensaje: "Usuario creado correctamente."
 
   };
 
 }
 
-/************************************************/
+//======================================================
+// ELIMINAR USUARIO
+//======================================================
 
-function eliminarUsuario(d) {
+function eliminarUsuario(e) {
+
+  const id = e.parameter.id;
 
   const sh = hoja("Usuarios");
 
-  const fila = buscarFila(sh, d.id);
+  const datos = sh.getDataRange().getValues();
 
-  if (fila > 0) {
+  for (let i = 1; i < datos.length; i++) {
 
-    sh.deleteRow(fila);
+    if (String(datos[i][0]) === String(id)) {
+
+      sh.deleteRow(i + 1);
+
+      return {
+
+        ok: true,
+
+        mensaje: "Usuario eliminado."
+
+      };
+
+    }
 
   }
 
   return {
 
-    ok: true
+    ok: false,
+
+    mensaje: "Usuario no encontrado."
 
   };
 
