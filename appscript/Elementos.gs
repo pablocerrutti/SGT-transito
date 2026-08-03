@@ -3,19 +3,16 @@
  ELEMENTOS
 ********************************************************/
 
+//======================================================
+// OBTENER ELEMENTOS
+//======================================================
+
 function obtenerElementos() {
 
   const sh = hoja("Elementos");
-
   const datos = sh.getDataRange().getValues();
 
-  if (datos.length <= 1) {
-
-    return ok([]);
-
-  }
-
-  const lista = [];
+  let lista = [];
 
   for (let i = 1; i < datos.length; i++) {
 
@@ -42,13 +39,21 @@ function obtenerElementos() {
 
   }
 
-  return ok(lista);
+  return {
+
+    ok: true,
+
+    datos: lista
+
+  };
 
 }
 
-/************************************************/
+//======================================================
+// GUARDAR
+//======================================================
 
-function guardarElemento(d) {
+function guardarElemento(e) {
 
   const sh = hoja("Elementos");
 
@@ -57,16 +62,16 @@ function guardarElemento(d) {
   sh.appendRow([
 
     id,
-    d.codigo,
-    d.tipo,
-    d.serie,
-    d.nombre,
-    d.descripcion,
-    d.latitud,
-    d.longitud,
-    d.direccion,
-    d.estado,
-    d.caracteristicas,
+    e.parameter.codigo,
+    e.parameter.tipo,
+    e.parameter.serie,
+    e.parameter.nombre,
+    e.parameter.descripcion,
+    e.parameter.latitud,
+    e.parameter.longitud,
+    e.parameter.direccion,
+    e.parameter.estado,
+    e.parameter.caracteristicas,
     ahora(),
     "admin",
     "",
@@ -79,61 +84,87 @@ function guardarElemento(d) {
 
     ok: true,
 
-    id: id,
-
     mensaje: "Elemento guardado correctamente."
 
   };
 
 }
 
-/************************************************/
+//======================================================
+// ACTUALIZAR
+//======================================================
 
-function actualizarElemento(d) {
+function actualizarElemento(e) {
 
   const sh = hoja("Elementos");
 
-  const fila = buscarFila(sh, d.id);
+  const fila = buscarFila(sh, e.parameter.id);
 
   if (fila == -1) {
 
-    return error("Elemento no encontrado");
+    return {
+
+      ok: false,
+
+      mensaje: "Elemento no encontrado."
+
+    };
 
   }
 
-  sh.getRange(fila,2).setValue(d.codigo);
-  sh.getRange(fila,3).setValue(d.tipo);
-  sh.getRange(fila,4).setValue(d.serie);
-  sh.getRange(fila,5).setValue(d.nombre);
-  sh.getRange(fila,6).setValue(d.descripcion);
-  sh.getRange(fila,7).setValue(d.latitud);
-  sh.getRange(fila,8).setValue(d.longitud);
-  sh.getRange(fila,9).setValue(d.direccion);
-  sh.getRange(fila,10).setValue(d.estado);
-  sh.getRange(fila,11).setValue(d.caracteristicas);
+  sh.getRange(fila,2).setValue(e.parameter.codigo);
+  sh.getRange(fila,3).setValue(e.parameter.tipo);
+  sh.getRange(fila,4).setValue(e.parameter.serie);
+  sh.getRange(fila,5).setValue(e.parameter.nombre);
+  sh.getRange(fila,6).setValue(e.parameter.descripcion);
+  sh.getRange(fila,7).setValue(e.parameter.latitud);
+  sh.getRange(fila,8).setValue(e.parameter.longitud);
+  sh.getRange(fila,9).setValue(e.parameter.direccion);
+  sh.getRange(fila,10).setValue(e.parameter.estado);
+  sh.getRange(fila,11).setValue(e.parameter.caracteristicas);
   sh.getRange(fila,14).setValue(ahora());
   sh.getRange(fila,15).setValue("admin");
 
-  return ok("Actualizado");
+  return {
+
+    ok: true,
+
+    mensaje: "Elemento actualizado."
+
+  };
 
 }
 
-/************************************************/
+//======================================================
+// ELIMINAR
+//======================================================
 
-function eliminarElemento(d) {
+function eliminarElemento(e) {
 
   const sh = hoja("Elementos");
 
-  const fila = buscarFila(sh, d.id);
+  const fila = buscarFila(sh, e.parameter.id);
 
   if (fila == -1) {
 
-    return error("Elemento no encontrado");
+    return {
+
+      ok: false,
+
+      mensaje: "Elemento no encontrado."
+
+    };
 
   }
 
   sh.deleteRow(fila);
 
-  return ok("Eliminado");
+  return {
+
+    ok: true,
+
+    mensaje: "Elemento eliminado."
+
+  };
 
 }
