@@ -1,7 +1,7 @@
-// ======================================================
+//======================================================
 // SGT
 // LOGIN
-// ======================================================
+//======================================================
 
 const formulario = document.getElementById("loginForm");
 const mensaje = document.getElementById("mensaje");
@@ -15,15 +15,8 @@ formulario.addEventListener("submit", async function (e) {
     mensaje.style.color = "#17375e";
     mensaje.innerHTML = "Validando credenciales...";
 
-    const usuario = document
-        .getElementById("usuario")
-        .value
-        .trim();
-
-    const password = document
-        .getElementById("password")
-        .value
-        .trim();
+    const usuario = document.getElementById("usuario").value.trim();
+    const password = document.getElementById("password").value.trim();
 
     if (usuario === "" || password === "") {
 
@@ -36,7 +29,7 @@ formulario.addEventListener("submit", async function (e) {
 
     try {
 
-        const respuesta = await login(usuario, password);
+        const respuesta = await apiLogin(usuario, password);
 
         if (!respuesta.ok) {
 
@@ -48,8 +41,11 @@ formulario.addEventListener("submit", async function (e) {
         }
 
         localStorage.setItem(
+
             "usuarioActual",
+
             JSON.stringify(respuesta.usuario)
+
         );
 
         mensaje.style.color = "#22c55e";
@@ -68,21 +64,17 @@ formulario.addEventListener("submit", async function (e) {
         console.error(error);
 
         mensaje.style.color = "#ef4444";
-        mensaje.innerHTML = "Error de comunicación con el servidor.";
+        mensaje.innerHTML = "No fue posible conectar con el servidor.";
 
     }
 
 });
 
 //======================================================
-// SI YA HAY UNA SESIÓN INICIADA
-//======================================================
 
 window.addEventListener("load", function () {
 
-    const usuario = localStorage.getItem("usuarioActual");
-
-    if (usuario) {
+    if (localStorage.getItem("usuarioActual")) {
 
         window.location.href = "pages/dashboard.html";
 
