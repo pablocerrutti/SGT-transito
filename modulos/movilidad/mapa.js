@@ -176,7 +176,13 @@ async function cargarElementos(){
 
         }
 
-        const marcador=L.marker([lat,lng]).addTo(mapa);
+        const marcador = L.circleMarker([lat, lng], {
+    radius: 10,
+    color: "#ff0000",
+    fillColor: "#ff0000",
+    fillOpacity: 1,
+    weight: 2
+}).addTo(mapa);
 
         marcador.bindPopup(
 
