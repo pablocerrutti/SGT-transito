@@ -18,22 +18,25 @@ function obtenerElementos() {
 
     lista.push({
 
-      id: datos[i][0],
-      codigo: datos[i][1],
-      tipo: datos[i][2],
-      serie: datos[i][3],
-      nombre: datos[i][4],
-      descripcion: datos[i][5],
-      latitud: datos[i][6],
-      longitud: datos[i][7],
-      direccion: datos[i][8],
-      estado: datos[i][9],
-      caracteristicas: datos[i][10],
-      fechaAlta: datos[i][11],
-      usuarioAlta: datos[i][12],
-      fechaModificacion: datos[i][13],
-      usuarioModificacion: datos[i][14],
-      activo: datos[i][15]
+      id: String(datos[i][0]),
+      codigo: String(datos[i][1]),
+      tipo: String(datos[i][2]),
+      serie: String(datos[i][3]),
+      nombre: String(datos[i][4]),
+      descripcion: String(datos[i][5]),
+
+      latitud: String(datos[i][6]),
+
+      longitud: String(datos[i][7]),
+
+      direccion: String(datos[i][8]),
+      estado: String(datos[i][9]),
+      caracteristicas: String(datos[i][10]),
+      fechaAlta: String(datos[i][11]),
+      usuarioAlta: String(datos[i][12]),
+      fechaModificacion: String(datos[i][13]),
+      usuarioModificacion: String(datos[i][14]),
+      activo: String(datos[i][15])
 
     });
 
@@ -50,7 +53,7 @@ function obtenerElementos() {
 }
 
 //======================================================
-// GUARDAR
+// GUARDAR ELEMENTO
 //======================================================
 
 function guardarElemento(e) {
@@ -59,19 +62,25 @@ function guardarElemento(e) {
 
   const id = generarID("EL");
 
+  const latitud = String(e.parameter.latitud || "").replace(",", ".");
+  const longitud = String(e.parameter.longitud || "").replace(",", ".");
+
   sh.appendRow([
 
     id,
-    e.parameter.codigo,
-    e.parameter.tipo,
-    e.parameter.serie,
-    e.parameter.nombre,
-    e.parameter.descripcion,
-    e.parameter.latitud,
-    e.parameter.longitud,
-    e.parameter.direccion,
-    e.parameter.estado,
-    e.parameter.caracteristicas,
+    e.parameter.codigo || "",
+    e.parameter.tipo || "",
+    e.parameter.serie || "",
+    e.parameter.nombre || "",
+    e.parameter.descripcion || "",
+
+    latitud,
+
+    longitud,
+
+    e.parameter.direccion || "",
+    e.parameter.estado || "",
+    e.parameter.caracteristicas || "",
     ahora(),
     "admin",
     "",
@@ -91,7 +100,7 @@ function guardarElemento(e) {
 }
 
 //======================================================
-// ACTUALIZAR
+// ACTUALIZAR ELEMENTO
 //======================================================
 
 function actualizarElemento(e) {
@@ -112,16 +121,23 @@ function actualizarElemento(e) {
 
   }
 
-  sh.getRange(fila,2).setValue(e.parameter.codigo);
-  sh.getRange(fila,3).setValue(e.parameter.tipo);
-  sh.getRange(fila,4).setValue(e.parameter.serie);
-  sh.getRange(fila,5).setValue(e.parameter.nombre);
-  sh.getRange(fila,6).setValue(e.parameter.descripcion);
-  sh.getRange(fila,7).setValue(e.parameter.latitud);
-  sh.getRange(fila,8).setValue(e.parameter.longitud);
-  sh.getRange(fila,9).setValue(e.parameter.direccion);
-  sh.getRange(fila,10).setValue(e.parameter.estado);
-  sh.getRange(fila,11).setValue(e.parameter.caracteristicas);
+  sh.getRange(fila,2).setValue(e.parameter.codigo || "");
+  sh.getRange(fila,3).setValue(e.parameter.tipo || "");
+  sh.getRange(fila,4).setValue(e.parameter.serie || "");
+  sh.getRange(fila,5).setValue(e.parameter.nombre || "");
+  sh.getRange(fila,6).setValue(e.parameter.descripcion || "");
+
+  sh.getRange(fila,7).setValue(
+    String(e.parameter.latitud || "").replace(",", ".")
+  );
+
+  sh.getRange(fila,8).setValue(
+    String(e.parameter.longitud || "").replace(",", ".")
+  );
+
+  sh.getRange(fila,9).setValue(e.parameter.direccion || "");
+  sh.getRange(fila,10).setValue(e.parameter.estado || "");
+  sh.getRange(fila,11).setValue(e.parameter.caracteristicas || "");
   sh.getRange(fila,14).setValue(ahora());
   sh.getRange(fila,15).setValue("admin");
 
@@ -136,7 +152,7 @@ function actualizarElemento(e) {
 }
 
 //======================================================
-// ELIMINAR
+// ELIMINAR ELEMENTO
 //======================================================
 
 function eliminarElemento(e) {
