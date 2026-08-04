@@ -1,257 +1,351 @@
-<!DOCTYPE html>
-<html lang="es">
+//======================================================
+// SGT - MOVILIDAD URBANA
+// mapa.js
+//======================================================
 
-<head>
+let mapa;
+let marcadorNuevo = null;
+let marcadores = [];
 
-<meta charset="UTF-8">
+//======================================================
+// INICIAR
+//======================================================
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+window.onload = function () {
 
-<title>SGT | Movilidad Urbana</title>
+    comprobarSesion();
 
-<link rel="stylesheet" href="../../css/estilos.css">
-<link rel="stylesheet" href="mapa.css">
+    iniciarMapa();
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    cargarTipos();
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"/>
+    cargarElementos();
 
-</head>
+    document
+        .getElementById("formElemento")
+        .addEventListener("submit", guardarElemento);
 
-<body>
+    document
+        .getElementById("btnActualizar")
+        .addEventListener("click", cargarElementos);
 
-<div class="sidebar">
+    document
+        .getElementById("filtroTipo")
+        .addEventListener("change", filtrar);
 
-<div class="logo">
+    document
+        .getElementById("buscar")
+        .addEventListener("keyup", filtrar);
 
-<img src="../../img/logo.png" width="80">
+    document
+        .getElementById("btnDashboard")
+        .onclick = function () {
 
-<h2>SGT</h2>
+            window.location.href = "../../pages/dashboard.html";
 
-<p>Movilidad Urbana</p>
+        };
 
-</div>
+    document
+        .getElementById("btnSalir")
+        .onclick = salir;
 
-<ul>
+};
 
-<li class="activo">
+//======================================================
+// COMPROBAR SESIÓN
+//======================================================
 
-<i class="fa-solid fa-map-location-dot"></i>
+function comprobarSesion() {
 
-Mapa
+    const usuario = JSON.parse(localStorage.getItem("usuarioActual"));
 
-</li>
+    if (!usuario) {
 
-<li id="btnElementos">
+        window.location.href = "../../index.html";
+        return;
 
-<i class="fa-solid fa-list"></i>
+    }
 
-Elementos
+    document.getElementById("usuarioActual").innerHTML =
+        "<strong>" + usuario.nombre + "</strong>";
 
-</li>
+}
 
-<li id="btnInspecciones">
+//======================================================
+// MAPA
+//======================================================
 
-<i class="fa-solid fa-clipboard-check"></i>
+function iniciarMapa() {
 
-Inspecciones
+    mapa = L.map("map").setView([-34.0997, -56.2140], 15);
 
-</li>
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            attribution: "&copy; OpenStreetMap"
+        }
+    ).addTo(mapa);
 
-<li id="btnDashboard">
+    mapa.on("click", function (e) {
 
-<i class="fa-solid fa-house"></i>
+        document.getElementById("lat").value = e.latlng.lat;
+        document.getElementById("lng").value = e.latlng.lng;
 
-Dashboard
+        if (marcadorNuevo) {
 
-</li>
+            mapa.removeLayer(marcadorNuevo);
 
-<li id="btnSalir">
+        }
 
-<i class="fa-solid fa-right-from-bracket"></i>
+        marcadorNuevo = L.circleMarker(e.latlng, {
 
-Salir
+            radius: 8,
+            color: "#ff0000",
+            fillColor: "#ff0000",
+            fillOpacity: 1
 
-</li>
+        }).addTo(mapa);
 
-</ul>
+    });
 
-</div>
+}
 
-<div class="contenido">
+//======================================================
+// TIPOS
+//======================================================
 
-<header>
+function cargarTipos() {
 
-<div>
+    const tipos = [
 
-<h1>Mapa de Movilidad Urbana</h1>
+        "Semáforo",
+        "Radar",
+        "Cruce Peatonal",
+        "Lomo de Burro",
+        "Cartel",
+        "Señal Vertical",
+        "Señal Horizontal",
+        "Cámara",
+        "Otro"
 
-<p>
+    ];
 
-Seleccione una categoría o haga clic sobre el mapa para crear un nuevo elemento.
+    const select = document.getElementById("tipo");
+    const filtro = document.getElementById("filtroTipo");
 
-</p>
+    select.innerHTML = "";
+    filtro.innerHTML = '<option value="">Todos los elementos</option>';
 
-</div>
+    tipos.forEach(function (tipo) {
 
-<div id="usuarioActual"></div>
+        select.innerHTML += `<option value="${tipo}">${tipo}</option>`;
+        filtro.innerHTML += `<option value="${tipo}">${tipo}</option>`;
 
-</header>
+    });
 
-<div class="barraSuperior">
+}
 
-<select id="filtroTipo">
+//======================================================
+// CARGAR ELEMENTOS
+//======================================================
 
-<option value="">Todos los elementos</option>
+async function cargarElementos() {
 
-</select>
+    marcadores.forEach(function (m) {
 
-<input
-type="text"
-id="buscar"
-placeholder="Buscar por código, nombre o dirección">
+        mapa.removeLayer(m);
 
-<button id="btnActualizar">
+    });
 
-<i class="fa-solid fa-rotate"></i>
+    marcadores = [];
 
-Actualizar
+    const respuesta = await apiObtenerElementos();
 
-</button>
+    console.log("RESPUESTA API:", respuesta);
 
-</div>
+    if (!respuesta.ok) {
 
-<div class="contenedorPrincipal">
+        alert(respuesta.mensaje);
+        return;
 
-<div id="map"></div>
+    }
 
-<div class="panel">
+    respuesta.datos.forEach(function (e) {
 
-<h2>
+        console.log(e);
 
-Nuevo elemento
+        const lat = parseFloat(e.latitud);
+        const lng = parseFloat(e.longitud);
 
-</h2>
+        if (isNaN(lat) || isNaN(lng)) {
 
-<form id="formElemento">
+            console.warn("Sin coordenadas:", e);
+            return;
 
-<label>
+        }
 
-Tipo
+        const marcador = L.circleMarker([lat, lng], {
 
-</label>
+            radius: 8,
+            color: "#ff0000",
+            fillColor: "#ff0000",
+            fillOpacity: 1
 
-<select id="tipo" required>
+        }).addTo(mapa);
 
-</select>
+        marcador.bindPopup(
 
-<label>
+            `
+            <b>${e.nombre || "(Sin nombre)"}</b><br>
+            Código: ${e.codigo}<br>
+            Tipo: ${e.tipo}<br>
+            Estado: ${e.estado}<br>
+            ${e.direccion}
+            `
 
-Código
+        );
 
-</label>
+        marcador.datos = e;
 
-<input
-type="text"
-id="codigo">
+        marcadores.push(marcador);
 
-<label>
+    });
 
-Serie
+    console.log("Marcadores cargados:", marcadores.length);
 
-</label>
+}
 
-<input
-type="text"
-id="serie">
+//======================================================
+// GUARDAR ELEMENTO
+//======================================================
 
-<label>
+async function guardarElemento(evento) {
 
-Nombre
+    evento.preventDefault();
 
-</label>
+    const elemento = {
 
-<input
-type="text"
-id="nombre">
+        tipo: document.getElementById("tipo").value,
+        codigo: document.getElementById("codigo").value,
+        serie: document.getElementById("serie").value,
+        nombre: document.getElementById("nombre").value,
+        descripcion: document.getElementById("descripcion").value,
+        direccion: document.getElementById("direccion").value,
+        estado: document.getElementById("estado").value,
+        caracteristicas: document.getElementById("caracteristicas").value,
+        latitud: document.getElementById("lat").value,
+        longitud: document.getElementById("lng").value
 
-<label>
+    };
 
-Descripción
+    if (elemento.latitud === "" || elemento.longitud === "") {
 
-</label>
+        alert("Debe seleccionar un punto en el mapa.");
+        return;
 
-<textarea id="descripcion"></textarea>
+    }
 
-<label>
+    const respuesta = await apiGuardarElemento(elemento);
 
-Dirección
+    if (!respuesta.ok) {
 
-</label>
+        alert(respuesta.mensaje);
+        return;
 
-<input
-type="text"
-id="direccion">
+    }
 
-<label>
+    alert("Elemento guardado correctamente.");
 
-Estado
+    document.getElementById("formElemento").reset();
 
-</label>
+    document.getElementById("lat").value = "";
+    document.getElementById("lng").value = "";
 
-<select id="estado">
+    if (marcadorNuevo) {
 
-<option>Activo</option>
+        mapa.removeLayer(marcadorNuevo);
+        marcadorNuevo = null;
 
-<option>En reparación</option>
+    }
 
-<option>Fuera de servicio</option>
+    cargarElementos();
 
-<option>Retirado</option>
+}
 
-</select>
+//======================================================
+// FILTRAR
+//======================================================
 
-<label>
+function filtrar() {
 
-Características
+    const texto = document
+        .getElementById("buscar")
+        .value
+        .toLowerCase();
 
-</label>
+    const tipo = document
+        .getElementById("filtroTipo")
+        .value;
 
-<textarea id="caracteristicas"></textarea>
+    marcadores.forEach(function (marcador) {
 
-<input
-type="hidden"
-id="lat">
+        const d = marcador.datos;
 
-<input
-type="hidden"
-id="lng">
+        let visible = true;
 
-<button
-type="submit">
+        if (tipo !== "" && d.tipo !== tipo) {
 
-<i class="fa-solid fa-floppy-disk"></i>
+            visible = false;
 
-Guardar elemento
+        }
 
-</button>
+        if (texto !== "") {
 
-</form>
+            const cadena =
+                (d.codigo || "") +
+                " " +
+                (d.nombre || "") +
+                " " +
+                (d.direccion || "");
 
-</div>
+            if (!cadena.toLowerCase().includes(texto)) {
 
-</div>
+                visible = false;
 
-</div>
+            }
 
-<script src="../../js/api.js"></script>
+        }
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        if (visible) {
 
-<script src="mapa.js"></script>
+            if (!mapa.hasLayer(marcador)) {
 
-</body>
+                marcador.addTo(mapa);
 
-</html>
+            }
+
+        } else {
+
+            if (mapa.hasLayer(marcador)) {
+
+                mapa.removeLayer(marcador);
+
+            }
+
+        }
+
+    });
+
+}
+
+//======================================================
+// SALIR
+//======================================================
+
+function salir() {
+
+    localStorage.removeItem("usuarioActual");
+
+    window.location.href = "../../index.html";
+
+}
