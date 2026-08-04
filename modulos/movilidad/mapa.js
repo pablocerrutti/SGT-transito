@@ -10,6 +10,18 @@ let marcadores = [];
 
 //======================================================
 
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+
+    iconRetinaUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+
+    iconUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+
+    shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png"
+
+});
+
 window.onload = function () {
 
     comprobarSesion();
@@ -85,6 +97,12 @@ function iniciarMapa() {
         }
 
     ).addTo(mapa);
+
+    setTimeout(function () {
+
+    mapa.invalidateSize();
+
+}, 300);
 
     mapa.on("click",function(e){
 
@@ -176,13 +194,7 @@ async function cargarElementos(){
 
         }
 
-        const marcador = L.circleMarker([lat, lng], {
-    radius: 10,
-    color: "#ff0000",
-    fillColor: "#ff0000",
-    fillOpacity: 1,
-    weight: 2
-}).addTo(mapa);
+   const marcador = L.marker([lat,lng]).addTo(mapa);
 
         marcador.bindPopup(
 
