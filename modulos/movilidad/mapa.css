@@ -111,17 +111,25 @@ header {
 }
 
 /*************************************************
- ICONOS DEL MAPA - ESTILO GOOGLE MAPS / WAZE
+ PIN ESTILO GOOGLE MAPS / WAZE
 *************************************************/
 
-.icono-elemento{
-    background:transparent !important;
-    border:none !important;
+.pin-mapa{
+
+    width:58px;
+    height:72px;
+
+    position:relative;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
 }
 
 /* Globo */
 
-.globo-mapa{
+.pin-cuerpo{
 
     width:58px;
     height:58px;
@@ -132,47 +140,39 @@ header {
     align-items:center;
     justify-content:center;
 
-    position:relative;
-
     border:4px solid #ffffff;
 
     box-shadow:
-        0 5px 14px rgba(0,0,0,.45);
+        0 4px 12px rgba(0,0,0,.45);
 
-    transition:.20s;
+    transition:.2s;
+
 }
 
 /* Punta */
 
-.globo-mapa::after{
-
-    content:"";
-
-    position:absolute;
-
-    bottom:-9px;
-
-    left:50%;
+.pin-punta{
 
     width:18px;
     height:18px;
 
-    transform:
-        translateX(-50%)
-        rotate(45deg);
+    margin-top:-7px;
 
-    background:inherit;
+    transform:rotate(45deg);
 
     border-right:4px solid #ffffff;
     border-bottom:4px solid #ffffff;
+
+    box-shadow:
+        2px 3px 6px rgba(0,0,0,.18);
 
 }
 
 /* Hover */
 
-.globo-mapa:hover{
+.pin-mapa:hover{
 
-    transform:scale(1.08);
+    transform:scale(1.10);
 
 }
 
@@ -181,10 +181,7 @@ header {
 .icono-mapa{
 
     font-size:34px;
-
     line-height:1;
-
-    text-align:center;
 
     filter:
         drop-shadow(
@@ -197,60 +194,67 @@ header {
  COLORES
 *************************************************/
 
-.icono-elemento.rojo .globo-mapa{
+.icono-elemento.rojo .pin-cuerpo,
+.icono-elemento.rojo .pin-punta{
     background:#dc2626;
 }
 
-.icono-elemento.azul .globo-mapa{
+.icono-elemento.azul .pin-cuerpo,
+.icono-elemento.azul .pin-punta{
     background:#2563eb;
 }
 
-.icono-elemento.verde .globo-mapa{
+.icono-elemento.verde .pin-cuerpo,
+.icono-elemento.verde .pin-punta{
     background:#16a34a;
 }
 
-.icono-elemento.amarillo .globo-mapa{
+.icono-elemento.amarillo .pin-cuerpo,
+.icono-elemento.amarillo .pin-punta{
     background:#facc15;
 }
 
-.icono-elemento.gris .globo-mapa{
+.icono-elemento.gris .pin-cuerpo,
+.icono-elemento.gris .pin-punta{
     background:#64748b;
 }
 
-.icono-elemento.blanco .globo-mapa{
+.icono-elemento.blanco .pin-cuerpo,
+.icono-elemento.blanco .pin-punta{
     background:#ffffff;
 }
 
-.icono-elemento.violeta .globo-mapa{
+.icono-elemento.violeta .pin-cuerpo,
+.icono-elemento.violeta .pin-punta{
     background:#7c3aed;
 }
 
-.icono-elemento.rosa .globo-mapa{
+.icono-elemento.rosa .pin-cuerpo,
+.icono-elemento.rosa .pin-punta{
     background:#ec4899;
 }
 
-.icono-elemento.celeste .globo-mapa{
+.icono-elemento.celeste .pin-cuerpo,
+.icono-elemento.celeste .pin-punta{
     background:#06b6d4;
 }
 
-.icono-elemento.cian .globo-mapa{
+.icono-elemento.cian .pin-cuerpo,
+.icono-elemento.cian .pin-punta{
     background:#0891b2;
 }
 
-.icono-elemento.pendiente .globo-mapa{
+.icono-elemento.pendiente .pin-cuerpo,
+.icono-elemento.pendiente .pin-punta{
     background:#475569;
 }
 
-/* Iconos oscuros sobre fondos claros */
+/* Color del emoji */
 
-.icono-elemento.amarillo .icono-mapa,
-.icono-elemento.blanco .icono-mapa{
-
+.icono-elemento.blanco .icono-mapa,
+.icono-elemento.amarillo .icono-mapa{
     color:#111;
-
 }
-
-/* Iconos blancos sobre fondos oscuros */
 
 .icono-elemento.rojo .icono-mapa,
 .icono-elemento.azul .icono-mapa,
@@ -261,11 +265,8 @@ header {
 .icono-elemento.celeste .icono-mapa,
 .icono-elemento.cian .icono-mapa,
 .icono-elemento.pendiente .icono-mapa{
-
     color:#fff;
-
 }
-
 /*************************************************
  POPUP
 *************************************************/
