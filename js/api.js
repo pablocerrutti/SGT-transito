@@ -22,3 +22,6 @@ async function apiObtenerInspecciones(idElemento){ return api('obtenerInspeccion
 async function apiGuardarInspeccion(datos){ return api('guardarInspeccion',datos); }
 async function apiSubirFoto(datos){ return api('subirFoto',datos); }
 async function apiSubirArchivo(archivo) { const params=new URLSearchParams({accion:'subirArchivo'}); Object.keys(archivo).forEach(function(k){ if(archivo[k]!==undefined&&archivo[k]!==null)params.set(k,archivo[k]); }); try { const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:params.toString()}); return JSON.parse(await r.text()); } catch(error) { return {ok:false,mensaje:'No fue posible cargar el archivo: '+error.message}; } }
+async function apiObtenerCategorias(){
+  return api('obtenerCategorias');
+}
