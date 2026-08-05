@@ -2,14 +2,15 @@
 <html lang="es">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <title>SGT | Fiscalización</title>
+<title>SGT | Fiscalización</title>
 
-    <link rel="stylesheet" href="../../css/estilos.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="stylesheet" href="inspecciones.css">
+<link rel="stylesheet" href="../../css/estilos.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link rel="stylesheet" href="inspecciones.css">
+
 </head>
 
 <body>
@@ -17,12 +18,21 @@
 <main class="contenido sin-sidebar">
 
 <header>
-    <div>
-        <h1>Fiscalización</h1>
-        <p id="usuarioNombre"></p>
-    </div>
 
-    <button id="btnVolver">Volver</button>
+<div>
+
+<h1>Fiscalización</h1>
+
+<p id="usuarioNombre"></p>
+
+</div>
+
+<button id="btnVolver" type="button">
+
+Volver
+
+</button>
+
 </header>
 
 <section class="formulario">
@@ -31,129 +41,159 @@
 
 <form id="formInspeccion">
 
-    <h3>Inspector actuante</h3>
+<h3>Inspector actuante</h3>
 
-    <label>Número Beta</label>
-    <input
-        type="text"
-        id="beta"
-        readonly>
+<label for="beta">Número Beta</label>
 
-    <label>Inspector</label>
-    <input
-        type="text"
-        id="inspector"
-        readonly>
+<input
+id="beta"
+type="text"
+readonly
+autocomplete="off"
+placeholder="Se completa automáticamente">
 
+<label for="inspector">Inspector</label>
 
-    <h3>Datos del vehículo</h3>
+<input
+id="inspector"
+type="text"
+readonly
+autocomplete="off"
+placeholder="Se completa automáticamente">
 
-    <label>Matrícula</label>
-    <input
-        type="text"
-        id="matricula"
-        maxlength="10"
-        required>
+<hr>
 
-    <label>Tipo de actuación</label>
-    <select id="tipoActuacion" required>
+<h3>Datos del vehículo</h3>
 
-        <option value="">Seleccione...</option>
+<label for="matricula">Matrícula</label>
 
-        <option value="Fiscalización">
-            Fiscalización
-        </option>
+<input
+id="matricula"
+type="text"
+maxlength="10"
+required
+autocomplete="off"
+style="text-transform:uppercase">
 
-        <option value="Multa">
-            Multa
-        </option>
+<label for="tipoActuacion">Tipo de actuación</label>
 
-        <option value="Apercibimiento">
-            Apercibimiento
-        </option>
+<select id="tipoActuacion" required>
 
-        <option value="Control">
-            Control Vehicular
-        </option>
+<option value="">Seleccione...</option>
 
-    </select>
+<option value="Fiscalización">
+Fiscalización
+</option>
 
+<option value="Multa">
+Multa
+</option>
 
-    <div id="datosBoleta" style="display:none;">
+<option value="Apercibimiento">
+Apercibimiento
+</option>
 
-        <label>Número de boleta</label>
+<option value="Control">
+Control Vehicular
+</option>
 
-        <input
-            type="text"
-            id="numeroBoleta">
+</select>
 
-    </div>
+<div id="datosBoleta" style="display:none;">
 
+<label for="numeroBoleta">
+Número de boleta
+</label>
 
-    <h3>Datos del infractor</h3>
+<input
+id="numeroBoleta"
+type="text"
+autocomplete="off">
 
-    <label>Nombre completo</label>
+</div>
 
-    <input
-        type="text"
-        id="nombreInfractor"
-        required>
+<hr>
 
-    <label>Cédula de identidad</label>
+<h3>Datos del infractor</h3>
 
-    <input
-        type="text"
-        id="cedula"
-        required>
+<label for="nombreInfractor">
+Nombre completo
+</label>
 
+<input
+id="nombreInfractor"
+type="text"
+required
+autocomplete="off">
 
-    <h3>Detalle de la actuación</h3>
+<label for="cedula">
+Cédula de identidad
+</label>
 
-    <label>Descripción</label>
+<input
+id="cedula"
+type="text"
+required
+autocomplete="off">
 
-    <textarea
-        id="detalle"
-        maxlength="3000"
-        required></textarea>
+<hr>
 
+<h3>Detalle de la actuación</h3>
 
-    <h3>Evidencia</h3>
+<label for="detalle">
+Descripción
+</label>
 
-    <label>
-        Video BodyCam
-        <small>(máx. 30 MB)</small>
-    </label>
+<textarea
+id="detalle"
+maxlength="3000"
+required></textarea>
 
-    <input
-        id="video"
-        type="file"
-        accept="video/*">
+<hr>
 
+<h3>Evidencia</h3>
 
-    <div id="fotoActuacion">
+<label>
 
-        <label>
-            Fotografía de la actuación / Boleta
-            <small>(Obligatoria para multas y apercibimientos)</small>
-        </label>
+Video BodyCam
 
-        <input
-            id="documento"
-            type="file"
-            accept="image/*">
+<small>(máx. 30 MB)</small>
 
-    </div>
+</label>
 
-    <button type="submit">
-        Guardar actuación
-    </button>
+<input
+id="video"
+type="file"
+accept="video/*">
+
+<div id="fotoActuacion">
+
+<label>
+
+Fotografía de la actuación / Boleta
+
+<small>(Obligatoria para multas y apercibimientos)</small>
+
+</label>
+
+<input
+id="documento"
+type="file"
+accept="image/*">
+
+</div>
+
+<button type="submit">
+
+Guardar actuación
+
+</button>
 
 </form>
 
 <p id="mensaje" aria-live="polite"></p>
 
 </section>
-
 
 <section>
 
@@ -178,15 +218,15 @@ const documento=document.getElementById("documento");
 
 tipo.addEventListener("change",()=>{
 
-    const requiere=
-        tipo.value==="Multa" ||
-        tipo.value==="Apercibimiento";
+const requiere=
+tipo.value==="Multa" ||
+tipo.value==="Apercibimiento";
 
-    boleta.style.display=requiere?"block":"none";
+boleta.style.display=requiere?"block":"none";
 
-    foto.style.display=requiere?"block":"none";
+foto.style.display=requiere?"block":"none";
 
-    documento.required=requiere;
+documento.required=requiere;
 
 });
 
