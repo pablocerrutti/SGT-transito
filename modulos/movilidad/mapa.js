@@ -708,53 +708,17 @@ function esElementoUbicable(e){
 
 }
 
-
-
-
-
 // ICONOS DEL MAPA DESDE CATEGORIAS
 
 function crearIcono(tipo,pendiente){
 
+// ICONOS DEL MAPA DESDE CATEGORIAS
 
-  const categoria =
-    obtenerCategoria(tipo);
-
-
-
-  let simbolo =
-    '📍';
-
-
-
-  if(categoria){
-
-
-    const iconos = {
-
-
-      'traffic-light':'🚦',
-
-      'camera':'📡',
-
-      'person-walking':'🚶',
-
-      'road':'⚠️',
-
-      'signs-post':'🪧',
-
-      'location-dot':'📍',
-
-      'parking':'🅿️',
-
-      'bi-taxi':'🚕',
-
-      'disc. parking':'♿',function crearIcono(tipo, pendiente){
+function crearIcono(tipo, pendiente){
 
     const categoria = obtenerCategoria(tipo);
 
     const iconos = {
-
         "traffic-light":"🚦",
         "camera":"📷",
         "person-walking":"🚶",
@@ -765,118 +729,6 @@ function crearIcono(tipo,pendiente){
         "bi-taxi":"🚕",
         "disc. parking":"♿",
         "Otros":"📌"
-
-    };
-
-    const simbolo = categoria
-        ? (iconos[categoria.icono] || "📍")
-        : "📍";
-
-    const color = categoria
-        ? categoria.color
-        : "gris";
-
-    return L.divIcon({
-
-        className:
-            "icono-elemento " +
-            color +
-            (pendiente ? " pendiente" : ""),
-
-        html:
-        `
-        <div class="pin-mapa">
-
-            <div class="pin-cuerpo">
-
-                <span class="icono-mapa">
-                    ${simbolo}
-                </span>
-
-            </div>
-
-            <div class="pin-punta"></div>
-
-        </div>
-        `,
-
-        iconSize:[54,70],
-        iconAnchor:[27,68],
-        popupAnchor:[0,-62]
-
-    });
-
-}
-
-  return L.divIcon({
-
-
-    className:
-      'icono-elemento '+
-      (
-        categoria
-        ? categoria.color
-        : 'gris'
-      )
-      +
-      (
-        pendiente
-        ? ' pendiente'
-        : ''
-      ),
-
-
-
-
-    html:
-      '<span class="icono-mapa">'+
-      simbolo+
-      '</span>',
-
-
-
-
-    iconSize:[
-      42,
-      42
-    ],
-
-
-
-    iconAnchor:[
-      21,
-      42
-    ],
-
-
-
-    popupAnchor:[
-      0,
-      -42
-    ]
-
-
-  });
-
-
-}
-function crearIcono(tipo, pendiente){
-
-    const categoria = obtenerCategoria(tipo);
-
-    const iconos = {
-
-        "traffic-light":"🚦",
-        "camera":"📡",
-        "person-walking":"🚶",
-        "road":"⚠️",
-        "signs-post":"🪧",
-        "location-dot":"📍",
-        "parking":"🅿️",
-        "bi-taxi":"🚕",
-        "disc. parking":"♿",
-        "Otros":"📌"
-
     };
 
     const emoji = categoria
@@ -894,35 +746,22 @@ function crearIcono(tipo, pendiente){
             color +
             (pendiente ? " pendiente" : ""),
 
-        html:
-            `
+        html: `
             <div class="pin-mapa">
-
-                <div class="pin-circulo">
-
-                    <span class="icono-mapa">
-                        ${emoji}
-                    </span>
-
+                <div class="pin-cuerpo">
+                    <span class="icono-mapa">${emoji}</span>
                 </div>
-
                 <div class="pin-punta"></div>
-
             </div>
-            `,
+        `,
 
-        iconSize:[52,72],
-
-        iconAnchor:[26,68],
-
-        popupAnchor:[0,-58]
+        iconSize:[58,74],
+        iconAnchor:[29,72],
+        popupAnchor:[0,-60]
 
     });
 
 }
-
-
-
 function campoPopup(etiqueta,valor){
 
   if(
