@@ -1,1 +1,197 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SGT | Inspecciones</title><link rel="stylesheet" href="../../css/estilos.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"><link rel="stylesheet" href="inspecciones.css"></head><body><main class="contenido sin-sidebar"><header><div><h1>Inspecciones</h1><p id="usuarioNombre"></p></div><button id="btnVolver">Volver</button></header><section class="formulario"><h2>Registrar incidencia</h2><form id="formInspeccion"><label>Elemento</label><select id="elemento" required></select><label>Descripción de la incidencia</label><textarea id="incidencia" required maxlength="3000"></textarea><label>Video de la inspección <small>(máx. 30 MB)</small></label><input id="video" type="file" accept="video/*"><label>Foto de actuación o boleta de multa <small>(máx. 10 MB)</small></label><input id="documento" type="file" accept="image/*,application/pdf"><button type="submit">Guardar inspección</button></form><p id="mensaje" aria-live="polite"></p></section><section><h2>Inspecciones registradas</h2><div id="lista"></div></section></main><script src="../../js/api.js"></script><script src="inspecciones.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title>SGT | Fiscalización</title>
+
+    <link rel="stylesheet" href="../../css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="inspecciones.css">
+</head>
+
+<body>
+
+<main class="contenido sin-sidebar">
+
+<header>
+    <div>
+        <h1>Fiscalización</h1>
+        <p id="usuarioNombre"></p>
+    </div>
+
+    <button id="btnVolver">Volver</button>
+</header>
+
+<section class="formulario">
+
+<h2>Registrar actuación</h2>
+
+<form id="formInspeccion">
+
+    <h3>Inspector actuante</h3>
+
+    <label>Número Beta</label>
+    <input
+        type="text"
+        id="beta"
+        readonly>
+
+    <label>Inspector</label>
+    <input
+        type="text"
+        id="inspector"
+        readonly>
+
+
+    <h3>Datos del vehículo</h3>
+
+    <label>Matrícula</label>
+    <input
+        type="text"
+        id="matricula"
+        maxlength="10"
+        required>
+
+    <label>Tipo de actuación</label>
+    <select id="tipoActuacion" required>
+
+        <option value="">Seleccione...</option>
+
+        <option value="Fiscalización">
+            Fiscalización
+        </option>
+
+        <option value="Multa">
+            Multa
+        </option>
+
+        <option value="Apercibimiento">
+            Apercibimiento
+        </option>
+
+        <option value="Control">
+            Control Vehicular
+        </option>
+
+    </select>
+
+
+    <div id="datosBoleta" style="display:none;">
+
+        <label>Número de boleta</label>
+
+        <input
+            type="text"
+            id="numeroBoleta">
+
+    </div>
+
+
+    <h3>Datos del infractor</h3>
+
+    <label>Nombre completo</label>
+
+    <input
+        type="text"
+        id="nombreInfractor"
+        required>
+
+    <label>Cédula de identidad</label>
+
+    <input
+        type="text"
+        id="cedula"
+        required>
+
+
+    <h3>Detalle de la actuación</h3>
+
+    <label>Descripción</label>
+
+    <textarea
+        id="detalle"
+        maxlength="3000"
+        required></textarea>
+
+
+    <h3>Evidencia</h3>
+
+    <label>
+        Video BodyCam
+        <small>(máx. 30 MB)</small>
+    </label>
+
+    <input
+        id="video"
+        type="file"
+        accept="video/*">
+
+
+    <div id="fotoActuacion">
+
+        <label>
+            Fotografía de la actuación / Boleta
+            <small>(Obligatoria para multas y apercibimientos)</small>
+        </label>
+
+        <input
+            id="documento"
+            type="file"
+            accept="image/*">
+
+    </div>
+
+    <button type="submit">
+        Guardar actuación
+    </button>
+
+</form>
+
+<p id="mensaje" aria-live="polite"></p>
+
+</section>
+
+
+<section>
+
+<h2>Actuaciones registradas</h2>
+
+<div id="lista"></div>
+
+</section>
+
+</main>
+
+<script src="../../js/api.js"></script>
+
+<script src="inspecciones.js"></script>
+
+<script>
+
+const tipo=document.getElementById("tipoActuacion");
+const boleta=document.getElementById("datosBoleta");
+const foto=document.getElementById("fotoActuacion");
+const documento=document.getElementById("documento");
+
+tipo.addEventListener("change",()=>{
+
+    const requiere=
+        tipo.value==="Multa" ||
+        tipo.value==="Apercibimiento";
+
+    boleta.style.display=requiere?"block":"none";
+
+    foto.style.display=requiere?"block":"none";
+
+    documento.required=requiere;
+
+});
+
+</script>
+
+</body>
+
+</html>
