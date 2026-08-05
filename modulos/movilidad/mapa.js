@@ -1281,24 +1281,9 @@ function mostrarMensaje(texto,tipo){
 
 
 }
-
-
-
-
-
-
-
 function salir(){
 
+    localStorage.removeItem('usuarioActual');
 
-  localStorage.removeItem(
-    'usuarioActual'
-  );
-
-
-
-  window.location.href =
-    '../../index.html';
-
-
+    window.location.href='../../index.html';
 }
