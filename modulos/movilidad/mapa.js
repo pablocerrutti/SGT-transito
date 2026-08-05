@@ -36,7 +36,7 @@ function enlazarEventos() {
   document.getElementById('filtroTipo').addEventListener('change', renderizarMarcadores);
   document.getElementById('buscar').addEventListener('input', renderizarMarcadores);
   document.getElementById('btnDashboard').addEventListener('click', function() { window.location.href = '../../pages/dashboard.html'; });
-  document.getElementById('btnInspecciones').addEventListener('click', function() { window.location.href = '../movilidad/inspecciones.html'; });
+  document.getElementById('btnInspecciones').addEventListener('click', function() { window.location.href = '../movilidad/inspeccion.html'; });
   document.getElementById('btnSalir').addEventListener('click', salir);
 }
 function cargarTipos() {
