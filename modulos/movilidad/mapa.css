@@ -110,39 +110,70 @@ header {
   background:#d9e8f5;
 }
 
-
 /*************************************************
  ICONOS DEL MAPA
 *************************************************/
 
-.icono-elemento {
+.icono-elemento{
+    background:transparent;
+    border:none;
+}
 
-  background:transparent;
-  border:none;
+/* Globo del marcador */
+
+.globo-mapa{
+
+    width:54px;
+    height:54px;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:4px solid #ffffff;
+
+    box-shadow:
+        0 4px 12px rgba(0,0,0,.45);
+
+    position:relative;
 
 }
 
+/* Punta del marcador */
 
-.icono-elemento i {
+.globo-mapa::after{
 
-  width:38px;
-  height:38px;
+    content:"";
 
-  display:flex;
+    position:absolute;
 
-  align-items:center;
-  justify-content:center;
+    bottom:-10px;
 
-  border-radius:50%;
+    left:50%;
 
-  border:3px solid white;
+    transform:translateX(-50%) rotate(45deg);
 
-  box-shadow:
-  0 2px 8px rgba(0,0,0,.45);
+    width:16px;
+    height:16px;
 
-  font-size:20px;
+    background:inherit;
 
-  color:white;
+    border-right:4px solid #ffffff;
+    border-bottom:4px solid #ffffff;
+
+}
+
+/* Icono */
+
+.icono-mapa{
+
+    font-size:30px;
+    line-height:1;
+
+    filter:
+        drop-shadow(0 1px 2px rgba(0,0,0,.35));
 
 }
 
@@ -152,65 +183,49 @@ header {
  COLORES DESDE CATEGORIAS
 *************************************************/
 
-
-.icono-elemento.rojo i {
-  background:#dc2626;
+.icono-elemento.rojo .globo-mapa{
+    background:#dc2626;
 }
 
-
-.icono-elemento.azul i {
-  background:#2563eb;
+.icono-elemento.azul .globo-mapa{
+    background:#2563eb;
 }
 
-
-.icono-elemento.verde i {
-  background:#16a34a;
+.icono-elemento.verde .globo-mapa{
+    background:#16a34a;
 }
 
-
-.icono-elemento.amarillo i {
-  background:#eab308;
-  color:#111;
+.icono-elemento.amarillo .globo-mapa{
+    background:#facc15;
 }
 
-
-.icono-elemento.gris i {
-  background:#64748b;
+.icono-elemento.gris .globo-mapa{
+    background:#64748b;
 }
 
-
-.icono-elemento.blanco i {
-  background:#ffffff;
-  color:#111;
+.icono-elemento.blanco .globo-mapa{
+    background:#ffffff;
 }
 
-
-.icono-elemento.violeta i {
-  background:#7c3aed;
+.icono-elemento.violeta .globo-mapa{
+    background:#7c3aed;
 }
 
-
-.icono-elemento.rosa i {
-  background:#ec4899;
+.icono-elemento.rosa .globo-mapa{
+    background:#ec4899;
 }
 
-
-.icono-elemento.celeste i {
-  background:#06b6d4;
+.icono-elemento.celeste .globo-mapa{
+    background:#06b6d4;
 }
 
-
-.icono-elemento.cian i {
-  background:#0891b2;
+.icono-elemento.cian .globo-mapa{
+    background:#0891b2;
 }
 
-
-.icono-elemento.pendiente i {
-  background:#475569;
+.icono-elemento.pendiente .globo-mapa{
+    background:#475569;
 }
-
-
-
 /*************************************************
  POPUP
 *************************************************/
