@@ -707,18 +707,12 @@ function esElementoUbicable(e){
 
 
 }
-
-// ICONOS DEL MAPA DESDE CATEGORIAS
-
-function crearIcono(tipo,pendiente){
-
-// ICONOS DEL MAPA DESDE CATEGORIAS
-
 function crearIcono(tipo, pendiente){
 
     const categoria = obtenerCategoria(tipo);
 
     const iconos = {
+
         "traffic-light":"🚦",
         "camera":"📷",
         "person-walking":"🚶",
@@ -729,6 +723,7 @@ function crearIcono(tipo, pendiente){
         "bi-taxi":"🚕",
         "disc. parking":"♿",
         "Otros":"📌"
+
     };
 
     const emoji = categoria
@@ -762,6 +757,7 @@ function crearIcono(tipo, pendiente){
     });
 
 }
+
 function campoPopup(etiqueta,valor){
 
   if(
