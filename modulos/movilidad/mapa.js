@@ -1,142 +1,1044 @@
-﻿// SGT - MOVILIDAD URBANA / MAPA
-const TIPOS = ['Semáforo','Radar','Cruce Peatonal','Lomo de Burro','Cartel','Señal Vertical','Señal Horizontal','Cámara','Otro'];
-const CONFIG_ICONOS = {
-  'Semáforo': {simbolo:'🚦',clase:'semaforo'}, 'Radar': {simbolo:'📡',clase:'radar'},
-  'Cruce Peatonal': {simbolo:'🚸',clase:'cruce'}, 'Lomo de Burro': {simbolo:'⚠️',clase:'lomo'},
-  'Cartel': {simbolo:'🪧',clase:'cartel'}, 'Señal Vertical': {simbolo:'🚧',clase:'vertical'},
-  'Señal Horizontal': {simbolo:'↔',clase:'horizontal'}, 'Cámara': {simbolo:'📷',clase:'camara'},
-  'Otro': {simbolo:'•',clase:'otro'}
-};
-let mapa, marcadorNuevo = null, capaMarcadores, elementos = [];
+// SGT - MOVILIDAD URBANA / MAPA
+
+let mapa;
+let marcadorNuevo = null;
+let capaMarcadores;
+let elementos = [];
+let categorias = [];
 
 document.addEventListener('DOMContentLoaded', iniciarPagina);
-function iniciarPagina() {
+
+async function iniciarPagina() {
+
   if (!comprobarSesion()) return;
-  iniciarMapa(); cargarTipos(); enlazarEventos(); cargarElementos();
+
+  iniciarMapa();
+
+  await cargarCategorias();
+
+  enlazarEventos();
+
+  cargarElementos();
+
 }
+
+
 function comprobarSesion() {
+
   let usuario;
-  try { usuario = JSON.parse(localStorage.getItem('usuarioActual')); } catch (_) { usuario = null; }
-  if (!usuario) { window.location.href = '../../index.html'; return false; }
+
+  try {
+    usuario = JSON.parse(localStorage.getItem('usuarioActual'));
+  } catch (_) {
+    usuario = null;
+  }
+
+  if (!usuario) {
+
+    window.location.href = '../../index.html';
+    return false;
+
+  }
+
+
   const rol = normalizar(usuario.rol);
-  if (!['super admin','supervisor','movilidad'].includes(rol)) { window.location.href = '../../pages/dashboard.html'; return false; }
-  document.getElementById('usuarioActual').textContent = usuario.nombre || usuario.usuario || '';
+
+
+  if (!['super admin','supervisor','movilidad'].includes(rol)) {
+
+    window.location.href = '../../pages/dashboard.html';
+    return false;
+
+  }
+
+
+  document.getElementById('usuarioActual').textContent =
+    usuario.nombre || usuario.usuario || '';
+
+
   return true;
+
 }
+
+
+
 function iniciarMapa() {
-  mapa = L.map('map').setView([-34.0997, -56.2140], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap', maxZoom:19}).addTo(mapa);
+
+  mapa = L.map('map').setView(
+    [-34.0997,-56.2140],
+    15
+  );
+
+
+  L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+      attribution:'© OpenStreetMap',
+      maxZoom:19
+    }
+  ).addTo(mapa);
+
+
   capaMarcadores = L.layerGroup().addTo(mapa);
-  mapa.on('click', seleccionarUbicacion);
-  setTimeout(function() { mapa.invalidateSize(); }, 150);
+
+
+  mapa.on(
+    'click',
+    seleccionarUbicacion
+  );
+
+
+  setTimeout(
+    function(){
+      mapa.invalidateSize();
+    },
+    150
+  );
+
 }
-function enlazarEventos() {
-  document.getElementById('formElemento').addEventListener('submit', guardarElemento);
-  document.getElementById('btnActualizar').addEventListener('click', cargarElementos);
-  document.getElementById('filtroTipo').addEventListener('change', renderizarMarcadores);
-  document.getElementById('buscar').addEventListener('input', renderizarMarcadores);
-  document.getElementById('btnDashboard').addEventListener('click', function() { window.location.href = '../../pages/dashboard.html'; });
-  document.getElementById('btnInspecciones').addEventListener('click', function() { window.location.href = '../movilidad/inspeccion.html'; });
-  document.getElementById('btnSalir').addEventListener('click', salir);
-}
-function cargarTipos() {
-  const tipo = document.getElementById('tipo'); const filtro = document.getElementById('filtroTipo');
-  tipo.replaceChildren(); filtro.replaceChildren(new Option('Todos los elementos', ''));
-  TIPOS.forEach(function(nombre) { tipo.add(new Option(nombre, nombre)); filtro.add(new Option(nombre, nombre)); });
-}
-function seleccionarUbicacion(evento) {
-  const {lat, lng} = evento.latlng;
-  document.getElementById('lat').value = lat.toFixed(7); document.getElementById('lng').value = lng.toFixed(7);
-  if (marcadorNuevo) mapa.removeLayer(marcadorNuevo);
-  marcadorNuevo = L.marker([lat, lng], {icon:crearIcono('Otro', true), draggable:true}).addTo(mapa).bindTooltip('Ubicación del nuevo elemento').openTooltip();
-  marcadorNuevo.on('dragend', function(e) { const p = e.target.getLatLng(); document.getElementById('lat').value = p.lat.toFixed(7); document.getElementById('lng').value = p.lng.toFixed(7); });
-  mostrarMensaje('Ubicación seleccionada. Complete el formulario y guarde.', 'exito');
-}
-async function cargarElementos() {
-  const boton = document.getElementById('btnActualizar'); boton.disabled = true;
-  mostrarMensaje('Actualizando elementos…');
-  const respuesta = await apiObtenerElementos(); boton.disabled = false;
-  if (!respuesta || !respuesta.ok) { mostrarMensaje((respuesta && respuesta.mensaje) || 'No se pudieron cargar los elementos.', 'error'); return; }
-  elementos = Array.isArray(respuesta.datos) ? respuesta.datos : [];
-  renderizarMarcadores(); mostrarMensaje('');
-}
-function renderizarMarcadores() {
-  if (!capaMarcadores) return;
-  const tipo = document.getElementById('filtroTipo').value;
-  const texto = normalizar(document.getElementById('buscar').value);
-  // No se dibujan filas de plantilla, encabezados repetidos ni elementos
-  // incompletos. Un elemento válido siempre tiene ID, código y coordenadas.
-  const elementosValidos = elementos.filter(esElementoUbicable);
-  const visibles = elementosValidos.filter(function(elemento) {
-    if (tipo && elemento.tipo !== tipo) return false;
-    return !texto || normalizar([elemento.codigo, elemento.nombre, elemento.direccion, elemento.tipo, elemento.estado].join(' ')).includes(texto);
+
+
+
+async function cargarCategorias(){
+
+  const respuesta = await apiObtenerCategorias();
+
+
+  if(!respuesta || !respuesta.ok){
+
+    mostrarMensaje(
+      'No se pudieron cargar las categorías',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+  categorias = (respuesta.datos || [])
+    .filter(c =>
+      String(c.activo).toUpperCase()==='SI'
+    );
+
+
+  const tipo =
+    document.getElementById('tipo');
+
+
+  const filtro =
+    document.getElementById('filtroTipo');
+
+
+  tipo.replaceChildren();
+
+  filtro.replaceChildren(
+    new Option(
+      'Todos los elementos',
+      ''
+    )
+  );
+
+
+  categorias.forEach(function(c){
+
+    tipo.add(
+      new Option(
+        c.nombre,
+        c.nombre
+      )
+    );
+
+
+    filtro.add(
+      new Option(
+        c.nombre,
+        c.nombre
+      )
+    );
+
   });
-  capaMarcadores.clearLayers();
-  visibles.forEach(function(elemento) {
-    const lat = coordenada(elemento.latitud), lng = coordenada(elemento.longitud);
-    const marcador = L.marker([lat, lng], {icon:crearIcono(elemento.tipo)});
-    marcador.bindPopup(crearPopup(elemento), {maxWidth:360});
-    marcador.on('popupopen', function() { enlazarAccionesPopup(marcador, elemento); });
-    marcador.addTo(capaMarcadores);
-  });
-  document.getElementById('contadorResultados').textContent = visibles.length + ' de ' + elementosValidos.length + ' elemento' + (elementosValidos.length === 1 ? '' : 's');
+
 }
-function esElementoUbicable(elemento) {
-  const id = String(elemento.id || '').trim();
-  const codigo = String(elemento.codigo || '').trim();
-  const lat = coordenada(elemento.latitud), lng = coordenada(elemento.longitud);
-  const inactivo = ['no', 'false', '0', 'retirado'].includes(normalizar(elemento.activo));
-  return Boolean(id && codigo && !inactivo && lat !== null && lng !== null && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180);
+
+
+
+function obtenerCategoria(nombre){
+
+  return categorias.find(function(c){
+
+    return normalizar(c.nombre) === normalizar(nombre);
+
+  }) || null;
+
 }
-function crearIcono(tipo, pendiente) {
-  const config = CONFIG_ICONOS[tipo] || CONFIG_ICONOS.Otro;
-  return L.divIcon({className:'icono-elemento ' + config.clase + (pendiente ? ' pendiente' : ''), html:'<span aria-hidden="true">' + config.simbolo + '</span>', iconSize:[34,34], iconAnchor:[17,34], popupAnchor:[0,-34]});
+
+
+
+function enlazarEventos(){
+
+  document
+  .getElementById('formElemento')
+  .addEventListener(
+    'submit',
+    guardarElemento
+  );
+
+
+  document
+  .getElementById('btnActualizar')
+  .addEventListener(
+    'click',
+    cargarElementos
+  );
+
+
+  document
+  .getElementById('filtroTipo')
+  .addEventListener(
+    'change',
+    renderizarMarcadores
+  );
+
+
+  document
+  .getElementById('buscar')
+  .addEventListener(
+    'input',
+    renderizarMarcadores
+  );
+
+
+  document
+  .getElementById('btnDashboard')
+  .addEventListener(
+    'click',
+    function(){
+      window.location.href='../../pages/dashboard.html';
+    }
+  );
+
+
+  document
+  .getElementById('btnInspecciones')
+  .addEventListener(
+    'click',
+    function(){
+      window.location.href='../movilidad/inspeccion.html';
+    }
+  );
+
+
+  document
+  .getElementById('btnSalir')
+  .addEventListener(
+    'click',
+    salir
+  );
+
 }
-function crearPopup(e) {
-  return '<article class="popup-elemento"><h3>' + escapar(e.codigo || 'Sin código') + '</h3>' +
-    campoPopup('Tipo', e.tipo) + campoPopup('Serie', e.serie) + campoPopup('Nombre', e.nombre) +
-    campoPopup('Estado', e.estado, 'estado-' + normalizar(e.estado).replace(/\s+/g,'-')) +
-    campoPopup('Dirección', e.direccion) + campoPopup('Descripción', e.descripcion) +
-    campoPopup('Características', e.caracteristicas) + campoPopup('Fecha de alta', e.fechaAlta) +
-    campoPopup('Usuario de alta', e.usuarioAlta) + campoPopup('Última modificación', e.fechaModificacion) +
-    '<button type="button" class="btn-eliminar-elemento" data-accion="eliminar-elemento"><i class="fa-solid fa-trash"></i> Eliminar elemento</button></article>';
+
+
+
+function seleccionarUbicacion(evento){
+
+  const lat = evento.latlng.lat;
+  const lng = evento.latlng.lng;
+
+
+  document.getElementById('lat').value =
+    lat.toFixed(7);
+
+
+  document.getElementById('lng').value =
+    lng.toFixed(7);
+
+
+  if(marcadorNuevo)
+    mapa.removeLayer(marcadorNuevo);
+
+
+  marcadorNuevo =
+    L.marker(
+      [lat,lng],
+      {
+        icon:crearIcono(
+          'Otro',
+          true
+        ),
+        draggable:true
+      }
+    )
+    .addTo(mapa)
+    .bindTooltip(
+      'Ubicación del nuevo elemento'
+    )
+    .openTooltip();
+
+
+
+  marcadorNuevo.on(
+    'dragend',
+    function(e){
+
+      const p=e.target.getLatLng();
+
+      document.getElementById('lat').value =
+        p.lat.toFixed(7);
+
+      document.getElementById('lng').value =
+        p.lng.toFixed(7);
+
+    }
+  );
+
+
+  mostrarMensaje(
+    'Ubicación seleccionada',
+    'exito'
+  );
+
 }
-function campoPopup(etiqueta, valor, clase) { if (valor === undefined || valor === null || String(valor).trim() === '') return ''; return '<p' + (clase ? ' class="' + clase + '"' : '') + '><strong>' + escapar(etiqueta) + ':</strong> ' + escapar(valor) + '</p>'; }
-function enlazarAccionesPopup(marcador, elemento) {
-  const contenido = marcador.getPopup().getElement();
-  const boton = contenido && contenido.querySelector('[data-accion="eliminar-elemento"]');
-  if (boton) boton.addEventListener('click', function() { eliminarElementoDesdeMapa(elemento); }, {once:true});
-}
-async function eliminarElementoDesdeMapa(elemento) {
-  const codigo = elemento.codigo || 'este elemento';
-  if (!window.confirm('¿Eliminar ' + codigo + '? Esta acción no se puede deshacer.')) return;
-  const respuesta = await apiEliminarElemento(elemento.id);
-  if (!respuesta || !respuesta.ok) { mostrarMensaje((respuesta && respuesta.mensaje) || 'No fue posible eliminar el elemento.', 'error'); return; }
-  mapa.closePopup();
-  elementos = elementos.filter(function(item) { return String(item.id) !== String(elemento.id); });
+async function cargarElementos(){
+
+  const boton =
+    document.getElementById('btnActualizar');
+
+  if(boton)
+    boton.disabled=true;
+
+
+  const respuesta =
+    await apiObtenerElementos();
+
+
+  if(boton)
+    boton.disabled=false;
+
+
+  if(!respuesta || !respuesta.ok){
+
+    mostrarMensaje(
+      (respuesta && respuesta.mensaje) ||
+      'No se pudieron cargar los elementos.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+  elementos =
+    Array.isArray(respuesta.datos)
+    ? respuesta.datos
+    : [];
+
+
   renderizarMarcadores();
-  mostrarMensaje(respuesta.mensaje || 'Elemento eliminado.', 'exito');
+
 }
-async function guardarElemento(evento) {
+
+
+
+function renderizarMarcadores(){
+
+  if(!capaMarcadores)
+    return;
+
+
+  const tipo =
+    document.getElementById('filtroTipo').value;
+
+
+  const texto =
+    normalizar(
+      document.getElementById('buscar').value
+    );
+
+
+  const validos =
+    elementos.filter(
+      esElementoUbicable
+    );
+
+
+  const visibles =
+    validos.filter(function(e){
+
+
+      if(tipo &&
+        normalizar(e.tipo)!==normalizar(tipo))
+        return false;
+
+
+      return !texto ||
+        normalizar(
+          [
+            e.codigo,
+            e.nombre,
+            e.tipo,
+            e.direccion,
+            e.estado
+          ].join(' ')
+        ).includes(texto);
+
+
+    });
+
+
+
+  capaMarcadores.clearLayers();
+
+
+
+  visibles.forEach(function(e){
+
+
+    const lat =
+      coordenada(e.latitud);
+
+    const lng =
+      coordenada(e.longitud);
+
+
+
+    const marcador =
+      L.marker(
+        [lat,lng],
+        {
+          icon:crearIcono(e.tipo)
+        }
+      );
+
+
+    marcador.bindPopup(
+      crearPopup(e),
+      {
+        maxWidth:380
+      }
+    );
+
+
+    marcador.on(
+      'popupopen',
+      function(){
+
+        enlazarAccionesPopup(
+          marcador,
+          e
+        );
+
+      }
+    );
+
+
+    marcador.addTo(
+      capaMarcadores
+    );
+
+
+  });
+
+
+
+  const contador =
+    document.getElementById(
+      'contadorResultados'
+    );
+
+
+  if(contador){
+
+    contador.textContent =
+      visibles.length+
+      ' de '+
+      validos.length+
+      ' elementos';
+
+  }
+
+
+}
+
+
+
+function esElementoUbicable(e){
+
+  const id =
+    String(e.id || '').trim();
+
+
+  const codigo =
+    String(e.codigo || '').trim();
+
+
+  const lat =
+    coordenada(e.latitud);
+
+
+  const lng =
+    coordenada(e.longitud);
+
+
+
+  const inactivo =
+    [
+      'no',
+      'false',
+      '0'
+    ]
+    .includes(
+      normalizar(e.activo)
+    );
+
+
+  return Boolean(
+    id &&
+    codigo &&
+    !inactivo &&
+    lat!==null &&
+    lng!==null
+  );
+
+}
+
+
+
+function crearIcono(tipo,pendiente){
+
+
+  const categoria =
+    obtenerCategoria(tipo);
+
+
+
+  let icono =
+    categoria ?
+    categoria.icono :
+    'location-dot';
+
+
+
+  let color =
+    categoria ?
+    categoria.color :
+    'gris';
+
+
+
+  return L.divIcon({
+
+    className:
+      'icono-elemento '+
+      color+
+      (pendiente ? ' pendiente':''),
+    
+
+    html:
+      '<i class="fa-solid fa-'+
+      icono+
+      '"></i>',
+
+
+    iconSize:[
+      38,
+      38
+    ],
+
+
+    iconAnchor:[
+      19,
+      38
+    ],
+
+
+    popupAnchor:[
+      0,
+      -38
+    ]
+
+  });
+
+
+}
+
+
+
+function crearPopup(e){
+
+  return `
+  <article class="popup-elemento">
+
+    <h3>
+      ${escapar(e.codigo || 'Sin código')}
+    </h3>
+
+    ${campoPopup('Tipo',e.tipo)}
+    ${campoPopup('Nombre',e.nombre)}
+    ${campoPopup('Serie',e.serie)}
+
+    ${campoPopup(
+      'Estado',
+      e.estado
+    )}
+
+    ${campoPopup(
+      'Dirección',
+      e.direccion
+    )}
+
+    ${campoPopup(
+      'Descripción',
+      e.descripcion
+    )}
+
+    ${campoPopup(
+      'Características',
+      e.caracteristicas
+    )}
+
+    ${campoPopup(
+      'Fecha alta',
+      e.fechaAlta
+    )}
+
+    ${campoPopup(
+      'Usuario',
+      e.usuarioAlta
+    )}
+
+
+    <button
+      type="button"
+      class="btn-eliminar-elemento"
+      data-accion="eliminar-elemento">
+
+      <i class="fa-solid fa-trash"></i>
+      Eliminar elemento
+
+    </button>
+
+
+  </article>
+  `;
+
+}
+
+
+
+function campoPopup(etiqueta,valor){
+
+  if(
+    valor===undefined ||
+    valor===null ||
+    String(valor).trim()===''
+  )
+    return '';
+
+
+  return `
+
+  <p>
+    <span class="etiqueta-popup">
+      ${escapar(etiqueta)}:
+    </span>
+
+    ${escapar(valor)}
+
+  </p>
+
+  `;
+
+}
+
+
+
+function enlazarAccionesPopup(marcador,elemento){
+
+  const contenido =
+    marcador.getPopup().getElement();
+
+
+  const boton =
+    contenido &&
+    contenido.querySelector(
+      '[data-accion="eliminar-elemento"]'
+    );
+
+
+  if(boton){
+
+    boton.addEventListener(
+      'click',
+      function(){
+
+        eliminarElementoDesdeMapa(
+          elemento
+        );
+
+      },
+      {
+        once:true
+      }
+    );
+
+  }
+
+}
+async function eliminarElementoDesdeMapa(elemento){
+
+  const codigo =
+    elemento.codigo || 'este elemento';
+
+
+  if(!confirm(
+    '¿Eliminar '+
+    codigo+
+    '?'
+  ))
+    return;
+
+
+
+  const respuesta =
+    await apiEliminarElemento(
+      elemento.id
+    );
+
+
+  if(!respuesta || !respuesta.ok){
+
+    mostrarMensaje(
+      respuesta.mensaje ||
+      'No fue posible eliminar.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+
+  mapa.closePopup();
+
+
+  elementos =
+    elementos.filter(function(e){
+
+      return String(e.id)!==
+             String(elemento.id);
+
+    });
+
+
+  renderizarMarcadores();
+
+
+  mostrarMensaje(
+    'Elemento eliminado.',
+    'exito'
+  );
+
+}
+
+
+
+async function guardarElemento(evento){
+
   evento.preventDefault();
-  const latitud = document.getElementById('lat').value, longitud = document.getElementById('lng').value;
-  if (!latitud || !longitud) { mostrarMensaje('Seleccione la ubicación del elemento en el mapa.', 'error'); return; }
-  const usuario = (() => { try { const u = JSON.parse(localStorage.getItem('usuarioActual')); return u && (u.nombre || u.usuario); } catch (_) { return ''; } })();
-  const elemento = {tipo:valor('tipo'),nombre:valor('nombre'),descripcion:valor('descripcion'),latitud:latitud,longitud:longitud,direccion:valor('direccion'),estado:valor('estado'),caracteristicas:valor('caracteristicas'),usuario:usuario};
-  const boton = document.querySelector('#formElemento button[type="submit"]'); boton.disabled = true;
-  const respuesta = await apiGuardarElemento(elemento); boton.disabled = false;
-  if (!respuesta || !respuesta.ok) { mostrarMensaje((respuesta && respuesta.mensaje) || 'No fue posible guardar el elemento.', 'error'); return; }
-  document.getElementById('codigo').value = respuesta.codigo || ''; document.getElementById('serie').value = respuesta.serie || '';
-  document.getElementById('formElemento').reset();
-  // Se vuelven a mostrar los datos generados después del reset del formulario.
-  document.getElementById('codigo').value = respuesta.codigo || ''; document.getElementById('serie').value = respuesta.serie || '';
-  if (marcadorNuevo) { mapa.removeLayer(marcadorNuevo); marcadorNuevo = null; }
-  mostrarMensaje('Elemento guardado: ' + (respuesta.codigo || '') + ' (serie ' + (respuesta.serie || '') + ').', 'exito');
+
+
+  const latitud =
+    document.getElementById('lat').value;
+
+
+  const longitud =
+    document.getElementById('lng').value;
+
+
+
+  if(!latitud || !longitud){
+
+    mostrarMensaje(
+      'Seleccione una ubicación en el mapa.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+
+  const tipo =
+    valor('tipo');
+
+
+
+  const categoria =
+    obtenerCategoria(tipo);
+
+
+
+  const usuario =
+    (()=>{
+
+      try{
+
+        const u =
+          JSON.parse(
+            localStorage.getItem(
+              'usuarioActual'
+            )
+          );
+
+        return u.nombre || u.usuario;
+
+      }
+      catch(_){
+
+        return '';
+
+      }
+
+    })();
+
+
+
+  const elemento = {
+
+
+    tipo:tipo,
+
+
+    icono:
+      categoria ?
+      categoria.icono :
+      '',
+
+
+    color:
+      categoria ?
+      categoria.color :
+      '',
+
+
+
+    nombre:
+      valor('nombre'),
+
+
+
+    descripcion:
+      valor('descripcion'),
+
+
+
+    latitud:
+      latitud,
+
+
+
+    longitud:
+      longitud,
+
+
+
+    direccion:
+      valor('direccion'),
+
+
+
+    estado:
+      valor('estado'),
+
+
+
+    caracteristicas:
+      valor('caracteristicas'),
+
+
+
+    usuario:
+      usuario
+
+
+  };
+
+
+
+  const boton =
+    document.querySelector(
+      '#formElemento button[type="submit"]'
+    );
+
+
+  if(boton)
+    boton.disabled=true;
+
+
+
+  const respuesta =
+    await apiGuardarElemento(
+      elemento
+    );
+
+
+
+  if(boton)
+    boton.disabled=false;
+
+
+
+  if(!respuesta || !respuesta.ok){
+
+    mostrarMensaje(
+      respuesta.mensaje ||
+      'No se pudo guardar.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+
+  document.getElementById('codigo').value =
+    respuesta.codigo || '';
+
+  document.getElementById('serie').value =
+    respuesta.serie || '';
+
+
+
+  document
+    .getElementById('formElemento')
+    .reset();
+
+
+
+  if(marcadorNuevo){
+
+    mapa.removeLayer(
+      marcadorNuevo
+    );
+
+    marcadorNuevo=null;
+
+  }
+
+
+
+  mostrarMensaje(
+    'Elemento guardado: '+
+    respuesta.codigo,
+    'exito'
+  );
+
+
+
   await cargarElementos();
+
 }
-function valor(id) { return document.getElementById(id).value.trim(); }
-function coordenada(valor) { const numero = Number(String(valor == null ? '' : valor).replace(',', '.')); return Number.isFinite(numero) ? numero : null; }
-function normalizar(valor) { return String(valor || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
-function escapar(valor) { return String(valor == null ? '' : valor).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-function mostrarMensaje(texto, tipo) { const mensaje = document.getElementById('mensajeMapa'); mensaje.textContent = texto; mensaje.className = 'mensaje' + (tipo ? ' ' + tipo : ''); }
-function salir() { localStorage.removeItem('usuarioActual'); window.location.href = '../../index.html'; }
+
+
+
+
+function valor(id){
+
+  const e =
+    document.getElementById(id);
+
+  return e ?
+    e.value.trim() :
+    '';
+
+}
+
+
+
+
+function coordenada(valor){
+
+  const numero =
+    Number(
+      String(valor || '')
+      .replace(',','.')
+    );
+
+
+  return Number.isFinite(numero)
+    ? numero
+    : null;
+
+}
+
+
+
+
+function normalizar(valor){
+
+  return String(valor || '')
+    .normalize('NFD')
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    )
+    .toLowerCase()
+    .trim();
+
+}
+
+
+
+
+function escapar(valor){
+
+  return String(valor || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+
+}
+
+function mostrarMensaje(texto,tipo){
+
+  const mensaje =
+    document.getElementById(
+      'mensajeMapa'
+    );
+
+
+  if(!mensaje)
+    return;
+
+
+  mensaje.textContent =
+    texto || '';
+
+
+  mensaje.className =
+    'mensaje '+
+    (tipo || '');
+
+}
+
+
+
+
+function salir(){
+
+  localStorage.removeItem(
+    'usuarioActual'
+  );
+
+
+  window.location.href =
+    '../../index.html';
+
+}
