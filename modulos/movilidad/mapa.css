@@ -111,20 +111,20 @@ header {
 }
 
 /*************************************************
- ICONOS DEL MAPA
+ ICONOS DEL MAPA - ESTILO GOOGLE MAPS / WAZE
 *************************************************/
 
 .icono-elemento{
-    background:transparent;
-    border:none;
+    background:transparent !important;
+    border:none !important;
 }
 
-/* Globo del marcador */
+/* Globo */
 
 .globo-mapa{
 
-    width:54px;
-    height:54px;
+    width:58px;
+    height:58px;
 
     border-radius:50%;
 
@@ -132,16 +132,17 @@ header {
     align-items:center;
     justify-content:center;
 
+    position:relative;
+
     border:4px solid #ffffff;
 
     box-shadow:
-        0 4px 12px rgba(0,0,0,.45);
+        0 5px 14px rgba(0,0,0,.45);
 
-    position:relative;
-
+    transition:.20s;
 }
 
-/* Punta del marcador */
+/* Punta */
 
 .globo-mapa::after{
 
@@ -149,14 +150,16 @@ header {
 
     position:absolute;
 
-    bottom:-10px;
+    bottom:-9px;
 
     left:50%;
 
-    transform:translateX(-50%) rotate(45deg);
+    width:18px;
+    height:18px;
 
-    width:16px;
-    height:16px;
+    transform:
+        translateX(-50%)
+        rotate(45deg);
 
     background:inherit;
 
@@ -165,22 +168,33 @@ header {
 
 }
 
-/* Icono */
+/* Hover */
 
-.icono-mapa{
+.globo-mapa:hover{
 
-    font-size:30px;
-    line-height:1;
-
-    filter:
-        drop-shadow(0 1px 2px rgba(0,0,0,.35));
+    transform:scale(1.08);
 
 }
 
+/* Emoji */
 
+.icono-mapa{
+
+    font-size:34px;
+
+    line-height:1;
+
+    text-align:center;
+
+    filter:
+        drop-shadow(
+            0 2px 2px rgba(0,0,0,.35)
+        );
+
+}
 
 /*************************************************
- COLORES DESDE CATEGORIAS
+ COLORES
 *************************************************/
 
 .icono-elemento.rojo .globo-mapa{
@@ -226,6 +240,32 @@ header {
 .icono-elemento.pendiente .globo-mapa{
     background:#475569;
 }
+
+/* Iconos oscuros sobre fondos claros */
+
+.icono-elemento.amarillo .icono-mapa,
+.icono-elemento.blanco .icono-mapa{
+
+    color:#111;
+
+}
+
+/* Iconos blancos sobre fondos oscuros */
+
+.icono-elemento.rojo .icono-mapa,
+.icono-elemento.azul .icono-mapa,
+.icono-elemento.verde .icono-mapa,
+.icono-elemento.gris .icono-mapa,
+.icono-elemento.violeta .icono-mapa,
+.icono-elemento.rosa .icono-mapa,
+.icono-elemento.celeste .icono-mapa,
+.icono-elemento.cian .icono-mapa,
+.icono-elemento.pendiente .icono-mapa{
+
+    color:#fff;
+
+}
+
 /*************************************************
  POPUP
 *************************************************/
