@@ -749,25 +749,64 @@ function crearIcono(tipo,pendiente){
 
       'bi-taxi':'🚕',
 
-      'disc. parking':'♿',
+      'disc. parking':'♿',function crearIcono(tipo, pendiente){
 
-      'Otros':'•'
+    const categoria = obtenerCategoria(tipo);
 
+    const iconos = {
+
+        "traffic-light":"🚦",
+        "camera":"📷",
+        "person-walking":"🚶",
+        "road":"⚠️",
+        "signs-post":"🪧",
+        "location-dot":"📍",
+        "parking":"🅿️",
+        "bi-taxi":"🚕",
+        "disc. parking":"♿",
+        "Otros":"📌"
 
     };
 
+    const simbolo = categoria
+        ? (iconos[categoria.icono] || "📍")
+        : "📍";
 
+    const color = categoria
+        ? categoria.color
+        : "gris";
 
-    simbolo =
-      iconos[categoria.icono] ||
-      '📍';
+    return L.divIcon({
 
+        className:
+            "icono-elemento " +
+            color +
+            (pendiente ? " pendiente" : ""),
 
-  }
+        html:
+        `
+        <div class="pin-mapa">
 
+            <div class="pin-cuerpo">
 
+                <span class="icono-mapa">
+                    ${simbolo}
+                </span>
 
+            </div>
 
+            <div class="pin-punta"></div>
+
+        </div>
+        `,
+
+        iconSize:[54,70],
+        iconAnchor:[27,68],
+        popupAnchor:[0,-62]
+
+    });
+
+}
 
   return L.divIcon({
 
