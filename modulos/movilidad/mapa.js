@@ -821,42 +821,66 @@ function crearIcono(tipo,pendiente){
 
 
 }
-function crearPopup(e){
+function crearIcono(tipo, pendiente){
 
-  return `
-  <article class="popup-elemento">
+    const categoria = obtenerCategoria(tipo);
 
-    <h3>
-      ${escapar(e.codigo || 'Sin código')}
-    </h3>
+    const iconos = {
 
-    ${campoPopup('Tipo',e.tipo)}
-    ${campoPopup('Nombre',e.nombre)}
-    ${campoPopup('Serie',e.serie)}
-    ${campoPopup('Estado',e.estado)}
-    ${campoPopup('Dirección',e.direccion)}
-    ${campoPopup('Descripción',e.descripcion)}
-    ${campoPopup('Características',e.caracteristicas)}
-    ${campoPopup('Fecha alta',e.fechaAlta)}
-    ${campoPopup('Usuario',e.usuarioAlta)}
+        "traffic-light":"🚦",
+        "camera":"📡",
+        "person-walking":"🚶",
+        "road":"⚠️",
+        "signs-post":"🪧",
+        "location-dot":"📍",
+        "parking":"🅿️",
+        "bi-taxi":"🚕",
+        "disc. parking":"♿",
+        "Otros":"📌"
 
+    };
 
-    <button
-      type="button"
-      class="btn-eliminar-elemento"
-      data-accion="eliminar-elemento">
+    const emoji = categoria
+        ? (iconos[categoria.icono] || "📍")
+        : "📍";
 
-      <i class="fa-solid fa-trash"></i>
-      Eliminar elemento
+    const color = categoria
+        ? categoria.color
+        : "gris";
 
-    </button>
+    return L.divIcon({
 
+        className:
+            "icono-elemento " +
+            color +
+            (pendiente ? " pendiente" : ""),
 
-  </article>
-  `;
+        html:
+            `
+            <div class="pin-mapa">
+
+                <div class="pin-circulo">
+
+                    <span class="icono-mapa">
+                        ${emoji}
+                    </span>
+
+                </div>
+
+                <div class="pin-punta"></div>
+
+            </div>
+            `,
+
+        iconSize:[52,72],
+
+        iconAnchor:[26,68],
+
+        popupAnchor:[0,-58]
+
+    });
 
 }
-
 
 
 
