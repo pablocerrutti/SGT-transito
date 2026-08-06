@@ -314,47 +314,51 @@ function renderizarMarcadores(){
         );
 
         return cadena.includes(texto);
-console.log("Elementos:", elementos);
+
+        console.log("Elementos:", elementos);
 console.log("Categorías:", categorias);
-    });
 
-    visibles.forEach(function(e){
-console.log({
-    tipo: e.tipo,
-    categoria: categorias.find(c =>
-        normalizar(c.nombre) === normalizar(e.tipo)
-    )
+const visibles = elementos.filter(function(e){
+
+    if(!e.latitud || !e.longitud)
+        return false;
+
+    if(
+        filtroTipo &&
+        normalizar(e.tipo) !== normalizar(filtroTipo)
+    ){
+        return false;
+    }
+
+    const cadena = normalizar(
+        [
+            e.codigo,
+            e.nombre,
+            e.tipo,
+            e.direccion,
+            e.estado
+        ].join(" ")
+    );
+
+    return cadena.includes(texto);
+
 });
-        const lat = parseFloat(
-            String(e.latitud).replace(",",".")
-        );
 
-        const lng = parseFloat(
-            String(e.longitud).replace(",",".")
-        );
+visibles.forEach(function(e){
 
-        if(isNaN(lat) || isNaN(lng))
-            return;
-
-        L.marker(
-
-            [lat,lng],
-
-            {
-                icon:crearIcono(e.tipo)
-            }
-
+    console.log({
+        tipo: e.tipo,
+        categoria: categorias.find(c =>
+            normalizar(c.nombre) === normalizar(e.tipo)
         )
-
-        .bindPopup(
-
-            crearPopup(e)
-
-        )
-
-        .addTo(capaMarcadores);
-
     });
+
+    const lat = parseFloat(
+        String(e.latitud).replace(",",".")
+    );
+
+    ...
+});
 
     document.getElementById(
         "contadorResultados"
