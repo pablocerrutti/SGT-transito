@@ -1,18 +1,19 @@
-Variables globales
+//==================================================
+// SGT - MOVILIDAD URBANA
+// mapa.js
+//==================================================
 
-DOMContentLoaded
+let mapa = null;
+let capaMarcadores = null;
+let marcadorNuevo = null;
 
-Control de sesión
+let categorias = [];
+let elementos = [];
 
-Inicializar mapa
-
-Eventos principales
-cargarCategorias()
-
-obtenerCategoria()
-
-normalizar()
-
+document.addEventListener(
+    "DOMContentLoaded",
+    iniciarPagina
+);
 configuración de filtros
 cargarElementos()
 
