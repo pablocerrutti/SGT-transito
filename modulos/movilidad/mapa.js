@@ -314,11 +314,17 @@ function renderizarMarcadores(){
         );
 
         return cadena.includes(texto);
-
+console.log("Elementos:", elementos);
+console.log("Categorías:", categorias);
     });
 
     visibles.forEach(function(e){
-
+console.log({
+    tipo: e.tipo,
+    categoria: categorias.find(c =>
+        normalizar(c.nombre) === normalizar(e.tipo)
+    )
+});
         const lat = parseFloat(
             String(e.latitud).replace(",",".")
         );
