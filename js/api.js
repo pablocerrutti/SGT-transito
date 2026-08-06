@@ -1,4 +1,4 @@
-﻿// SGT - Cliente de la API de Google Apps Script
+// SGT - Cliente de la API de Google Apps Script
 const API_URL = 'https://script.google.com/macros/s/AKfycbzYU8xREGRuJ3-8ZrK-dbYUZNzVBhPiIceVWU3OftmxvO6fNCBFcFwrnurmWofjkFxR/exec';
 async function api(accion, datos = {}) {
   const params = new URLSearchParams({accion});
@@ -22,6 +22,5 @@ async function apiObtenerInspecciones(idElemento){ return api('obtenerInspeccion
 async function apiGuardarInspeccion(datos){ return api('guardarInspeccion',datos); }
 async function apiSubirFoto(datos){ return api('subirFoto',datos); }
 async function apiSubirArchivo(archivo) { const params=new URLSearchParams({accion:'subirArchivo'}); Object.keys(archivo).forEach(function(k){ if(archivo[k]!==undefined&&archivo[k]!==null)params.set(k,archivo[k]); }); try { const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:params.toString()}); return JSON.parse(await r.text()); } catch(error) { return {ok:false,mensaje:'No fue posible cargar el archivo: '+error.message}; } }
-async function apiObtenerCategorias(){
-  return api('obtenerCategorias');
+async function apiObtenerCategorias(){return api('obtenerCategorias');
 }
