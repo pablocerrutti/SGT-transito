@@ -1,0 +1,209 @@
+Layout
+
+Mapa
+
+Panel
+
+Barra superior
+
+Responsive
+Marcadores estilo Google Maps
+
+Animaciones
+
+Sombras
+
+Hover
+
+Colores
+Popup
+
+Botones
+
+Etiquetas
+
+Responsive final
+
+.pin-cuerpo{
+
+width:60px;
+height:60px;
+
+border-radius:50%;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:34px;
+
+background:#fff;
+
+border:4px solid #ffffff;
+
+box-shadow:0 8px 18px rgba(0,0,0,.45);
+
+}
+
+.pin-punta{
+
+width:22px;
+height:22px;
+
+background:inherit;
+
+transform:rotate(45deg);
+
+margin:auto;
+
+margin-top:-8px;
+
+}
+
+.popup-card{
+
+width:280px;
+
+font-family:Arial;
+
+}
+
+.popup-card h2{
+
+margin:0;
+
+font-size:20px;
+
+color:#0d47a1;
+
+}
+
+.popup-linea{
+
+margin-top:10px;
+
+font-size:15px;
+
+line-height:1.5;
+
+}
+
+.popup-botones{
+
+display:flex;
+
+gap:10px;
+
+margin-top:15px;
+
+}
+
+.btn-inspeccion{
+
+flex:1;
+
+background:#1976d2;
+
+color:white;
+
+border:none;
+
+padding:10px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+.btn-eliminar{
+
+flex:1;
+
+background:#d32f2f;
+
+color:white;
+
+border:none;
+
+padding:10px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+.estado-popup{
+
+font-weight:bold;
+
+color:#2e7d32;
+
+font-size:16px;
+
+}
+/*====================================================
+COLORES DE LOS MARCADORES
+====================================================*/
+
+.icono-elemento.rojo .pin-cuerpo{
+    background:#e53935;
+    color:#fff;
+}
+
+.icono-elemento.verde .pin-cuerpo{
+    background:#43a047;
+    color:#fff;
+}
+
+.icono-elemento.azul .pin-cuerpo{
+    background:#1e88e5;
+    color:#fff;
+}
+
+.icono-elemento.amarillo .pin-cuerpo{
+    background:#fbc02d;
+    color:#222;
+}
+
+.icono-elemento.naranja .pin-cuerpo{
+    background:#fb8c00;
+    color:#fff;
+}
+
+.icono-elemento.violeta .pin-cuerpo{
+    background:#8e24aa;
+    color:#fff;
+}
+
+.icono-elemento.celeste .pin-cuerpo{
+    background:#00acc1;
+    color:#fff;
+}
+
+.icono-elemento.gris .pin-cuerpo{
+    background:#757575;
+    color:#fff;
+}
+.icono-elemento.blanco .pin-cuerpo{
+    background:#ffffff;
+    color:#333;
+    border:5px solid #999;
+}
+
+.icono-elemento.rosa .pin-cuerpo{
+    background:#ec407a;
+    color:#fff;
+}
+
+.icono-elemento.cian .pin-cuerpo{
+    background:#00bcd4;
+    color:#fff;
+}
