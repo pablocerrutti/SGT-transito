@@ -1,15 +1,14 @@
-```javascript
 // =====================================================
 // SGT
-// Dashboard Principal
+// DASHBOARD PRINCIPAL
 // =====================================================
 
 let usuario = null;
 
 
-//======================================================
+// =====================================================
 // OBTENER USUARIO
-//======================================================
+// =====================================================
 
 try {
 
@@ -17,46 +16,50 @@ try {
         localStorage.getItem("usuarioActual")
     );
 
-} catch (_) {
+} catch (e) {
 
     usuario = null;
 
 }
 
 
-//======================================================
+// =====================================================
 // VALIDAR SESIÓN
-//======================================================
+// =====================================================
 
 if (!usuario) {
 
-    window.location.href =
-        "../index.html";
+    window.location.href = "../index.html";
 
 } else {
 
+    iniciarDashboard();
 
-    //==================================================
+}
+
+
+// =====================================================
+// INICIAR DASHBOARD
+// =====================================================
+
+function iniciarDashboard() {
+
+    // -------------------------------------------------
     // MOSTRAR USUARIO
-    //==================================================
+    // -------------------------------------------------
 
     const usuarioNombre =
-        document.getElementById(
-            "usuarioNombre"
-        );
-
+        document.getElementById("usuarioNombre");
 
     const bienvenida =
-        document.getElementById(
-            "bienvenida"
-        );
+        document.getElementById("bienvenida");
 
 
     if (usuarioNombre) {
 
         usuarioNombre.innerHTML =
             "<strong>" +
-            (usuario.nombre || usuario.usuario || "") +
+            esc(usuario.nombre || usuario.usuario || "") +
             "</strong>";
 
     }
@@ -71,61 +74,36 @@ if (!usuario) {
     }
 
 
-    //==================================================
+    // -------------------------------------------------
     // REFERENCIAS
-    //==================================================
+    // -------------------------------------------------
 
     const cardUsuarios =
-        document.getElementById(
-            "cardUsuarios"
-        );
-
+        document.getElementById("cardUsuarios");
 
     const cardMovilidad =
-        document.getElementById(
-            "cardMovilidad"
-        );
-
+        document.getElementById("cardMovilidad");
 
     const cardFiscalizacion =
-        document.getElementById(
-            "cardFiscalizacion"
-        );
+        document.getElementById("cardFiscalizacion");
 
 
     const menuUsuarios =
-        document.getElementById(
-            "menuUsuarios"
-        );
-
+        document.getElementById("menuUsuarios");
 
     const menuMovilidad =
-        document.getElementById(
-            "menuMovilidad"
-        );
-
+        document.getElementById("menuMovilidad");
 
     const menuFiscalizacion =
-        document.getElementById(
-            "menuFiscalizacion"
-        );
+        document.getElementById("menuFiscalizacion");
 
 
-    //==================================================
+    // -------------------------------------------------
     // NORMALIZAR ROL
-    //==================================================
+    // -------------------------------------------------
 
     const rol =
-        String(
-            usuario.rol || ""
-        )
-        .normalize("NFD")
-        .replace(
-            /[\u0300-\u036f]/g,
-            ""
-        )
-        .toLowerCase()
-        .trim();
+        normalizarRol(usuario.rol);
 
 
     console.log(
@@ -133,125 +111,109 @@ if (!usuario) {
         usuario
     );
 
-
     console.log(
         "Rol:",
         rol
     );
 
 
-    //==================================================
-    // PERMISOS
-    //==================================================
+    // -------------------------------------------------
+    // OCULTAR TODO LO QUE NO CORRESPONDA
+    // -------------------------------------------------
 
-    switch (rol) {
+    ocultar(cardUsuarios);
+    ocultar(cardMovilidad);
+    ocultar(cardFiscalizacion);
 
-
-        //==============================================
-        // SUPER ADMIN
-        //==============================================
-
-        case "super admin":
-
-            // Todo visible
-
-            break;
+    ocultar(menuUsuarios);
+    ocultar(menuMovilidad);
+    ocultar(menuFiscalizacion);
 
 
-        //==============================================
-        // SUPERVISOR
-        //==============================================
+    // =================================================
+    // SUPER ADMIN
+    // =================================================
 
-        case "supervisor":
+    if (rol === "super admin") {
 
-            ocultar(
-                cardUsuarios
-            );
+        mostrar(cardUsuarios);
+        mostrar(cardMovilidad);
+        mostrar(cardFiscalizacion);
 
-            ocultar(
-                menuUsuarios
-            );
-
-            break;
-
-
-        //==============================================
-        // MOVILIDAD
-        //==============================================
-
-        case "movilidad":
-
-            ocultar(
-                cardUsuarios
-            );
-
-            ocultar(
-                menuUsuarios
-            );
-
-            // Movilidad mantiene:
-            // - Movilidad Urbana
-            // - Fiscalización
-
-            break;
-
-
-        //==============================================
-        // FISCALIZACION
-        //==============================================
-
-        case "fiscalizacion":
-
-            ocultar(
-                cardUsuarios
-            );
-
-            ocultar(
-                cardMovilidad
-            );
-
-            ocultar(
-                menuUsuarios
-            );
-
-            ocultar(
-                menuMovilidad
-            );
-
-            break;
-
-
-        //==============================================
-        // ROL NO RECONOCIDO
-        //==============================================
-
-        default:
-
-            console.error(
-                "Rol no reconocido:",
-                usuario.rol
-            );
-
-            cerrarSesion();
-
-            return;
+        mostrar(menuUsuarios);
+        mostrar(menuMovilidad);
+        mostrar(menuFiscalizacion);
 
     }
 
 
-    //==================================================
-    // EVENTOS - USUARIOS
-    //==================================================
+    // =================================================
+    // SUPERVISOR
+    // =================================================
+
+    else if (rol === "supervisor") {
+
+        mostrar(cardMovilidad);
+        mostrar(cardFiscalizacion);
+
+        mostrar(menuMovilidad);
+        mostrar(menuFiscalizacion);
+
+    }
+
+
+    // =================================================
+    // MOVILIDAD
+    // =================================================
+
+    else if (rol === "movilidad") {
+
+        mostrar(cardMovilidad);
+
+        mostrar(menuMovilidad);
+
+    }
+
+
+    // =================================================
+    // FISCALIZACION
+    // =================================================
+
+    else if (rol === "fiscalizacion") {
+
+        mostrar(cardFiscalizacion);
+
+        mostrar(menuFiscalizacion);
+
+    }
+
+
+    // =================================================
+    // ROL DESCONOCIDO
+    // =================================================
+
+    else {
+
+        console.error(
+            "Rol no reconocido:",
+            usuario.rol
+        );
+
+        cerrarSesion();
+
+        return;
+
+    }
+
+
+    // =================================================
+    // EVENTOS
+    // =================================================
 
     if (cardUsuarios) {
 
         cardUsuarios.onclick =
-            function () {
-
-                window.location.href =
-                    "usuarios.html";
-
-            };
+            abrirUsuarios;
 
     }
 
@@ -259,29 +221,15 @@ if (!usuario) {
     if (menuUsuarios) {
 
         menuUsuarios.onclick =
-            function () {
-
-                window.location.href =
-                    "usuarios.html";
-
-            };
+            abrirUsuarios;
 
     }
 
 
-    //==================================================
-    // EVENTOS - MOVILIDAD
-    //==================================================
-
     if (cardMovilidad) {
 
         cardMovilidad.onclick =
-            function () {
-
-                window.location.href =
-                    "../modulos/movilidad/mapa.html";
-
-            };
+            abrirMovilidad;
 
     }
 
@@ -289,29 +237,15 @@ if (!usuario) {
     if (menuMovilidad) {
 
         menuMovilidad.onclick =
-            function () {
-
-                window.location.href =
-                    "../modulos/movilidad/mapa.html";
-
-            };
+            abrirMovilidad;
 
     }
 
 
-    //==================================================
-    // EVENTOS - FISCALIZACION
-    //==================================================
-
     if (cardFiscalizacion) {
 
         cardFiscalizacion.onclick =
-            function () {
-
-                window.location.href =
-                    "../modulos/fiscalizacion/inspecciones.html";
-
-            };
+            abrirFiscalizacion;
 
     }
 
@@ -319,12 +253,7 @@ if (!usuario) {
     if (menuFiscalizacion) {
 
         menuFiscalizacion.onclick =
-            function () {
-
-                window.location.href =
-                    "../modulos/fiscalizacion/inspecciones.html";
-
-            };
+            abrirFiscalizacion;
 
     }
 
@@ -332,25 +261,125 @@ if (!usuario) {
 }
 
 
-//======================================================
-// OCULTAR ELEMENTO
-//======================================================
+// =====================================================
+// NAVEGACIÓN
+// =====================================================
 
-function ocultar(objeto) {
+function abrirUsuarios() {
 
-    if (objeto) {
+    window.location.href =
+        "usuarios.html";
 
-        objeto.style.display =
-            "none";
+}
+
+
+function abrirMovilidad() {
+
+    window.location.href =
+        "../modulos/movilidad/mapa.html";
+
+}
+
+
+function abrirFiscalizacion() {
+
+    window.location.href =
+        "../modulos/fiscalizacion/inspecciones.html";
+
+}
+
+
+// =====================================================
+// MOSTRAR
+// =====================================================
+
+function mostrar(elemento) {
+
+    if (elemento) {
+
+        elemento.style.display = "";
 
     }
 
 }
 
 
-//======================================================
+// =====================================================
+// OCULTAR
+// =====================================================
+
+function ocultar(elemento) {
+
+    if (elemento) {
+
+        elemento.style.display = "none";
+
+    }
+
+}
+
+
+// =====================================================
+// NORMALIZAR ROL
+// =====================================================
+
+function normalizarRol(valor) {
+
+    return String(valor || "")
+
+        .normalize("NFD")
+
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+
+        .toLowerCase()
+
+        .trim();
+
+}
+
+
+// =====================================================
+// ESCAPAR HTML
+// =====================================================
+
+function esc(valor) {
+
+    return String(valor || "")
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// =====================================================
 // CERRAR SESIÓN
-//======================================================
+// =====================================================
 
 function cerrarSesion() {
 
@@ -358,8 +387,30 @@ function cerrarSesion() {
         "usuarioActual"
     );
 
+
     window.location.href =
         "../index.html";
 
 }
-```
+
+
+// =====================================================
+// DEBUG
+// =====================================================
+
+window.debugDashboard =
+    function() {
+
+        console.log(
+            "Usuario:",
+            usuario
+        );
+
+        console.log(
+            "Rol:",
+            usuario
+                ? usuario.rol
+                : "sin usuario"
+        );
+
+    };
