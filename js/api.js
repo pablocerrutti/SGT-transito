@@ -33,3 +33,35 @@ async function apiObtenerLocalidades(){
     return api('obtenerLocalidades');
 
 }
+
+//==================================================
+// ZONAS DE ESTACIONAMIENTO
+//==================================================
+
+async function apiObtenerZonasEstacionamiento(){
+
+    return api('obtenerZonasEstacionamiento');
+
+}
+
+
+async function apiGuardarZonaEstacionamiento(zona){
+
+    return api(
+        'guardarZonaEstacionamiento',
+        zona
+    );
+
+}
+
+
+async function apiEliminarZonaEstacionamiento(id){
+
+    return api(
+        'eliminarZonaEstacionamiento',
+        {
+            id:id
+        }
+    );
+
+}
