@@ -129,28 +129,12 @@ switch (
     // MOVILIDAD
     //==================================================
 
-    case "movilidad":
+   case "movilidad":
 
-        /*
-         * Movilidad puede acceder a:
-         *
-         * - Movilidad Urbana
-         * - Fiscalización
-         *
-         * No puede acceder a:
-         *
-         * - Usuarios
-         */
+    ocultar(cardUsuarios);
+    ocultar(menuUsuarios);
 
-        ocultar(
-            cardUsuarios
-        );
-
-        ocultar(
-            menuUsuarios
-        );
-
-        break;
+    break;
 
 
     //==================================================
