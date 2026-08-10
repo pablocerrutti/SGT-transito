@@ -947,3 +947,45 @@
     opacity:1;
 
 }
+/*====================================================
+  PANEL NUEVO ELEMENTO
+====================================================*/
+
+.panel h2,
+.panel label{
+
+    color:#222 !important;
+
+    font-weight:700 !important;
+
+    opacity:1 !important;
+
+}
+
+
+.panel input,
+.panel select,
+.panel textarea{
+
+    color:#222 !important;
+
+    background:#ffffff !important;
+
+}
+
+
+.panel select{
+
+    color:#222 !important;
+
+}
+
+
+.panel input::placeholder,
+.panel textarea::placeholder{
+
+    color:#666 !important;
+
+    opacity:1 !important;
+
+}
