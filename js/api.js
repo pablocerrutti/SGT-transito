@@ -399,3 +399,40 @@ async function apiEliminarZonaEstacionamiento(
     );
 
 }
+//==================================================
+// ZONAS DE ESTACIONAMIENTO TARIFADO
+//==================================================
+
+async function apiObtenerZonasEstacionamiento(){
+
+    return api(
+        'obtenerZonasEstacionamiento'
+    );
+
+}
+
+
+async function apiGuardarZonaEstacionamiento(
+    datos
+){
+
+    return api(
+        'guardarZonaEstacionamiento',
+        datos
+    );
+
+}
+
+
+async function apiEliminarZonaEstacionamiento(
+    id
+){
+
+    return api(
+        'eliminarZonaEstacionamiento',
+        {
+            id:id
+        }
+    );
+
+}
