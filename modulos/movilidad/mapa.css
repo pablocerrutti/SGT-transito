@@ -906,3 +906,44 @@
     }
 
 }
+/*====================================================
+  TEXTO DE LOS CAMPOS DEL PANEL
+====================================================*/
+
+.panel label{
+
+    color:#222 !important;
+
+    font-weight:700;
+
+    opacity:1;
+
+}
+
+
+.panel h2{
+
+    color:#0d47a1 !important;
+
+}
+
+
+.panel input,
+.panel select,
+.panel textarea{
+
+    color:#222 !important;
+
+    background:#fff !important;
+
+}
+
+
+.panel input::placeholder,
+.panel textarea::placeholder{
+
+    color:#777 !important;
+
+    opacity:1;
+
+}
