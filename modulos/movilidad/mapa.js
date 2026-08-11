@@ -1221,7 +1221,7 @@ function renderizarMarcadores(){
 
 
 //==================================================
-// CENTRAR LOCALIDAD
+// CENTRAR LOCALIDAD SELECCIONADA
 //==================================================
 
 function centrarLocalidadSeleccionada(){
@@ -1249,17 +1249,21 @@ function centrarLocalidadSeleccionada(){
     }
 
 
-    const localidad =
+    const localidadSeleccionada =
         normalizar(
             filtroLocalidad.value
         );
 
 
+    //==================================================
+    // BUSCAR ELEMENTOS DE ESA LOCALIDAD
+    //==================================================
+
     const elementosLocalidad =
         elementos.filter(
             function(e){
 
-                const nombre =
+                const localidad =
                     e.localidadNombre ||
                     e.localidad ||
                     e.nombreLocalidad ||
@@ -1267,84 +1271,105 @@ function centrarLocalidadSeleccionada(){
 
 
                 return (
-                    normalizar(nombre)
+                    normalizar(localidad)
                     ===
-                    localidad
+                    localidadSeleccionada
                 );
 
             }
         );
 
 
-    if(
-        !elementosLocalidad.length
-    ){
+    //==================================================
+    // OBTENER COORDENADAS
+    //==================================================
 
-        return;
-
-    }
+    const puntos = [];
 
 
-    const puntos =
-        elementosLocalidad
-        .map(
-            function(e){
+    elementosLocalidad.forEach(
+        function(e){
 
-                const lat =
-                    coordenada(
-                        e.latitud
-                    );
+            const lat =
+                coordenada(
+                    e.latitud
+                );
 
 
-                const lng =
-                    coordenada(
-                        e.longitud
-                    );
+            const lng =
+                coordenada(
+                    e.longitud
+                );
 
 
-                if(
-                    lat === null ||
-                    lng === null
-                ){
+            if(
+                lat !== null &&
+                lng !== null
+            ){
 
-                    return null;
-
-                }
-
-
-                return [
+                puntos.push([
                     lat,
                     lng
-                ];
+                ]);
 
             }
-        )
-        .filter(Boolean);
-
-
-    if(!puntos.length){
-
-        return;
-
-    }
-
-
-    mapa.fitBounds(
-        L.latLngBounds(puntos),
-        {
-
-            padding:[
-                50,
-                50
-            ],
-
-            maxZoom:16
 
         }
     );
 
-}
 
+    //==================================================
+    // SI HAY ELEMENTOS
+    //==================================================
+
+    if(puntos.length){
+
+        const limites =
+            L.latLngBounds(
+                puntos
+            );
+
+
+        mapa.fitBounds(
+            limites,
+            {
+
+                padding:[
+                    80,
+                    80
+                ],
+
+                maxZoom:15,
+
+                animate:true,
+
+                duration:0.8
+
+            }
+        );
+
+
+        return;
+
+    }
+
+
+    //==================================================
+    // SI NO HAY ELEMENTOS
+    //==================================================
+
+    console.warn(
+        "No hay elementos para la localidad:",
+        filtroLocalidad.value
+    );
+
+
+    mostrarMensaje(
+        "No hay elementos registrados en esta localidad.",
+        "error"
+    );
+
+}
 
 //==================================================
 // ICONO POI
