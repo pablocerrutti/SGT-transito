@@ -1404,6 +1404,11 @@ function crearIcono(tipo){
 
         "disc. parking":
             "fa-solid fa-wheelchair",
+        "bus":
+            "fa-solid fa-bus",
+
+        "speed":
+            "fa-solid fa-gauge-high",
 
         "Otros":
             "fa-solid fa-location-dot"
