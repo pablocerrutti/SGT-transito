@@ -6,20 +6,23 @@
 let mapa = null;
 
 let capaMarcadores = null;
-let capaZonasEstacionamiento = null;
 
 let marcadorNuevo = null;
 
 let categorias = [];
+
 let elementos = [];
+
 let localidades = [];
 
+
+//==================================================
+// ZONAS DE ESTACIONAMIENTO
+//==================================================
+
+let capaZonasEstacionamiento = null;
+
 let zonasEstacionamiento = [];
-
-
-//==================================================
-// VARIABLES - DIBUJO DE ZONAS
-//==================================================
 
 let dibujandoZona = false;
 
@@ -89,7 +92,11 @@ function comprobarSesion(){
                 )
             );
 
-    }catch(e){}
+    }catch(e){
+
+        usuario = null;
+
+    }
 
 
     if(!usuario){
@@ -135,7 +142,9 @@ function iniciarMapa(){
 
 
     const elementoMapa =
-        document.getElementById("map");
+        document.getElementById(
+            "map"
+        );
 
 
     if(!elementoMapa){
@@ -148,10 +157,6 @@ function iniciarMapa(){
 
     }
 
-
-    //==============================================
-    // MAPA BASE
-    //==============================================
 
     mapa =
         L.map("map").setView(
@@ -168,10 +173,12 @@ function iniciarMapa(){
         L.tileLayer(
             "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             {
+
                 attribution:
                     "© OpenStreetMap",
 
                 maxZoom:20
+
             }
         );
 
@@ -184,10 +191,12 @@ function iniciarMapa(){
         L.tileLayer(
             "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
             {
+
                 attribution:
                     "Tiles © Esri",
 
                 maxZoom:20
+
             }
         );
 
@@ -200,12 +209,15 @@ function iniciarMapa(){
         L.tileLayer(
             "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
             {
+
                 attribution:
                     "Labels © Esri",
 
                 maxZoom:20,
 
-                pane:"overlayPane"
+                pane:
+                    "overlayPane"
+
             }
         );
 
@@ -221,7 +233,9 @@ function iniciarMapa(){
         ]);
 
 
-    mapaCalles.addTo(mapa);
+    mapaCalles.addTo(
+        mapa
+    );
 
 
     //==============================================
@@ -246,74 +260,52 @@ function iniciarMapa(){
         mapasBase,
         null,
         {
+
             collapsed:true,
+
             position:"topright"
+
         }
-    ).addTo(mapa);
+    ).addTo(
+        mapa
+    );
 
 
     //==============================================
-    // CAPA DE MARCADORES
+    // CAPA MARCADORES
     //==============================================
 
     capaMarcadores =
-        L.layerGroup().addTo(mapa);
+        L.layerGroup()
+        .addTo(mapa);
 
 
     //==============================================
-    // CAPA DE ZONAS
+    // CAPA ZONAS
     //==============================================
 
     capaZonasEstacionamiento =
-        L.layerGroup().addTo(mapa);
+        L.layerGroup()
+        .addTo(mapa);
 
 
     //==============================================
     // CLICK MAPA
-    //
-    // SI DIBUJAMOS ZONA:
-    //     AGREGA VÉRTICE
-    //
-    // SI NO:
-    //     CREA NUEVA UBICACIÓN
     //==============================================
 
     mapa.on(
         "click",
-        function(e){
-
-            if(dibujandoZona){
-
-                agregarPuntoZona(e);
-
-                return;
-
-            }
-
-
-            seleccionarUbicacion(e);
-
-        }
+        seleccionarUbicacion
     );
 
 
     //==============================================
     // CLICK DERECHO
-    //
-    // CERRAR POLÍGONO
     //==============================================
 
     mapa.on(
         "contextmenu",
-        function(e){
-
-            if(dibujandoZona){
-
-                finalizarZona();
-
-            }
-
-        }
+        finalizarZona
     );
 
 
@@ -324,7 +316,11 @@ function iniciarMapa(){
     setTimeout(
         function(){
 
-            mapa.invalidateSize();
+            if(mapa){
+
+                mapa.invalidateSize();
+
+            }
 
         },
         500
@@ -341,6 +337,12 @@ async function cargarCategorias(){
 
     const respuesta =
         await apiObtenerCategorias();
+
+
+    console.log(
+        "Respuesta categorías:",
+        respuesta
+    );
 
 
     if(
@@ -367,6 +369,12 @@ async function cargarCategorias(){
                 ===
                 "SI"
         );
+
+
+    console.log(
+        "Categorías cargadas:",
+        categorias
+    );
 
 
     const tipo =
@@ -546,7 +554,9 @@ async function cargarLocalidades(){
                     )
                 ){
 
-                    nombres.push(nombre);
+                    nombres.push(
+                        nombre
+                    );
 
                 }
 
@@ -651,7 +661,13 @@ function enlazarEventos(){
             "click",
             async function(){
 
-                await actualizarMapa();
+                await cargarCategorias();
+
+                await cargarLocalidades();
+
+                await cargarElementos();
+
+                await cargarZonasEstacionamiento();
 
             }
         );
@@ -713,10 +729,6 @@ function enlazarEventos(){
     }
 
 
-    //==============================================
-    // DASHBOARD
-    //==============================================
-
     const dashboard =
         document.getElementById(
             "btnDashboard"
@@ -735,10 +747,6 @@ function enlazarEventos(){
 
     }
 
-
-    //==============================================
-    // INFORMES
-    //==============================================
 
     const informes =
         document.getElementById(
@@ -759,10 +767,6 @@ function enlazarEventos(){
     }
 
 
-    //==============================================
-    // SALIR
-    //==============================================
-
     const salirBtn =
         document.getElementById(
             "btnSalir"
@@ -776,10 +780,6 @@ function enlazarEventos(){
 
     }
 
-
-    //==============================================
-    // ZONA NUEVA
-    //==============================================
 
     const btnNuevaZona =
         document.getElementById(
@@ -796,10 +796,6 @@ function enlazarEventos(){
 
     }
 
-
-    //==============================================
-    // CANCELAR ZONA
-    //==============================================
 
     const btnCancelarZona =
         document.getElementById(
@@ -827,6 +823,10 @@ function seleccionarUbicacion(e){
 
     if(dibujandoZona){
 
+        agregarPuntoZona(
+            e
+        );
+
         return;
 
     }
@@ -835,15 +835,21 @@ function seleccionarUbicacion(e){
     const lat =
         e.latlng.lat;
 
+
     const lng =
         e.latlng.lng;
 
 
     const campoLat =
-        document.getElementById("lat");
+        document.getElementById(
+            "lat"
+        );
+
 
     const campoLng =
-        document.getElementById("lng");
+        document.getElementById(
+            "lng"
+        );
 
 
     if(campoLat){
@@ -877,12 +883,15 @@ function seleccionarUbicacion(e){
         L.marker(
             [lat,lng],
             {
+
                 draggable:true,
 
                 icon:
                     crearIconoNuevo()
+
             }
-        ).addTo(mapa);
+        )
+        .addTo(mapa);
 
 
     marcadorNuevo.on(
@@ -935,74 +944,56 @@ async function cargarElementos(){
     );
 
 
-    try{
-
-        const respuesta =
-            await apiObtenerElementos();
+    const respuesta =
+        await apiObtenerElementos();
 
 
-        console.log(
-            "Respuesta API:",
-            respuesta
-        );
+    console.log(
+        "Respuesta API:",
+        respuesta
+    );
 
 
-        if(
-            !respuesta ||
-            !respuesta.ok
-        ){
-
-            mostrarMensaje(
-                respuesta?.mensaje ||
-                "No se pudieron obtener los elementos.",
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        elementos =
-            Array.isArray(
-                respuesta.datos
-            )
-            ?
-            respuesta.datos
-            :
-            [];
-
-
-        console.log(
-            "Elementos cargados:",
-            elementos.length
-        );
-
-
-        renderizarMarcadores();
-
+    if(
+        !respuesta ||
+        !respuesta.ok
+    ){
 
         mostrarMensaje(
-            elementos.length +
-            " elementos cargados.",
-            "exito"
-        );
-
-    }
-    catch(error){
-
-        console.error(
-            "Error cargando elementos:",
-            error
-        );
-
-
-        mostrarMensaje(
-            "Error cargando elementos.",
+            respuesta?.mensaje ||
+            "No se pudieron obtener los elementos.",
             "error"
         );
 
+        return;
+
     }
+
+
+    elementos =
+        Array.isArray(
+            respuesta.datos
+        )
+        ?
+        respuesta.datos
+        :
+        [];
+
+
+    console.log(
+        "Elementos cargados:",
+        elementos.length
+    );
+
+
+    renderizarMarcadores();
+
+
+    mostrarMensaje(
+        elementos.length +
+        " elementos cargados.",
+        "exito"
+    );
 
 }
 
@@ -1093,10 +1084,6 @@ function renderizarMarcadores(){
                 }
 
 
-                //==================================
-                // FILTRO TIPO
-                //==================================
-
                 if(
                     filtroTipo &&
                     normalizar(e.tipo)
@@ -1108,10 +1095,6 @@ function renderizarMarcadores(){
 
                 }
 
-
-                //==================================
-                // FILTRO LOCALIDAD
-                //==================================
 
                 if(
                     localidadSeleccionada
@@ -1141,10 +1124,6 @@ function renderizarMarcadores(){
                 }
 
 
-                //==================================
-                // BUSQUEDA
-                //==================================
-
                 const cadena =
                     normalizar(
                         [
@@ -1167,10 +1146,6 @@ function renderizarMarcadores(){
         );
 
 
-    //================================================
-    // CREAR MARCADORES
-    //================================================
-
     visibles.forEach(
         function(e){
 
@@ -1190,6 +1165,7 @@ function renderizarMarcadores(){
                 L.marker(
                     [lat,lng],
                     {
+
                         icon:
                             crearIcono(
                                 e.tipo
@@ -1198,6 +1174,7 @@ function renderizarMarcadores(){
                         keyboard:true,
 
                         riseOnHover:true
+
                     }
                 );
 
@@ -1205,6 +1182,7 @@ function renderizarMarcadores(){
             marcador.bindPopup(
                 crearPopup(e),
                 {
+
                     maxWidth:320,
 
                     minWidth:280,
@@ -1212,6 +1190,7 @@ function renderizarMarcadores(){
                     autoPan:true,
 
                     closeButton:true
+
                 }
             );
 
@@ -1223,10 +1202,6 @@ function renderizarMarcadores(){
         }
     );
 
-
-    //================================================
-    // CONTADOR
-    //================================================
 
     const contador =
         document.getElementById(
@@ -1337,7 +1312,10 @@ function centrarLocalidadSeleccionada(){
                 }
 
 
-                return [lat,lng];
+                return [
+                    lat,
+                    lng
+                ];
 
             }
         )
@@ -1354,12 +1332,14 @@ function centrarLocalidadSeleccionada(){
     mapa.fitBounds(
         L.latLngBounds(puntos),
         {
+
             padding:[
                 50,
                 50
             ],
 
             maxZoom:16
+
         }
     );
 
@@ -1375,6 +1355,10 @@ function crearIcono(tipo){
     const categoria =
         obtenerCategoria(tipo);
 
+
+    //================================================
+    // MAPA DE ICONOS
+    //================================================
 
     const iconos = {
 
@@ -1404,17 +1388,61 @@ function crearIcono(tipo){
 
         "disc. parking":
             "fa-solid fa-wheelchair",
+
+        //============================================
+        // PARADA DE BUS
+        //============================================
+
         "bus":
             "fa-solid fa-bus",
+
+        "bus-stop":
+            "fa-solid fa-bus",
+
+        "parada bus":
+            "fa-solid fa-bus",
+
+        "parada de bus":
+            "fa-solid fa-bus",
+
+        "parada de omnibus":
+            "fa-solid fa-bus",
+
+        "parada de ómnibus":
+            "fa-solid fa-bus",
+
+        //============================================
+        // SONDA DE VELOCIDAD
+        //============================================
 
         "speed":
             "fa-solid fa-gauge-high",
 
-        "Otros":
+        "speed-sensor":
+            "fa-solid fa-gauge-high",
+
+        "sonda":
+            "fa-solid fa-gauge-high",
+
+        "sonda de velocidad":
+            "fa-solid fa-gauge-high",
+
+        "radar":
+            "fa-solid fa-camera",
+
+        //============================================
+        // OTROS
+        //============================================
+
+        "otros":
             "fa-solid fa-location-dot"
 
     };
 
+
+    //================================================
+    // POR DEFECTO
+    //================================================
 
     let claseIcono =
         "fa-solid fa-location-dot";
@@ -1424,24 +1452,151 @@ function crearIcono(tipo){
         "gris";
 
 
+    //================================================
+    // CATEGORIA ENCONTRADA
+    //================================================
+
     if(categoria){
 
-        claseIcono =
-            iconos[
-                categoria.icono
-            ]
-            ||
-            "fa-solid fa-location-dot";
+        const iconoOriginal =
+            String(
+                categoria.icono ||
+                ""
+            )
+            .trim();
 
+
+        const iconoNormalizado =
+            normalizar(
+                iconoOriginal
+            );
+
+
+        const nombreNormalizado =
+            normalizar(
+                categoria.nombre
+            );
+
+
+        console.log(
+            "================================"
+        );
+
+
+        console.log(
+            "TIPO:",
+            tipo
+        );
+
+
+        console.log(
+            "CATEGORIA:",
+            categoria
+        );
+
+
+        console.log(
+            "ICONO:",
+            iconoOriginal
+        );
+
+
+        console.log(
+            "ICONO NORMALIZADO:",
+            iconoNormalizado
+        );
+
+
+        //============================================
+        // BUSCAR POR ICONO
+        //============================================
+
+        if(
+            iconos[
+                iconoNormalizado
+            ]
+        ){
+
+            claseIcono =
+                iconos[
+                    iconoNormalizado
+                ];
+
+        }
+
+
+        //============================================
+        // BUSCAR POR NOMBRE
+        //============================================
+
+        else if(
+            nombreNormalizado.includes(
+                "parada"
+            )
+            &&
+            (
+                nombreNormalizado.includes(
+                    "bus"
+                )
+                ||
+                nombreNormalizado.includes(
+                    "omnibus"
+                )
+            )
+        ){
+
+            claseIcono =
+                "fa-solid fa-bus";
+
+        }
+
+
+        else if(
+            nombreNormalizado.includes(
+                "sonda"
+            )
+            &&
+            nombreNormalizado.includes(
+                "velocidad"
+            )
+        ){
+
+            claseIcono =
+                "fa-solid fa-gauge-high";
+
+        }
+
+
+        else if(
+            nombreNormalizado.includes(
+                "radar"
+            )
+        ){
+
+            claseIcono =
+                "fa-solid fa-camera";
+
+        }
+
+
+        //============================================
+        // COLOR
+        //============================================
 
         color =
             String(
                 categoria.color ||
                 "gris"
-            ).toLowerCase();
+            )
+            .trim()
+            .toLowerCase();
 
     }
 
+
+    //================================================
+    // CREAR ICONO
+    //================================================
 
     return L.divIcon({
 
@@ -1540,6 +1695,7 @@ function crearPopup(e){
             ${escapar(e.codigo)}
         </h2>
 
+
         <div class="popup-linea">
 
             <strong>Tipo</strong><br>
@@ -1598,7 +1754,8 @@ function crearPopup(e){
             <strong>Descripción</strong><br>
 
             ${escapar(
-                e.descripcion || "-"
+                e.descripcion ||
+                "-"
             )}
 
         </div>
@@ -1609,7 +1766,8 @@ function crearPopup(e){
             <strong>Características</strong><br>
 
             ${escapar(
-                e.caracteristicas || "-"
+                e.caracteristicas ||
+                "-"
             )}
 
         </div>
@@ -1624,11 +1782,13 @@ function crearPopup(e){
                 class="btn-inspeccion"
                 onclick="
                     abrirInspecciones(
-                        '${escAtributo(e.id)}'
+                        '${escapar(e.id)}'
                     )
                 "
             >
+
                 📝 Inspecciones
+
             </button>
 
 
@@ -1636,11 +1796,13 @@ function crearPopup(e){
                 class="btn-eliminar"
                 onclick="
                     eliminarElemento(
-                        '${escAtributo(e.id)}'
+                        '${escapar(e.id)}'
                     )
                 "
             >
+
                 🗑 Eliminar
+
             </button>
 
         </div>
@@ -1727,7 +1889,8 @@ async function guardarElemento(e){
 
     const datos = {
 
-        tipo:tipo,
+        tipo:
+            tipo,
 
         icono:
             categoria
@@ -1866,7 +2029,7 @@ async function guardarElemento(e){
 
 
 //==================================================
-// ZONAS DE ESTACIONAMIENTO TARIFADO
+// ZONAS DE ESTACIONAMIENTO
 //==================================================
 
 
@@ -1890,14 +2053,13 @@ function iniciarDibujoZona(){
     }
 
 
-    dibujandoZona = true;
+    dibujandoZona =
+        true;
 
-    puntosZona = [];
 
+    puntosZona =
+        [];
 
-    //==============================================
-    // LIMPIAR DIBUJO ANTERIOR
-    //==============================================
 
     if(lineaZona){
 
@@ -1905,7 +2067,8 @@ function iniciarDibujoZona(){
             lineaZona
         );
 
-        lineaZona = null;
+        lineaZona =
+            null;
 
     }
 
@@ -1916,14 +2079,11 @@ function iniciarDibujoZona(){
             poligonoZonaTemporal
         );
 
-        poligonoZonaTemporal = null;
+        poligonoZonaTemporal =
+            null;
 
     }
 
-
-    //==============================================
-    // OCULTAR BOTÓN NUEVA ZONA
-    //==============================================
 
     const btnNuevaZona =
         document.getElementById(
@@ -1934,6 +2094,12 @@ function iniciarDibujoZona(){
     const btnCancelarZona =
         document.getElementById(
             "btnCancelarZona"
+        );
+
+
+    const estadoZona =
+        document.getElementById(
+            "estadoZona"
         );
 
 
@@ -1953,16 +2119,6 @@ function iniciarDibujoZona(){
     }
 
 
-    //==============================================
-    // ESTADO
-    //==============================================
-
-    const estadoZona =
-        document.getElementById(
-            "estadoZona"
-        );
-
-
     if(estadoZona){
 
         estadoZona.textContent =
@@ -1974,15 +2130,11 @@ function iniciarDibujoZona(){
     }
 
 
-    //==============================================
-    // CURSOR
-    //==============================================
-
     mapa.getContainer().style.cursor =
         "crosshair";
 
 
-    mostrarMensajeMapa(
+    mostrarMensaje(
         "Dibujando zona de estacionamiento...",
         ""
     );
@@ -2004,44 +2156,18 @@ function agregarPuntoZona(e){
 
 
     const lat =
-        Number(
-            e.latlng.lat
-        );
+        e.latlng.lat;
 
 
     const lng =
-        Number(
-            e.latlng.lng
-        );
-
-
-    if(
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng)
-    ){
-
-        return;
-
-    }
+        e.latlng.lng;
 
 
     puntosZona.push([
-        Number(lat.toFixed(7)),
-        Number(lng.toFixed(7))
-    ]);
-
-
-    console.log(
-        "Punto zona:",
-        puntosZona.length,
         lat,
         lng
-    );
+    ]);
 
-
-    //==============================================
-    // LÍNEA
-    //==============================================
 
     if(puntosZona.length >= 2){
 
@@ -2058,22 +2184,22 @@ function agregarPuntoZona(e){
             L.polyline(
                 puntosZona,
                 {
-                    color:"#1976d2",
 
-                    weight:3,
+                    color:
+                        "#1976d2",
 
-                    dashArray:"8,6",
+                    weight:
+                        3,
 
-                    interactive:false
+                    dashArray:
+                        "8,6"
+
                 }
-            ).addTo(mapa);
+            )
+            .addTo(mapa);
 
     }
 
-
-    //==============================================
-    // POLÍGONO TEMPORAL
-    //==============================================
 
     if(puntosZona.length >= 3){
 
@@ -2090,24 +2216,28 @@ function agregarPuntoZona(e){
             L.polygon(
                 puntosZona,
                 {
-                    color:"#1976d2",
 
-                    weight:3,
+                    color:
+                        "#1976d2",
 
-                    fillColor:"#42a5f5",
+                    weight:
+                        3,
 
-                    fillOpacity:0.25,
+                    fillColor:
+                        "#42a5f5",
 
-                    interactive:false
+                    fillOpacity:
+                        0.25,
+
+                    interactive:
+                        false
+
                 }
-            ).addTo(mapa);
+            )
+            .addTo(mapa);
 
     }
 
-
-    //==============================================
-    // ESTADO
-    //==============================================
 
     const estadoZona =
         document.getElementById(
@@ -2122,7 +2252,7 @@ function agregarPuntoZona(e){
             +
             puntosZona.length
             +
-            ". Continúe o haga clic derecho para cerrar.";
+            ". Continúe haciendo clic o haga clic derecho para cerrar.";
 
     }
 
@@ -2130,10 +2260,10 @@ function agregarPuntoZona(e){
 
 
 //--------------------------------------------------
-// FINALIZAR
+// FINALIZAR ZONA
 //--------------------------------------------------
 
-function finalizarZona(){
+async function finalizarZona(){
 
     if(!dibujandoZona){
 
@@ -2144,8 +2274,8 @@ function finalizarZona(){
 
     if(puntosZona.length < 3){
 
-        mostrarMensajeMapa(
-            "La zona necesita al menos 3 puntos.",
+        mostrarMensaje(
+            "Una zona necesita al menos 3 puntos.",
             "error"
         );
 
@@ -2162,8 +2292,6 @@ function finalizarZona(){
 
     if(
         nombre === null
-        ||
-        nombre.trim() === ""
     ){
 
         return;
@@ -2171,8 +2299,24 @@ function finalizarZona(){
     }
 
 
-    guardarZonaEnServidor(
-        nombre.trim(),
+    const nombreLimpio =
+        nombre.trim();
+
+
+    if(!nombreLimpio){
+
+        mostrarMensaje(
+            "Debe ingresar un nombre para la zona.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    await guardarZonaEnServidor(
+        nombreLimpio,
         puntosZona
     );
 
@@ -2208,7 +2352,9 @@ async function guardarZonaEnServidor(
             JSON.parse(
                 localStorage.getItem(
                     "usuarioActual"
-                ) || "{}"
+                )
+                ||
+                "{}"
             );
 
 
@@ -2231,7 +2377,7 @@ async function guardarZonaEnServidor(
 
 
         console.log(
-            "Datos zona:",
+            "Guardando zona:",
             datos
         );
 
@@ -2261,7 +2407,7 @@ async function guardarZonaEnServidor(
         }
 
 
-        mostrarMensajeMapa(
+        mostrarMensaje(
             "Zona de estacionamiento guardada correctamente.",
             "exito"
         );
@@ -2272,6 +2418,7 @@ async function guardarZonaEnServidor(
 
         await cargarZonasEstacionamiento();
 
+
     }
     catch(error){
 
@@ -2281,8 +2428,9 @@ async function guardarZonaEnServidor(
         );
 
 
-        mostrarMensajeMapa(
-            error.message,
+        mostrarMensaje(
+            error.message ||
+            "Error al guardar la zona.",
             "error"
         );
 
@@ -2312,6 +2460,10 @@ async function guardarZonaEnServidor(
 async function cargarZonasEstacionamiento(){
 
     if(!capaZonasEstacionamiento){
+
+        console.warn(
+            "No existe capa de zonas."
+        );
 
         return;
 
@@ -2357,6 +2509,13 @@ async function cargarZonasEstacionamiento(){
 
         mostrarZonasEstacionamiento();
 
+
+        console.log(
+            "Zonas cargadas:",
+            zonasEstacionamiento.length
+        );
+
+
     }
     catch(error){
 
@@ -2389,15 +2548,13 @@ function mostrarZonasEstacionamiento(){
     zonasEstacionamiento.forEach(
         function(zona){
 
-            //======================================
-            // IGNORAR ZONAS INACTIVAS
-            //======================================
-
             if(
-                zona.activo &&
                 String(
-                    zona.activo
-                ).toUpperCase() !== "SI"
+                    zona.activo || ""
+                )
+                .toUpperCase()
+                !==
+                "SI"
             ){
 
                 return;
@@ -2405,28 +2562,15 @@ function mostrarZonasEstacionamiento(){
             }
 
 
-            let puntos = null;
+            let puntos;
 
 
             try{
 
-                if(
-                    Array.isArray(
+                puntos =
+                    JSON.parse(
                         zona.coordenadas
-                    )
-                ){
-
-                    puntos =
-                        zona.coordenadas;
-
-                }else{
-
-                    puntos =
-                        JSON.parse(
-                            zona.coordenadas
-                        );
-
-                }
+                    );
 
             }
             catch(error){
@@ -2442,8 +2586,7 @@ function mostrarZonasEstacionamiento(){
 
 
             if(
-                !Array.isArray(puntos)
-                ||
+                !Array.isArray(puntos) ||
                 puntos.length < 3
             ){
 
@@ -2457,35 +2600,39 @@ function mostrarZonasEstacionamiento(){
                     puntos,
                     {
 
-                        color:"#e65100",
+                        color:
+                            "#e65100",
 
-                        weight:3,
+                        weight:
+                            3,
 
-                        fillColor:"#ff9800",
+                        fillColor:
+                            "#ff9800",
 
-                        fillOpacity:0.22,
+                        fillOpacity:
+                            0.22,
 
-                        interactive:true
+                        interactive:
+                            true
 
                     }
                 );
 
 
-            //======================================
-            // POPUP
-            //======================================
+            poligono.bindPopup(
 
-            poligono.bindPopup(`
+                `
 
                 <div class="popup-zona">
 
                     <h3>
 
-                        <i class="fa-solid fa-square-parking"></i>
+                        <i
+                            class="fa-solid fa-square-parking">
+                        </i>
 
-                        ${escZona(
-                            zona.nombre ||
-                            "Zona de estacionamiento"
+                        ${escapar(
+                            zona.nombre
                         )}
 
                     </h3>
@@ -2506,9 +2653,8 @@ function mostrarZonasEstacionamiento(){
                             Localidad:
                         </strong>
 
-                        ${escZona(
+                        ${escapar(
                             zona.localidadNombre ||
-                            zona.localidad ||
                             "Sin localidad"
                         )}
 
@@ -2521,16 +2667,7 @@ function mostrarZonasEstacionamiento(){
                             Estado:
                         </strong>
 
-                        ${
-                            String(
-                                zona.activo || "SI"
-                            ).toUpperCase()
-                            === "SI"
-                            ?
-                            "Activa"
-                            :
-                            "Inactiva"
-                        }
+                        Activa
 
                     </p>
 
@@ -2540,12 +2677,14 @@ function mostrarZonasEstacionamiento(){
                         class="btn-eliminar-zona"
                         onclick="
                             eliminarZonaEstacionamiento(
-                                '${escAtributo(zona.id)}'
+                                '${escaparAtributo(zona.id)}'
                             )
                         "
                     >
 
-                        <i class="fa-solid fa-trash"></i>
+                        <i
+                            class="fa-solid fa-trash">
+                        </i>
 
                         Eliminar zona
 
@@ -2553,7 +2692,9 @@ function mostrarZonasEstacionamiento(){
 
                 </div>
 
-            `);
+                `
+
+            );
 
 
             poligono.addTo(
@@ -2570,7 +2711,9 @@ function mostrarZonasEstacionamiento(){
 // ELIMINAR ZONA
 //--------------------------------------------------
 
-async function eliminarZonaEstacionamiento(id){
+async function eliminarZonaEstacionamiento(
+    id
+){
 
     if(
         !confirm(
@@ -2591,6 +2734,12 @@ async function eliminarZonaEstacionamiento(id){
             );
 
 
+        console.log(
+            "Respuesta eliminar zona:",
+            respuesta
+        );
+
+
         if(
             !respuesta ||
             !respuesta.ok
@@ -2604,13 +2753,14 @@ async function eliminarZonaEstacionamiento(id){
         }
 
 
-        mostrarMensajeMapa(
+        mostrarMensaje(
             "Zona eliminada correctamente.",
             "exito"
         );
 
 
         await cargarZonasEstacionamiento();
+
 
     }
     catch(error){
@@ -2621,8 +2771,9 @@ async function eliminarZonaEstacionamiento(id){
         );
 
 
-        mostrarMensajeMapa(
-            error.message,
+        mostrarMensaje(
+            error.message ||
+            "No fue posible eliminar la zona.",
             "error"
         );
 
@@ -2656,6 +2807,12 @@ function cancelarDibujoZona(){
 
     }
 
+
+    mostrarMensaje(
+        "Dibujo de zona cancelado.",
+        ""
+    );
+
 }
 
 
@@ -2665,9 +2822,12 @@ function cancelarDibujoZona(){
 
 function limpiarDibujoZona(){
 
-    dibujandoZona = false;
+    dibujandoZona =
+        false;
 
-    puntosZona = [];
+
+    puntosZona =
+        [];
 
 
     if(lineaZona){
@@ -2676,7 +2836,8 @@ function limpiarDibujoZona(){
             lineaZona
         );
 
-        lineaZona = null;
+        lineaZona =
+            null;
 
     }
 
@@ -2687,7 +2848,8 @@ function limpiarDibujoZona(){
             poligonoZonaTemporal
         );
 
-        poligonoZonaTemporal = null;
+        poligonoZonaTemporal =
+            null;
 
     }
 
@@ -2731,6 +2893,27 @@ function limpiarDibujoZona(){
 
 
 //==================================================
+// ESC = CANCELAR ZONA
+//==================================================
+
+document.addEventListener(
+    "keydown",
+    function(e){
+
+        if(
+            e.key === "Escape" &&
+            dibujandoZona
+        ){
+
+            cancelarDibujoZona();
+
+        }
+
+    }
+);
+
+
+//==================================================
 // MENSAJES
 //==================================================
 
@@ -2764,48 +2947,21 @@ function mostrarMensaje(
 
 
 //==================================================
-// MENSAJE MAPA
+// NORMALIZAR
 //==================================================
 
-function mostrarMensajeMapa(
-    texto,
-    tipo=""
-){
+function normalizar(texto){
 
-    const elemento =
-        document.getElementById(
-            "mensajeMapa"
-        );
-
-
-    if(!elemento){
-
-        return;
-
-    }
-
-
-    elemento.textContent =
-        texto;
-
-
-    elemento.className =
-        "mensaje " +
-        tipo;
-
-
-    setTimeout(
-        function(){
-
-            elemento.textContent =
-                "";
-
-            elemento.className =
-                "mensaje";
-
-        },
-        5000
-    );
+    return String(
+        texto || ""
+    )
+    .normalize("NFD")
+    .replace(
+        /[\u0300-\u036f]/g,
+        ""
+    )
+    .toLowerCase()
+    .trim();
 
 }
 
@@ -2843,14 +2999,11 @@ function escapar(valor){
 }
 
 
-function escZona(valor){
+//==================================================
+// ESCAPAR ATRIBUTO
+//==================================================
 
-    return escapar(valor);
-
-}
-
-
-function escAtributo(valor){
+function escaparAtributo(valor){
 
     return String(
         valor || ""
@@ -2863,26 +3016,6 @@ function escAtributo(valor){
         /'/g,
         "\\'"
     );
-
-}
-
-
-//==================================================
-// NORMALIZAR
-//==================================================
-
-function normalizar(texto){
-
-    return String(
-        texto || ""
-    )
-    .normalize("NFD")
-    .replace(
-        /[\u0300-\u036f]/g,
-        ""
-    )
-    .toLowerCase()
-    .trim();
 
 }
 
@@ -2956,16 +3089,20 @@ function centrarEnElementos(){
 
 
     const grupo =
-        L.featureGroup(capas);
+        L.featureGroup(
+            capas
+        );
 
 
     mapa.fitBounds(
         grupo.getBounds(),
         {
+
             padding:[
                 40,
                 40
             ]
+
         }
     );
 
@@ -2992,35 +3129,7 @@ async function actualizarMapa(){
 
     await cargarZonasEstacionamiento();
 
-
-    mostrarMensaje(
-        "Mapa actualizado.",
-        "exito"
-    );
-
 }
-
-
-//==================================================
-// ESC = CANCELAR ZONA
-//==================================================
-
-document.addEventListener(
-    "keydown",
-    function(e){
-
-        if(
-            e.key === "Escape"
-            &&
-            dibujandoZona
-        ){
-
-            cancelarDibujoZona();
-
-        }
-
-    }
-);
 
 
 //==================================================
@@ -3101,18 +3210,6 @@ window.debugMapa =
 
         console.table(
             zonasEstacionamiento
-        );
-
-
-        console.log(
-            "Dibujando zona:",
-            dibujandoZona
-        );
-
-
-        console.log(
-            "Puntos zona:",
-            puntosZona
         );
 
     };
