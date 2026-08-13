@@ -1,19 +1,14 @@
-```javascript
 //==================================================
 // SGT - MOVILIDAD URBANA
 // mapa.js
 //==================================================
 
 let mapa = null;
-
 let capaMarcadores = null;
-
 let marcadorNuevo = null;
 
 let categorias = [];
-
 let elementos = [];
-
 let localidades = [];
 
 
@@ -21,11 +16,8 @@ let localidades = [];
 // TIPOS GEOMETRICOS ESPECIALES
 //==================================================
 
-const TIPO_ZONA_ESTACIONAMIENTO =
-    "Estacionamiento Tarifado";
-
-const TIPO_CORDON_ROJO =
-    "Cordón Rojo";
+const TIPO_ZONA_ESTACIONAMIENTO = "Estacionamiento Tarifado";
+const TIPO_CORDON_ROJO = "Cordón Rojo";
 
 
 //==================================================
@@ -33,15 +25,11 @@ const TIPO_CORDON_ROJO =
 //==================================================
 
 let capaZonasEstacionamiento = null;
-
 let zonasEstacionamiento = [];
 
 let dibujandoZona = false;
-
 let puntosZona = [];
-
 let lineaZona = null;
-
 let poligonoZonaTemporal = null;
 
 
@@ -50,13 +38,10 @@ let poligonoZonaTemporal = null;
 //==================================================
 
 let capaCordonesRojos = null;
-
 let cordonesRojos = [];
 
 let dibujandoCordon = false;
-
 let puntosCordon = [];
-
 let lineaCordonTemporal = null;
 
 
@@ -64,42 +49,39 @@ let lineaCordonTemporal = null;
 // INICIO
 //==================================================
 
-document.addEventListener(
-    "DOMContentLoaded",
-    iniciarPagina
-);
+document.addEventListener("DOMContentLoaded", iniciarPagina);
 
 
-async function iniciarPagina(){
+async function iniciarPagina() {
 
     console.clear();
 
-    console.log(
-        "===== INICIANDO MAPA ====="
-    );
+    console.log("====================================");
+    console.log("SGT - INICIANDO MAPA");
+    console.log("====================================");
 
-
-    if(!comprobarSesion()){
-
+    if (!comprobarSesion()) {
         return;
-
     }
 
-
     iniciarMapa();
+
+    if (!mapa) {
+        console.error("No se pudo iniciar el mapa.");
+        return;
+    }
 
     enlazarEventos();
 
     await cargarCategorias();
-
     await cargarLocalidades();
-
     await cargarElementos();
-
     await cargarZonasEstacionamiento();
-
     await cargarCordonesRojos();
 
+    console.log("====================================");
+    console.log("SGT - MAPA INICIADO CORRECTAMENTE");
+    console.log("====================================");
 }
 
 
@@ -107,44 +89,33 @@ async function iniciarPagina(){
 // SESION
 //==================================================
 
-function comprobarSesion(){
+function comprobarSesion() {
 
     let usuario = null;
 
+    try {
 
-    try{
+        usuario = JSON.parse(
+            localStorage.getItem("usuarioActual") || "null"
+        );
 
-        usuario =
-            JSON.parse(
-                localStorage.getItem(
-                    "usuarioActual"
-                )
-            );
+    } catch (error) {
 
-    }catch(e){
-
+        console.error("Error leyendo sesión:", error);
         usuario = null;
 
     }
 
+    if (!usuario) {
 
-    if(!usuario){
-
-        location.href =
-            "../../index.html";
-
+        location.href = "../../index.html";
         return false;
 
     }
 
+    const elemento = document.getElementById("usuarioActual");
 
-    const elemento =
-        document.getElementById(
-            "usuarioActual"
-        );
-
-
-    if(elemento){
+    if (elemento) {
 
         elemento.textContent =
             usuario.nombre ||
@@ -153,9 +124,7 @@ function comprobarSesion(){
 
     }
 
-
     return true;
-
 }
 
 
@@ -163,108 +132,86 @@ function comprobarSesion(){
 // INICIAR MAPA
 //==================================================
 
-function iniciarMapa(){
+function iniciarMapa() {
 
-    console.log(
-        "Creando Leaflet..."
-    );
+    console.log("Creando Leaflet...");
 
+    const elementoMapa = document.getElementById("map");
 
-    const elementoMapa =
-        document.getElementById(
-            "map"
-        );
+    if (!elementoMapa) {
 
+        console.error("No existe el elemento #map");
+        return;
 
-    if(!elementoMapa){
+    }
+
+    if (typeof L === "undefined") {
 
         console.error(
-            "No existe el elemento #map"
+            "Leaflet no está cargado. Verifique el script de Leaflet en HTML."
         );
 
         return;
 
     }
 
-
-    mapa =
-        L.map("map").setView(
-            [-34.0997, -56.2140],
-            15
-        );
+    mapa = L.map("map").setView(
+        [-34.0997, -56.2140],
+        15
+    );
 
 
     //==============================================
     // MAPA NORMAL
     //==============================================
 
-    const mapaCalles =
-        L.tileLayer(
-            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {
-
-                attribution:
-                    "© OpenStreetMap",
-
-                maxZoom:20
-
-            }
-        );
+    const mapaCalles = L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            attribution: "© OpenStreetMap",
+            maxZoom: 20
+        }
+    );
 
 
     //==============================================
-    // SATÉLITE
+    // SATELITE
     //==============================================
 
-    const satelite =
-        L.tileLayer(
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-            {
-
-                attribution:
-                    "Tiles © Esri",
-
-                maxZoom:20
-
-            }
-        );
+    const satelite = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+            attribution: "Tiles © Esri",
+            maxZoom: 20
+        }
+    );
 
 
     //==============================================
     // ETIQUETAS
     //==============================================
 
-    const etiquetas =
-        L.tileLayer(
-            "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-            {
-
-                attribution:
-                    "Labels © Esri",
-
-                maxZoom:20,
-
-                pane:
-                    "overlayPane"
-
-            }
-        );
-
-
-    //==============================================
-    // HÍBRIDO
-    //==============================================
-
-    const hibrido =
-        L.layerGroup([
-            satelite,
-            etiquetas
-        ]);
-
-
-    mapaCalles.addTo(
-        mapa
+    const etiquetas = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+        {
+            attribution: "Labels © Esri",
+            maxZoom: 20,
+            pane: "overlayPane"
+        }
     );
+
+
+    //==============================================
+    // HIBRIDO
+    //==============================================
+
+    const hibrido = L.layerGroup([
+        satelite,
+        etiquetas
+    ]);
+
+
+    mapaCalles.addTo(mapa);
 
 
     //==============================================
@@ -273,14 +220,9 @@ function iniciarMapa(){
 
     const mapasBase = {
 
-        "🗺️ Mapa":
-            mapaCalles,
-
-        "🛰️ Satélite":
-            satelite,
-
-        "🛰️ Híbrido":
-            hibrido
+        "🗺️ Mapa": mapaCalles,
+        "🛰️ Satélite": satelite,
+        "🛰️ Híbrido": hibrido
 
     };
 
@@ -289,24 +231,17 @@ function iniciarMapa(){
         mapasBase,
         null,
         {
-
-            collapsed:true,
-
-            position:"topright"
-
+            collapsed: true,
+            position: "topright"
         }
-    ).addTo(
-        mapa
-    );
+    ).addTo(mapa);
 
 
     //==============================================
     // CAPA MARCADORES
     //==============================================
 
-    capaMarcadores =
-        L.layerGroup()
-        .addTo(mapa);
+    capaMarcadores = L.layerGroup().addTo(mapa);
 
 
     //==============================================
@@ -314,8 +249,7 @@ function iniciarMapa(){
     //==============================================
 
     capaZonasEstacionamiento =
-        L.layerGroup()
-        .addTo(mapa);
+        L.layerGroup().addTo(mapa);
 
 
     //==============================================
@@ -323,8 +257,7 @@ function iniciarMapa(){
     //==============================================
 
     capaCordonesRojos =
-        L.layerGroup()
-        .addTo(mapa);
+        L.layerGroup().addTo(mapa);
 
 
     //==============================================
@@ -351,18 +284,16 @@ function iniciarMapa(){
     // CORREGIR TAMAÑO
     //==============================================
 
-    setTimeout(
-        function(){
+    setTimeout(function () {
 
-            if(mapa){
+        if (mapa) {
+            mapa.invalidateSize();
+        }
 
-                mapa.invalidateSize();
+    }, 500);
 
-            }
 
-        },
-        500
-    );
+    console.log("Leaflet creado correctamente.");
 
 }
 
@@ -371,191 +302,165 @@ function iniciarMapa(){
 // CATEGORIAS
 //==================================================
 
-async function cargarCategorias(){
+async function cargarCategorias() {
 
-    const respuesta =
-        await apiObtenerCategorias();
+    try {
 
+        const respuesta =
+            await apiObtenerCategorias();
 
-    console.log(
-        "Respuesta categorías:",
-        respuesta
-    );
-
-
-    if(
-        !respuesta ||
-        !respuesta.ok
-    ){
-
-        mostrarMensaje(
-            "No se pudieron cargar las categorías",
-            "error"
+        console.log(
+            "Respuesta categorías:",
+            respuesta
         );
 
-        return;
+        if (!respuesta || !respuesta.ok) {
 
-    }
+            mostrarMensaje(
+                "No se pudieron cargar las categorías.",
+                "error"
+            );
+
+            return;
+
+        }
+
+        categorias =
+            Array.isArray(respuesta.datos)
+                ? respuesta.datos.filter(function (c) {
+
+                    return String(
+                        c.activo || ""
+                    ).toUpperCase() === "SI";
+
+                })
+                : [];
 
 
-    categorias =
-        (respuesta.datos || [])
-        .filter(
-            c =>
-                String(c.activo)
-                .toUpperCase()
-                ===
-                "SI"
+        //==========================================
+        // ESTACIONAMIENTO TARIFADO
+        //==========================================
+
+        if (
+            !categorias.some(function (c) {
+
+                return normalizar(c.nombre) ===
+                    normalizar(TIPO_ZONA_ESTACIONAMIENTO);
+
+            })
+        ) {
+
+            categorias.push({
+
+                codigo: "GE001",
+                nombre: TIPO_ZONA_ESTACIONAMIENTO,
+                icono: "parking",
+                color: "naranja",
+                activo: "SI",
+                geometria: "poligono"
+
+            });
+
+        }
+
+
+        //==========================================
+        // CORDON ROJO
+        //==========================================
+
+        if (
+            !categorias.some(function (c) {
+
+                return normalizar(c.nombre) ===
+                    normalizar(TIPO_CORDON_ROJO);
+
+            })
+        ) {
+
+            categorias.push({
+
+                codigo: "GE002",
+                nombre: TIPO_CORDON_ROJO,
+                icono: "road",
+                color: "rojo",
+                activo: "SI",
+                geometria: "linea"
+
+            });
+
+        }
+
+
+        console.log(
+            "Categorías finales:",
+            categorias
         );
 
 
-    //================================================
-    // ESTACIONAMIENTO TARIFADO
-    //================================================
+        const tipo =
+            document.getElementById("tipo");
 
-    if(
-        !categorias.some(
-            c =>
-                normalizar(c.nombre)
-                ===
-                normalizar(
-                    TIPO_ZONA_ESTACIONAMIENTO
+        const filtro =
+            document.getElementById("filtroTipo");
+
+
+        if (tipo) {
+            tipo.innerHTML = "";
+        }
+
+        if (filtro) {
+
+            filtro.innerHTML = "";
+
+            filtro.add(
+                new Option(
+                    "Todos los elementos",
+                    ""
                 )
-        )
-    ){
+            );
 
-        categorias.push({
-
-            codigo:
-                "GE001",
-
-            nombre:
-                TIPO_ZONA_ESTACIONAMIENTO,
-
-            icono:
-                "parking",
-
-            color:
-                "naranja",
-
-            activo:
-                "SI",
-
-            geometria:
-                "poligono"
-
-        });
-
-    }
+        }
 
 
-    //================================================
-    // CORDON ROJO
-    //================================================
+        categorias.forEach(function (categoria) {
 
-    if(
-        !categorias.some(
-            c =>
-                normalizar(c.nombre)
-                ===
-                normalizar(
-                    TIPO_CORDON_ROJO
-                )
-        )
-    ){
-
-        categorias.push({
-
-            codigo:
-                "GE002",
-
-            nombre:
-                TIPO_CORDON_ROJO,
-
-            icono:
-                "road",
-
-            color:
-                "rojo",
-
-            activo:
-                "SI",
-
-            geometria:
-                "linea"
-
-        });
-
-    }
-
-
-    console.log(
-        "Categorías finales:",
-        categorias
-    );
-
-
-    const tipo =
-        document.getElementById(
-            "tipo"
-        );
-
-
-    const filtro =
-        document.getElementById(
-            "filtroTipo"
-        );
-
-
-    if(tipo){
-
-        tipo.innerHTML = "";
-
-    }
-
-
-    if(filtro){
-
-        filtro.innerHTML = "";
-
-        filtro.add(
-            new Option(
-                "Todos los elementos",
-                ""
-            )
-        );
-
-    }
-
-
-    categorias.forEach(
-        function(c){
-
-            if(tipo){
+            if (tipo) {
 
                 tipo.add(
                     new Option(
-                        c.nombre,
-                        c.nombre
+                        categoria.nombre,
+                        categoria.nombre
                     )
                 );
 
             }
 
-
-            if(filtro){
+            if (filtro) {
 
                 filtro.add(
                     new Option(
-                        c.nombre,
-                        c.nombre
+                        categoria.nombre,
+                        categoria.nombre
                     )
                 );
 
             }
 
-        }
-    );
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando categorías:",
+            error
+        );
+
+        mostrarMensaje(
+            "Error al cargar las categorías.",
+            "error"
+        );
+
+    }
 
 }
 
@@ -564,27 +469,18 @@ async function cargarCategorias(){
 // LOCALIDADES
 //==================================================
 
-async function cargarLocalidades(){
+async function cargarLocalidades() {
 
     const filtroLocalidad =
         document.getElementById(
             "filtroLocalidad"
         );
 
-
-    if(!filtroLocalidad){
-
-        console.warn(
-            "No existe #filtroLocalidad"
-        );
-
+    if (!filtroLocalidad) {
         return;
-
     }
 
-
     filtroLocalidad.innerHTML = "";
-
 
     filtroLocalidad.add(
         new Option(
@@ -593,122 +489,95 @@ async function cargarLocalidades(){
         )
     );
 
-
-    try{
+    try {
 
         const respuesta =
             await apiObtenerLocalidades();
-
 
         console.log(
             "Respuesta localidades:",
             respuesta
         );
 
-
-        if(
-            !respuesta ||
-            !respuesta.ok
-        ){
+        if (!respuesta || !respuesta.ok) {
 
             console.warn(
-                "No se pudieron cargar las localidades"
+                "No se pudieron cargar las localidades."
             );
 
             return;
 
         }
 
-
         localidades =
-            Array.isArray(
-                respuesta.datos
-            )
-            ?
-            respuesta.datos
-            :
-            [];
-
+            Array.isArray(respuesta.datos)
+                ? respuesta.datos
+                : [];
 
         const nombres = [];
 
 
-        localidades.forEach(
-            function(localidad){
+        localidades.forEach(function (localidad) {
 
-                let nombre = "";
+            let nombre = "";
 
+            if (typeof localidad === "string") {
 
-                if(
-                    typeof localidad === "string"
-                ){
+                nombre = localidad.trim();
 
-                    nombre =
-                        localidad.trim();
-
-                }else{
-
-                    nombre =
-                        localidad.nombre ||
-                        localidad.localidad ||
-                        localidad.nombreLocalidad ||
-                        localidad.descripcion ||
-                        "";
-
-                }
-
+            } else if (localidad) {
 
                 nombre =
-                    String(nombre).trim();
+                    localidad.nombre ||
+                    localidad.localidad ||
+                    localidad.nombreLocalidad ||
+                    localidad.descripcion ||
+                    "";
+
+            }
+
+            nombre = String(nombre).trim();
+
+            if (
+                nombre &&
+                !nombres.some(function (n) {
+
+                    return normalizar(n) ===
+                        normalizar(nombre);
+
+                })
+            ) {
+
+                nombres.push(nombre);
+
+            }
+
+        });
 
 
-                if(
-                    nombre &&
-                    !nombres.some(
-                        n =>
-                            normalizar(n)
-                            ===
-                            normalizar(nombre)
-                    )
-                ){
+        nombres.sort(function (a, b) {
 
-                    nombres.push(
-                        nombre
-                    );
-
+            return a.localeCompare(
+                b,
+                "es",
+                {
+                    sensitivity: "base"
                 }
+            );
 
-            }
-        );
-
-
-        nombres.sort(
-            function(a,b){
-
-                return a.localeCompare(
-                    b,
-                    "es",
-                    {
-                        sensitivity:"base"
-                    }
-                );
-
-            }
-        );
+        });
 
 
-        nombres.forEach(
-            function(nombre){
+        nombres.forEach(function (nombre) {
 
-                filtroLocalidad.add(
-                    new Option(
-                        nombre,
-                        nombre
-                    )
-                );
+            filtroLocalidad.add(
+                new Option(
+                    nombre,
+                    nombre
+                )
+            );
 
-            }
-        );
+        });
 
 
         console.log(
@@ -716,8 +585,7 @@ async function cargarLocalidades(){
             nombres
         );
 
-
-    }catch(error){
+    } catch (error) {
 
         console.error(
             "Error cargando localidades:",
@@ -733,14 +601,14 @@ async function cargarLocalidades(){
 // OBTENER CATEGORIA
 //==================================================
 
-function obtenerCategoria(nombre){
+function obtenerCategoria(nombre) {
 
-    return categorias.find(
-        c =>
-            normalizar(c.nombre)
-            ===
-            normalizar(nombre)
-    ) || null;
+    return categorias.find(function (categoria) {
+
+        return normalizar(categoria.nombre) ===
+            normalizar(nombre);
+
+    }) || null;
 
 }
 
@@ -749,19 +617,16 @@ function obtenerCategoria(nombre){
 // EVENTOS
 //==================================================
 
-function enlazarEventos(){
+function enlazarEventos() {
 
     //==============================================
     // FORMULARIO
     //==============================================
 
     const form =
-        document.getElementById(
-            "formElemento"
-        );
+        document.getElementById("formElemento");
 
-
-    if(form){
+    if (form) {
 
         form.addEventListener(
             "submit",
@@ -772,16 +637,13 @@ function enlazarEventos(){
 
 
     //==============================================
-    // SELECTOR DE TIPO
+    // TIPO
     //==============================================
 
     const selectorTipo =
-        document.getElementById(
-            "tipo"
-        );
+        document.getElementById("tipo");
 
-
-    if(selectorTipo){
+    if (selectorTipo) {
 
         selectorTipo.addEventListener(
             "change",
@@ -796,12 +658,9 @@ function enlazarEventos(){
     //==============================================
 
     const actualizar =
-        document.getElementById(
-            "btnActualizar"
-        );
+        document.getElementById("btnActualizar");
 
-
-    if(actualizar){
+    if (actualizar) {
 
         actualizar.addEventListener(
             "click",
@@ -816,16 +675,13 @@ function enlazarEventos(){
     //==============================================
 
     const buscar =
-        document.getElementById(
-            "buscar"
-        );
+        document.getElementById("buscar");
 
-
-    if(buscar){
+    if (buscar) {
 
         buscar.addEventListener(
             "input",
-            renderizarMarcadores
+            renderizarMapaCompleto
         );
 
     }
@@ -836,12 +692,9 @@ function enlazarEventos(){
     //==============================================
 
     const filtro =
-        document.getElementById(
-            "filtroTipo"
-        );
+        document.getElementById("filtroTipo");
 
-
-    if(filtro){
+    if (filtro) {
 
         filtro.addEventListener(
             "change",
@@ -860,15 +713,13 @@ function enlazarEventos(){
             "filtroLocalidad"
         );
 
-
-    if(filtroLocalidad){
+    if (filtroLocalidad) {
 
         filtroLocalidad.addEventListener(
             "change",
-            function(){
+            function () {
 
                 renderizarMapaCompleto();
-
                 centrarLocalidadSeleccionada();
 
             }
@@ -882,20 +733,16 @@ function enlazarEventos(){
     //==============================================
 
     const dashboard =
-        document.getElementById(
-            "btnDashboard"
-        );
+        document.getElementById("btnDashboard");
 
+    if (dashboard) {
 
-    if(dashboard){
+        dashboard.onclick = function () {
 
-        dashboard.onclick =
-            function(){
+            location.href =
+                "../../pages/dashboard.html";
 
-                location.href =
-                    "../../pages/dashboard.html";
-
-            };
+        };
 
     }
 
@@ -905,20 +752,16 @@ function enlazarEventos(){
     //==============================================
 
     const informes =
-        document.getElementById(
-            "btnInformes"
-        );
+        document.getElementById("btnInformes");
 
+    if (informes) {
 
-    if(informes){
+        informes.onclick = function () {
 
-        informes.onclick =
-            function(){
+            location.href =
+                "../informes/informes.html";
 
-                location.href =
-                    "../informes/informes.html";
-
-            };
+        };
 
     }
 
@@ -928,15 +771,11 @@ function enlazarEventos(){
     //==============================================
 
     const salirBtn =
-        document.getElementById(
-            "btnSalir"
-        );
+        document.getElementById("btnSalir");
 
+    if (salirBtn) {
 
-    if(salirBtn){
-
-        salirBtn.onclick =
-            salir;
+        salirBtn.onclick = salir;
 
     }
 
@@ -950,8 +789,7 @@ function enlazarEventos(){
             "btnNuevaZona"
         );
 
-
-    if(btnNuevaZona){
+    if (btnNuevaZona) {
 
         btnNuevaZona.addEventListener(
             "click",
@@ -970,8 +808,7 @@ function enlazarEventos(){
             "btnCancelarZona"
         );
 
-
-    if(btnCancelarZona){
+    if (btnCancelarZona) {
 
         btnCancelarZona.addEventListener(
             "click",
@@ -990,8 +827,7 @@ function enlazarEventos(){
             "btnNuevoCordon"
         );
 
-
-    if(btnNuevoCordon){
+    if (btnNuevoCordon) {
 
         btnNuevoCordon.addEventListener(
             "click",
@@ -1010,8 +846,7 @@ function enlazarEventos(){
             "btnCancelarCordon"
         );
 
-
-    if(btnCancelarCordon){
+    if (btnCancelarCordon) {
 
         btnCancelarCordon.addEventListener(
             "click",
@@ -1027,86 +862,51 @@ function enlazarEventos(){
 // CAMBIO DE TIPO
 //==================================================
 
-function manejarCambioTipo(){
+function manejarCambioTipo() {
 
     const selector =
-        document.getElementById(
-            "tipo"
-        );
+        document.getElementById("tipo");
 
-
-    if(!selector){
-
+    if (!selector) {
         return;
-
     }
 
-
-    const tipo =
-        selector.value;
+    const tipo = selector.value;
 
 
-    //================================================
-    // ESTACIONAMIENTO TARIFADO
-    //================================================
-
-    if(
-        normalizar(tipo)
-        ===
-        normalizar(
-            TIPO_ZONA_ESTACIONAMIENTO
-        )
-    ){
+    if (
+        normalizar(tipo) ===
+        normalizar(TIPO_ZONA_ESTACIONAMIENTO)
+    ) {
 
         actualizarTextoAyuda(
             "Dibuje la zona de estacionamiento tarifado sobre el mapa. Haga clic en los vértices y clic derecho para cerrar."
         );
 
-
-        if(!dibujandoZona){
-
+        if (!dibujandoZona) {
             iniciarDibujoZona();
-
         }
 
-
         return;
-
     }
 
 
-    //================================================
-    // CORDON ROJO
-    //================================================
-
-    if(
-        normalizar(tipo)
-        ===
-        normalizar(
-            TIPO_CORDON_ROJO
-        )
-    ){
+    if (
+        normalizar(tipo) ===
+        normalizar(TIPO_CORDON_ROJO)
+    ) {
 
         actualizarTextoAyuda(
             "Dibuje el cordón rojo sobre el mapa. Haga clic siguiendo el borde y clic derecho para finalizar."
         );
 
-
-        if(!dibujandoCordon){
-
+        if (!dibujandoCordon) {
             iniciarDibujoCordon();
-
         }
 
-
         return;
-
     }
 
-
-    //================================================
-    // ELEMENTO NORMAL
-    //================================================
 
     actualizarTextoAyuda(
         "Seleccione un punto del mapa para registrar un nuevo elemento."
@@ -1119,96 +919,66 @@ function manejarCambioTipo(){
 // TEXTO DE AYUDA
 //==================================================
 
-function actualizarTextoAyuda(texto){
+function actualizarTextoAyuda(texto) {
 
-    const elementos =
+    const elementosAyuda =
         document.querySelectorAll(
             ".contenido header p"
         );
 
+    elementosAyuda.forEach(function (elemento) {
 
-    elementos.forEach(
-        function(elemento){
+        elemento.textContent = texto;
 
-            elemento.textContent =
-                texto;
-
-        }
-    );
+    });
 
 }
 
 
 //==================================================
-// NUEVA UBICACION
+// SELECCIONAR UBICACION
 //==================================================
 
-function seleccionarUbicacion(e){
+function seleccionarUbicacion(e) {
 
-    if(dibujandoZona){
+    if (dibujandoZona) {
 
-        agregarPuntoZona(
-            e
-        );
+        agregarPuntoZona(e);
+        return;
 
+    }
+
+    if (dibujandoCordon) {
+
+        agregarPuntoCordon(e);
         return;
 
     }
 
 
-    if(dibujandoCordon){
-
-        agregarPuntoCordon(
-            e
-        );
-
-        return;
-
-    }
-
-
-    const lat =
-        e.latlng.lat;
-
-
-    const lng =
-        e.latlng.lng;
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
 
 
     const campoLat =
-        document.getElementById(
-            "lat"
-        );
-
+        document.getElementById("lat");
 
     const campoLng =
-        document.getElementById(
-            "lng"
-        );
+        document.getElementById("lng");
 
 
-    if(campoLat){
+    if (campoLat) {
+        campoLat.value = lat.toFixed(7);
+    }
 
-        campoLat.value =
-            lat.toFixed(7);
-
+    if (campoLng) {
+        campoLng.value = lng.toFixed(7);
     }
 
 
-    if(campoLng){
+    if (marcadorNuevo) {
 
-        campoLng.value =
-            lng.toFixed(7);
-
-    }
-
-
-    if(marcadorNuevo){
-
-        mapa.removeLayer(
-            marcadorNuevo
-        );
-
+        mapa.removeLayer(marcadorNuevo);
         marcadorNuevo = null;
 
     }
@@ -1216,14 +986,10 @@ function seleccionarUbicacion(e){
 
     marcadorNuevo =
         L.marker(
-            [lat,lng],
+            [lat, lng],
             {
-
-                draggable:true,
-
-                icon:
-                    crearIconoNuevo()
-
+                draggable: true,
+                icon: crearIconoNuevo()
             }
         )
         .addTo(mapa);
@@ -1231,25 +997,19 @@ function seleccionarUbicacion(e){
 
     marcadorNuevo.on(
         "drag",
-        function(){
+        function () {
 
-            const p =
+            const posicion =
                 marcadorNuevo.getLatLng();
 
-
-            if(campoLat){
-
+            if (campoLat) {
                 campoLat.value =
-                    p.lat.toFixed(7);
-
+                    posicion.lat.toFixed(7);
             }
 
-
-            if(campoLng){
-
+            if (campoLng) {
                 campoLng.value =
-                    p.lng.toFixed(7);
-
+                    posicion.lng.toFixed(7);
             }
 
         }
@@ -1257,10 +1017,10 @@ function seleccionarUbicacion(e){
 
 
     mapa.flyTo(
-        [lat,lng],
+        [lat, lng],
         18,
         {
-            duration:0.6
+            duration: 0.6
         }
     );
 
@@ -1271,64 +1031,66 @@ function seleccionarUbicacion(e){
 // CARGAR ELEMENTOS
 //==================================================
 
-async function cargarElementos(){
+async function cargarElementos() {
 
     mostrarMensaje(
         "Cargando elementos...",
         ""
     );
 
+    try {
 
-    const respuesta =
-        await apiObtenerElementos();
+        const respuesta =
+            await apiObtenerElementos();
 
+        console.log(
+            "Respuesta API:",
+            respuesta
+        );
 
-    console.log(
-        "Respuesta API:",
-        respuesta
-    );
+        if (!respuesta || !respuesta.ok) {
 
+            mostrarMensaje(
+                respuesta?.mensaje ||
+                "No se pudieron obtener los elementos.",
+                "error"
+            );
 
-    if(
-        !respuesta ||
-        !respuesta.ok
-    ){
+            return;
+
+        }
+
+        elementos =
+            Array.isArray(respuesta.datos)
+                ? respuesta.datos
+                : [];
+
+        console.log(
+            "Elementos cargados:",
+            elementos.length
+        );
+
+        renderizarMapaCompleto();
 
         mostrarMensaje(
-            respuesta?.mensaje ||
-            "No se pudieron obtener los elementos.",
+            elementos.length +
+            " elementos cargados.",
+            "exito"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando elementos:",
+            error
+        );
+
+        mostrarMensaje(
+            "Error al cargar los elementos.",
             "error"
         );
 
-        return;
-
     }
-
-
-    elementos =
-        Array.isArray(
-            respuesta.datos
-        )
-        ?
-        respuesta.datos
-        :
-        [];
-
-
-    console.log(
-        "Elementos cargados:",
-        elementos.length
-    );
-
-
-    renderizarMapaCompleto();
-
-
-    mostrarMensaje(
-        elementos.length +
-        " elementos cargados.",
-        "exito"
-    );
 
 }
 
@@ -1337,7 +1099,7 @@ async function cargarElementos(){
 // RENDERIZAR MAPA COMPLETO
 //==================================================
 
-function renderizarMapaCompleto(){
+function renderizarMapaCompleto() {
 
     renderizarMarcadores();
 
@@ -1348,29 +1110,20 @@ function renderizarMapaCompleto(){
 // RENDERIZAR MARCADORES
 //==================================================
 
-function renderizarMarcadores(){
+function renderizarMarcadores() {
 
-    if(!capaMarcadores){
-
+    if (!capaMarcadores) {
         return;
-
     }
-
 
     capaMarcadores.clearLayers();
 
 
     const filtroElemento =
-        document.getElementById(
-            "filtroTipo"
-        );
-
+        document.getElementById("filtroTipo");
 
     const campoBuscar =
-        document.getElementById(
-            "buscar"
-        );
-
+        document.getElementById("buscar");
 
     const filtroLocalidad =
         document.getElementById(
@@ -1380,255 +1133,169 @@ function renderizarMarcadores(){
 
     const filtroTipo =
         filtroElemento
-        ?
-        filtroElemento.value
-        :
-        "";
+            ? filtroElemento.value
+            : "";
 
 
     const localidadSeleccionada =
         filtroLocalidad
-        ?
-        filtroLocalidad.value
-        :
-        "";
+            ? filtroLocalidad.value
+            : "";
 
 
     const texto =
         normalizar(
             campoBuscar
-            ?
-            campoBuscar.value
-            :
-            ""
+                ? campoBuscar.value
+                : ""
         );
 
-
-    //================================================
-    // FILTRO DE GEOMETRIA ESPECIAL
-    //================================================
 
     const mostrandoZona =
-        normalizar(filtroTipo)
-        ===
-        normalizar(
-            TIPO_ZONA_ESTACIONAMIENTO
-        );
+        normalizar(filtroTipo) ===
+        normalizar(TIPO_ZONA_ESTACIONAMIENTO);
 
 
     const mostrandoCordon =
-        normalizar(filtroTipo)
-        ===
-        normalizar(
-            TIPO_CORDON_ROJO
-        );
+        normalizar(filtroTipo) ===
+        normalizar(TIPO_CORDON_ROJO);
 
 
-    //================================================
-    // SI SELECCIONÓ ZONA O CORDON
-    // NO MOSTRAR PUNTOS
-    //================================================
+    if (mostrandoZona || mostrandoCordon) {
 
-    if(
-        mostrandoZona ||
-        mostrandoCordon
-    ){
+        if (mostrandoZona) {
 
-        if(mostrandoZona){
-
-            mostrarZonasEstacionamiento(
-                true
-            );
+            mostrarZonasEstacionamiento(true);
 
         }
 
+        if (mostrandoCordon) {
 
-        if(mostrandoCordon){
-
-            mostrarCordonesRojos(
-                true
-            );
+            mostrarCordonesRojos(true);
 
         }
-
 
         actualizarContadorGeometrias();
 
         return;
-
     }
 
 
-    //================================================
-    // ELEMENTOS NORMALES
-    //================================================
-
     const visibles =
-        elementos.filter(
-            function(e){
+        elementos.filter(function (elemento) {
 
-                const lat =
-                    coordenada(
-                        e.latitud
-                    );
+            const lat =
+                coordenada(elemento.latitud);
 
-
-                const lng =
-                    coordenada(
-                        e.longitud
-                    );
+            const lng =
+                coordenada(elemento.longitud);
 
 
-                if(
-                    lat === null ||
-                    lng === null
-                ){
+            if (
+                lat === null ||
+                lng === null
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                filtroTipo &&
+                normalizar(elemento.tipo) !==
+                normalizar(filtroTipo)
+            ) {
+
+                return false;
+
+            }
+
+
+            if (localidadSeleccionada) {
+
+                const localidadElemento =
+                    elemento.localidadNombre ||
+                    elemento.localidad ||
+                    elemento.nombreLocalidad ||
+                    "";
+
+                if (
+                    normalizar(localidadElemento) !==
+                    normalizar(localidadSeleccionada)
+                ) {
 
                     return false;
 
                 }
 
+            }
 
-                if(
-                    filtroTipo &&
-                    normalizar(e.tipo)
-                    !==
-                    normalizar(filtroTipo)
-                ){
 
-                    return false;
+            const cadena =
+                normalizar([
+                    elemento.codigo,
+                    elemento.nombre,
+                    elemento.tipo,
+                    elemento.direccion,
+                    elemento.estado,
+                    elemento.localidadNombre,
+                    elemento.localidad
+                ].join(" "));
 
+
+            return cadena.includes(texto);
+
+        });
+
+
+    visibles.forEach(function (elemento) {
+
+        const lat =
+            coordenada(elemento.latitud);
+
+        const lng =
+            coordenada(elemento.longitud);
+
+
+        const marcador =
+            L.marker(
+                [lat, lng],
+                {
+                    icon: crearIcono(
+                        elemento.tipo
+                    ),
+                    keyboard: true,
+                    riseOnHover: true
                 }
+            );
 
 
-                if(
-                    localidadSeleccionada
-                ){
-
-                    const localidadElemento =
-                        e.localidadNombre ||
-                        e.localidad ||
-                        e.nombreLocalidad ||
-                        "";
-
-
-                    if(
-                        normalizar(
-                            localidadElemento
-                        )
-                        !==
-                        normalizar(
-                            localidadSeleccionada
-                        )
-                    ){
-
-                        return false;
-
-                    }
-
-                }
-
-
-                const cadena =
-                    normalizar(
-                        [
-                            e.codigo,
-                            e.nombre,
-                            e.tipo,
-                            e.direccion,
-                            e.estado,
-                            e.localidadNombre,
-                            e.localidad
-                        ].join(" ")
-                    );
-
-
-                return cadena.includes(
-                    texto
-                );
-
+        marcador.bindPopup(
+            crearPopup(elemento),
+            {
+                maxWidth: 320,
+                minWidth: 280,
+                autoPan: true,
+                closeButton: true
             }
         );
 
 
-    visibles.forEach(
-        function(e){
-
-            const lat =
-                coordenada(
-                    e.latitud
-                );
-
-
-            const lng =
-                coordenada(
-                    e.longitud
-                );
-
-
-            const marcador =
-                L.marker(
-                    [lat,lng],
-                    {
-
-                        icon:
-                            crearIcono(
-                                e.tipo
-                            ),
-
-                        keyboard:true,
-
-                        riseOnHover:true
-
-                    }
-                );
-
-
-            marcador.bindPopup(
-                crearPopup(e),
-                {
-
-                    maxWidth:320,
-
-                    minWidth:280,
-
-                    autoPan:true,
-
-                    closeButton:true
-
-                }
-            );
-
-
-            marcador.addTo(
-                capaMarcadores
-            );
-
-        }
-    );
-
-
-    //================================================
-    // MOSTRAR GEOMETRIAS CUANDO NO HAY FILTRO
-    //================================================
-
-    if(!filtroTipo){
-
-        mostrarZonasEstacionamiento(
-            false
+        marcador.addTo(
+            capaMarcadores
         );
 
+    });
 
-        mostrarCordonesRojos(
-            false
-        );
+
+    if (!filtroTipo) {
+
+        mostrarZonasEstacionamiento(false);
+        mostrarCordonesRojos(false);
 
     }
 
-
-    //================================================
-    // CONTADOR
-    //================================================
 
     const contador =
         document.getElementById(
@@ -1636,9 +1303,9 @@ function renderizarMarcadores(){
         );
 
 
-    if(contador){
+    if (contador) {
 
-        if(!filtroTipo){
+        if (!filtroTipo) {
 
             contador.textContent =
                 visibles.length +
@@ -1648,7 +1315,7 @@ function renderizarMarcadores(){
                 contarCordonesActivos() +
                 " cordones";
 
-        }else{
+        } else {
 
             contador.textContent =
                 visibles.length +
@@ -1665,18 +1332,15 @@ function renderizarMarcadores(){
 // CONTADOR GEOMETRIAS
 //==================================================
 
-function actualizarContadorGeometrias(){
+function actualizarContadorGeometrias() {
 
     const contador =
         document.getElementById(
             "contadorResultados"
         );
 
-
-    if(!contador){
-
+    if (!contador) {
         return;
-
     }
 
 
@@ -1685,39 +1349,29 @@ function actualizarContadorGeometrias(){
             "filtroTipo"
         );
 
-
     const valor =
         filtro
-        ?
-        filtro.value
-        :
-        "";
+            ? filtro.value
+            : "";
 
 
-    if(
-        normalizar(valor)
-        ===
-        normalizar(
-            TIPO_ZONA_ESTACIONAMIENTO
-        )
-    ){
+    if (
+        normalizar(valor) ===
+        normalizar(TIPO_ZONA_ESTACIONAMIENTO)
+    ) {
 
         contador.textContent =
             contarZonasActivas() +
             " zonas de estacionamiento";
 
         return;
-
     }
 
 
-    if(
-        normalizar(valor)
-        ===
-        normalizar(
-            TIPO_CORDON_ROJO
-        )
-    ){
+    if (
+        normalizar(valor) ===
+        normalizar(TIPO_CORDON_ROJO)
+    ) {
 
         contador.textContent =
             contarCordonesActivos() +
@@ -1729,22 +1383,17 @@ function actualizarContadorGeometrias(){
 
 
 //==================================================
-// CONTAR ZONAS ACTIVAS
+// CONTAR ZONAS
 //==================================================
 
-function contarZonasActivas(){
+function contarZonasActivas() {
 
     return zonasEstacionamiento.filter(
-        function(z){
+        function (zona) {
 
-            return (
-                String(
-                    z.activo || ""
-                )
-                .toUpperCase()
-                ===
-                "SI"
-            );
+            return String(
+                zona.activo || ""
+            ).toUpperCase() === "SI";
 
         }
     ).length;
@@ -1753,22 +1402,17 @@ function contarZonasActivas(){
 
 
 //==================================================
-// CONTAR CORDONES ACTIVOS
+// CONTAR CORDONES
 //==================================================
 
-function contarCordonesActivos(){
+function contarCordonesActivos() {
 
     return cordonesRojos.filter(
-        function(c){
+        function (cordon) {
 
-            return (
-                String(
-                    c.activo || ""
-                )
-                .toUpperCase()
-                ===
-                "SI"
-            );
+            return String(
+                cordon.activo || ""
+            ).toUpperCase() === "SI";
 
         }
     ).length;
@@ -1777,15 +1421,13 @@ function contarCordonesActivos(){
 
 
 //==================================================
-// CENTRAR LOCALIDAD SELECCIONADA
+// CENTRAR LOCALIDAD
 //==================================================
 
-function centrarLocalidadSeleccionada(){
+function centrarLocalidadSeleccionada() {
 
-    if(!mapa){
-
+    if (!mapa) {
         return;
-
     }
 
 
@@ -1795,10 +1437,10 @@ function centrarLocalidadSeleccionada(){
         );
 
 
-    if(
+    if (
         !filtroLocalidad ||
         !filtroLocalidad.value
-    ){
+    ) {
 
         return;
 
@@ -1811,80 +1453,66 @@ function centrarLocalidadSeleccionada(){
         );
 
 
-    //================================================
-    // ELEMENTOS
-    //================================================
-
-    const elementosLocalidad =
-        elementos.filter(
-            function(e){
-
-                const localidad =
-                    e.localidadNombre ||
-                    e.localidad ||
-                    e.nombreLocalidad ||
-                    "";
-
-
-                return (
-                    normalizar(localidad)
-                    ===
-                    localidadSeleccionada
-                );
-
-            }
-        );
-
-
     const puntos = [];
 
 
-    elementosLocalidad.forEach(
-        function(e){
+    //==============================================
+    // ELEMENTOS
+    //==============================================
 
-            const lat =
-                coordenada(
-                    e.latitud
-                );
+    elementos.forEach(function (elemento) {
 
-
-            const lng =
-                coordenada(
-                    e.longitud
-                );
+        const localidad =
+            elemento.localidadNombre ||
+            elemento.localidad ||
+            elemento.nombreLocalidad ||
+            "";
 
 
-            if(
-                lat !== null &&
-                lng !== null
-            ){
+        if (
+            normalizar(localidad) !==
+            localidadSeleccionada
+        ) {
 
-                puntos.push([
-                    lat,
-                    lng
-                ]);
-
-            }
+            return;
 
         }
-    );
 
 
-    //================================================
+        const lat =
+            coordenada(elemento.latitud);
+
+        const lng =
+            coordenada(elemento.longitud);
+
+
+        if (
+            lat !== null &&
+            lng !== null
+        ) {
+
+            puntos.push([
+                lat,
+                lng
+            ]);
+
+        }
+
+    });
+
+
+    //==============================================
     // ZONAS
-    //================================================
+    //==============================================
 
     zonasEstacionamiento.forEach(
-        function(zona){
+        function (zona) {
 
-            if(
+            if (
                 String(
                     zona.activo || ""
-                )
-                .toUpperCase()
-                !==
-                "SI"
-            ){
+                ).toUpperCase() !== "SI"
+            ) {
 
                 return;
 
@@ -1897,80 +1525,46 @@ function centrarLocalidadSeleccionada(){
                 "";
 
 
-            if(
-                normalizar(localidad)
-                !==
+            if (
+                normalizar(localidad) !==
                 localidadSeleccionada
-            ){
+            ) {
 
                 return;
 
             }
 
 
-            try{
-
-                const coordenadas =
-                    JSON.parse(
-                        zona.coordenadas
-                    );
-
-
-                if(
-                    Array.isArray(
-                        coordenadas
-                    )
-                ){
-
-                    coordenadas.forEach(
-                        function(p){
-
-                            if(
-                                Array.isArray(p) &&
-                                p.length >= 2
-                            ){
-
-                                puntos.push([
-                                    Number(p[0]),
-                                    Number(p[1])
-                                ]);
-
-                            }
-
-                        }
-                    );
-
-                }
-
-            }
-            catch(error){
-
-                console.warn(
-                    "No se pudieron leer coordenadas de zona.",
-                    zona
+            const coordenadas =
+                leerCoordenadas(
+                    zona.coordenadas
                 );
 
-            }
+
+            coordenadas.forEach(
+                function (punto) {
+
+                    puntos.push(punto);
+
+                }
+            );
 
         }
     );
 
 
-    //================================================
+    //==============================================
     // CORDONES
-    //================================================
+    //==============================================
 
     cordonesRojos.forEach(
-        function(cordon){
+        function (cordon) {
 
-            if(
+            if (
                 String(
                     cordon.activo || ""
-                )
-                .toUpperCase()
-                !==
-                "SI"
-            ){
+                ).toUpperCase() !== "SI"
+            ) {
 
                 return;
 
@@ -1983,105 +1577,53 @@ function centrarLocalidadSeleccionada(){
                 "";
 
 
-            if(
-                normalizar(localidad)
-                !==
+            if (
+                normalizar(localidad) !==
                 localidadSeleccionada
-            ){
+            ) {
 
                 return;
 
             }
 
 
-            try{
-
-                const coordenadas =
-                    JSON.parse(
-                        cordon.coordenadas
-                    );
-
-
-                if(
-                    Array.isArray(
-                        coordenadas
-                    )
-                ){
-
-                    coordenadas.forEach(
-                        function(p){
-
-                            if(
-                                Array.isArray(p) &&
-                                p.length >= 2
-                            ){
-
-                                puntos.push([
-                                    Number(p[0]),
-                                    Number(p[1])
-                                ]);
-
-                            }
-
-                        }
-                    );
-
-                }
-
-            }
-            catch(error){
-
-                console.warn(
-                    "No se pudieron leer coordenadas de cordón.",
-                    cordon
+            const coordenadas =
+                leerCoordenadas(
+                    cordon.coordenadas
                 );
 
-            }
+
+            coordenadas.forEach(
+                function (punto) {
+
+                    puntos.push(punto);
+
+                }
+            );
 
         }
     );
 
 
-    //================================================
-    // CENTRAR
-    //================================================
-
-    if(puntos.length){
+    if (puntos.length) {
 
         const limites =
-            L.latLngBounds(
-                puntos
-            );
+            L.latLngBounds(puntos);
 
 
         mapa.fitBounds(
             limites,
             {
-
-                padding:[
-                    80,
-                    80
-                ],
-
-                maxZoom:15,
-
-                animate:true,
-
-                duration:0.8
-
+                padding: [80, 80],
+                maxZoom: 15,
+                animate: true,
+                duration: 0.8
             }
         );
-
 
         return;
 
     }
-
-
-    console.warn(
-        "No hay elementos para la localidad:",
-        filtroLocalidad.value
-    );
 
 
     mostrarMensaje(
@@ -2093,10 +1635,107 @@ function centrarLocalidadSeleccionada(){
 
 
 //==================================================
+// LEER COORDENADAS
+//==================================================
+
+function leerCoordenadas(valor) {
+
+    if (Array.isArray(valor)) {
+
+        return normalizarPuntos(valor);
+
+    }
+
+
+    if (
+        typeof valor !== "string" ||
+        !valor.trim()
+    ) {
+
+        return [];
+
+    }
+
+
+    try {
+
+        const datos =
+            JSON.parse(valor);
+
+        return normalizarPuntos(datos);
+
+    } catch (error) {
+
+        console.warn(
+            "Coordenadas inválidas:",
+            valor
+        );
+
+        return [];
+
+    }
+
+}
+
+
+//==================================================
+// NORMALIZAR PUNTOS
+//==================================================
+
+function normalizarPuntos(datos) {
+
+    if (!Array.isArray(datos)) {
+        return [];
+    }
+
+
+    const resultado = [];
+
+
+    datos.forEach(function (punto) {
+
+        if (
+            !Array.isArray(punto) ||
+            punto.length < 2
+        ) {
+
+            return;
+
+        }
+
+
+        const lat =
+            Number(punto[0]);
+
+        const lng =
+            Number(punto[1]);
+
+
+        if (
+            Number.isFinite(lat) &&
+            Number.isFinite(lng)
+        ) {
+
+            resultado.push([
+                lat,
+                lng
+            ]);
+
+        }
+
+    });
+
+
+    return resultado;
+
+}
+
+
+//==================================================
 // ICONO POI
 //==================================================
 
-function crearIcono(tipo){
+function crearIcono(tipo) {
 
     const categoria =
         obtenerCategoria(tipo);
@@ -2173,19 +1812,15 @@ function crearIcono(tipo){
     let claseIcono =
         "fa-solid fa-location-dot";
 
-
-    let color =
-        "gris";
+    let color = "gris";
 
 
-    if(categoria){
+    if (categoria) {
 
         const iconoOriginal =
             String(
-                categoria.icono ||
-                ""
-            )
-            .trim();
+                categoria.icono || ""
+            ).trim();
 
 
         const iconoNormalizado =
@@ -2200,63 +1835,35 @@ function crearIcono(tipo){
             );
 
 
-        if(
-            iconos[
-                iconoNormalizado
-            ]
-        ){
+        if (
+            iconos[iconoNormalizado]
+        ) {
 
             claseIcono =
-                iconos[
-                    iconoNormalizado
-                ];
+                iconos[iconoNormalizado];
 
-        }
-
-
-        else if(
-            nombreNormalizado.includes(
-                "parada"
-            )
-            &&
+        } else if (
+            nombreNormalizado.includes("parada") &&
             (
-                nombreNormalizado.includes(
-                    "bus"
-                )
-                ||
-                nombreNormalizado.includes(
-                    "omnibus"
-                )
+                nombreNormalizado.includes("bus") ||
+                nombreNormalizado.includes("omnibus")
             )
-        ){
+        ) {
 
             claseIcono =
                 "fa-solid fa-bus";
 
-        }
-
-
-        else if(
-            nombreNormalizado.includes(
-                "sonda"
-            )
-            &&
-            nombreNormalizado.includes(
-                "velocidad"
-            )
-        ){
+        } else if (
+            nombreNormalizado.includes("sonda") &&
+            nombreNormalizado.includes("velocidad")
+        ) {
 
             claseIcono =
                 "fa-solid fa-gauge-high";
 
-        }
-
-
-        else if(
-            nombreNormalizado.includes(
-                "radar"
-            )
-        ){
+        } else if (
+            nombreNormalizado.includes("radar")
+        ) {
 
             claseIcono =
                 "fa-solid fa-camera";
@@ -2266,8 +1873,7 @@ function crearIcono(tipo){
 
         color =
             String(
-                categoria.color ||
-                "gris"
+                categoria.color || "gris"
             )
             .trim()
             .toLowerCase();
@@ -2278,33 +1884,28 @@ function crearIcono(tipo){
     return L.divIcon({
 
         className:
-            "poi-elemento " +
-            color,
+            "poi-elemento " + color,
 
         html:
-        `
-        <div class="poi-pin">
+            '<div class="poi-pin">' +
+                '<div class="poi-icono">' +
+                    '<i class="' +
+                        escaparAtributoHTML(claseIcono) +
+                    '"></i>' +
+                '</div>' +
+            '</div>',
 
-            <div class="poi-icono">
-
-                <i class="${claseIcono}"></i>
-
-            </div>
-
-        </div>
-        `,
-
-        iconSize:[
+        iconSize: [
             44,
             52
         ],
 
-        iconAnchor:[
+        iconAnchor: [
             22,
             52
         ],
 
-        popupAnchor:[
+        popupAnchor: [
             0,
             -52
         ]
@@ -2318,7 +1919,7 @@ function crearIcono(tipo){
 // ICONO NUEVO
 //==================================================
 
-function crearIconoNuevo(){
+function crearIconoNuevo() {
 
     return L.divIcon({
 
@@ -2326,29 +1927,23 @@ function crearIconoNuevo(){
             "poi-elemento nuevo",
 
         html:
-        `
-        <div class="poi-pin">
+            '<div class="poi-pin">' +
+                '<div class="poi-icono">' +
+                    '<i class="fa-solid fa-crosshairs"></i>' +
+                '</div>' +
+            '</div>',
 
-            <div class="poi-icono">
-
-                <i class="fa-solid fa-crosshairs"></i>
-
-            </div>
-
-        </div>
-        `,
-
-        iconSize:[
+        iconSize: [
             44,
             52
         ],
 
-        iconAnchor:[
+        iconAnchor: [
             22,
             52
         ],
 
-        popupAnchor:[
+        popupAnchor: [
             0,
             -52
         ]
@@ -2362,131 +1957,96 @@ function crearIconoNuevo(){
 // POPUP ELEMENTO
 //==================================================
 
-function crearPopup(e){
+function crearPopup(elemento) {
 
-    return `
-
-    <div class="popup-card">
-
-        <h2>
-            ${escapar(e.codigo)}
-        </h2>
+    const id =
+        escaparAtributo(
+            elemento.id
+        );
 
 
-        <div class="popup-linea">
+    return (
+        '<div class="popup-card">' +
 
-            <strong>Tipo</strong><br>
+            '<h2>' +
+                escapar(elemento.codigo) +
+            '</h2>' +
 
-            ${escapar(e.tipo)}
+            '<div class="popup-linea">' +
+                '<strong>Tipo</strong><br>' +
+                escapar(elemento.tipo) +
+            '</div>' +
 
-        </div>
+            '<div class="popup-linea">' +
+                '<strong>Nombre</strong><br>' +
+                escapar(elemento.nombre) +
+            '</div>' +
 
+            '<div class="popup-linea">' +
+                '<strong>Localidad</strong><br>' +
+                escapar(
+                    elemento.localidadNombre ||
+                    elemento.localidad ||
+                    "-"
+                ) +
+            '</div>' +
 
-        <div class="popup-linea">
+            '<div class="popup-linea">' +
+                '<strong>Estado</strong><br>' +
+                '<span class="estado-popup">' +
+                    escapar(elemento.estado) +
+                '</span>' +
+            '</div>' +
 
-            <strong>Nombre</strong><br>
+            '<div class="popup-linea">' +
+                '<strong>Dirección</strong><br>' +
+                escapar(elemento.direccion) +
+            '</div>' +
 
-            ${escapar(e.nombre)}
+            '<div class="popup-linea">' +
+                '<strong>Descripción</strong><br>' +
+                escapar(
+                    elemento.descripcion || "-"
+                ) +
+            '</div>' +
 
-        </div>
+            '<div class="popup-linea">' +
+                '<strong>Características</strong><br>' +
+                escapar(
+                    elemento.caracteristicas || "-"
+                ) +
+            '</div>' +
 
+            '<hr>' +
 
-        <div class="popup-linea">
+            '<div class="popup-botones">' +
 
-            <strong>Localidad</strong><br>
+                '<button ' +
+                    'type="button" ' +
+                    'class="btn-inspeccion" ' +
+                    'onclick="abrirInspecciones(\'' +
+                        id +
+                    '\')">' +
 
-            ${escapar(
-                e.localidadNombre ||
-                e.localidad ||
-                "-"
-            )}
+                    '📝 Inspecciones' +
 
-        </div>
+                '</button>' +
 
+                '<button ' +
+                    'type="button" ' +
+                    'class="btn-eliminar" ' +
+                    'onclick="eliminarElemento(\'' +
+                        id +
+                    '\')">' +
 
-        <div class="popup-linea">
+                    '🗑 Eliminar' +
 
-            <strong>Estado</strong><br>
+                '</button>' +
 
-            <span class="estado-popup">
+            '</div>' +
 
-                ${escapar(e.estado)}
-
-            </span>
-
-        </div>
-
-
-        <div class="popup-linea">
-
-            <strong>Dirección</strong><br>
-
-            ${escapar(e.direccion)}
-
-        </div>
-
-
-        <div class="popup-linea">
-
-            <strong>Descripción</strong><br>
-
-            ${escapar(
-                e.descripcion ||
-                "-"
-            )}
-
-        </div>
-
-
-        <div class="popup-linea">
-
-            <strong>Características</strong><br>
-
-            ${escapar(
-                e.caracteristicas ||
-                "-"
-            )}
-
-        </div>
-
-
-        <hr>
-
-
-        <div class="popup-botones">
-
-            <button
-                class="btn-inspeccion"
-                onclick="
-                    abrirInspecciones(
-                        '${escapar(e.id)}'
-                    )
-                "
-            >
-
-                📝 Inspecciones
-
-            </button>
-
-
-            <button
-                class="btn-eliminar"
-                onclick="
-                    eliminarElemento(
-                        '${escapar(e.id)}'
-                    )
-                "
-            >
-
-                🗑 Eliminar
-
-            </button>
-
-        </div>
-
-    </div>
-
-    `;
+        '</div>'
+    );
 
 }
 
@@ -2495,7 +2055,7 @@ function crearPopup(e){
 // ABRIR INSPECCIONES
 //==================================================
 
-function abrirInspecciones(id){
+function abrirInspecciones(id) {
 
     location.href =
         "inspeccion.html?elemento=" +
@@ -2508,34 +2068,50 @@ function abrirInspecciones(id){
 // ELIMINAR ELEMENTO
 //==================================================
 
-async function eliminarElemento(id){
+async function eliminarElemento(id) {
 
-    if(
+    if (
         !confirm(
             "¿Eliminar este elemento?"
         )
-    ){
+    ) {
 
         return;
 
     }
 
 
-    const respuesta =
-        await apiEliminarElemento(id);
+    try {
+
+        const respuesta =
+            await apiEliminarElemento(id);
 
 
-    if(
-        respuesta &&
-        respuesta.ok
-    ){
+        if (
+            respuesta &&
+            respuesta.ok
+        ) {
 
-        await cargarElementos();
+            await cargarElementos();
 
-    }else{
+        } else {
+
+            mostrarMensaje(
+                respuesta?.mensaje ||
+                "No fue posible eliminar el elemento.",
+                "error"
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Error eliminando elemento:",
+            error
+        );
 
         mostrarMensaje(
-            respuesta?.mensaje ||
             "No fue posible eliminar el elemento.",
             "error"
         );
@@ -2549,7 +2125,7 @@ async function eliminarElemento(id){
 // GUARDAR ELEMENTO
 //==================================================
 
-async function guardarElemento(e){
+async function guardarElemento(e) {
 
     e.preventDefault();
 
@@ -2557,20 +2133,13 @@ async function guardarElemento(e){
     const tipo =
         document.getElementById(
             "tipo"
-        ).value;
+        )?.value || "";
 
 
-    //================================================
-    // PROTECCION GEOMETRIAS ESPECIALES
-    //================================================
-
-    if(
-        normalizar(tipo)
-        ===
-        normalizar(
-            TIPO_ZONA_ESTACIONAMIENTO
-        )
-    ){
+    if (
+        normalizar(tipo) ===
+        normalizar(TIPO_ZONA_ESTACIONAMIENTO)
+    ) {
 
         mostrarMensaje(
             "El Estacionamiento Tarifado se registra dibujando la zona sobre el mapa.",
@@ -2582,13 +2151,10 @@ async function guardarElemento(e){
     }
 
 
-    if(
-        normalizar(tipo)
-        ===
-        normalizar(
-            TIPO_CORDON_ROJO
-        )
-    ){
+    if (
+        normalizar(tipo) ===
+        normalizar(TIPO_CORDON_ROJO)
+    ) {
 
         mostrarMensaje(
             "El Cordón Rojo se registra dibujando el tramo sobre el mapa.",
@@ -2606,65 +2172,60 @@ async function guardarElemento(e){
 
     const datos = {
 
-        tipo:
-            tipo,
+        tipo: tipo,
 
         icono:
             categoria
-            ?
-            categoria.icono
-            :
-            "",
+                ? categoria.icono
+                : "",
 
         color:
             categoria
-            ?
-            categoria.color
-            :
-            "",
+                ? categoria.color
+                : "",
 
         nombre:
             document.getElementById(
                 "nombre"
-            ).value,
+            )?.value || "",
 
         descripcion:
             document.getElementById(
                 "descripcion"
-            ).value,
+            )?.value || "",
 
         direccion:
             document.getElementById(
                 "direccion"
-            ).value,
+            )?.value || "",
 
         estado:
             document.getElementById(
                 "estado"
-            ).value,
+            )?.value || "Activo",
 
         caracteristicas:
             document.getElementById(
                 "caracteristicas"
-            ).value,
+            )?.value || "",
 
         latitud:
             document.getElementById(
                 "lat"
-            ).value,
+            )?.value || "",
 
         longitud:
             document.getElementById(
                 "lng"
-            ).value
+            )?.value || ""
 
     };
 
 
-    if(
+    if (
         !datos.latitud ||
         !datos.longitud
-    ){
+    ) {
 
         mostrarMensaje(
             "Seleccione una ubicación en el mapa.",
@@ -2682,70 +2243,82 @@ async function guardarElemento(e){
     );
 
 
-    const respuesta =
-        await apiGuardarElemento(
-            datos
+    try {
+
+        const respuesta =
+            await apiGuardarElemento(datos);
+
+
+        console.log(
+            "Respuesta guardar:",
+            respuesta
         );
 
 
-    console.log(
-        "Respuesta guardar:",
-        respuesta
-    );
+        if (
+            !respuesta ||
+            !respuesta.ok
+        ) {
 
+            mostrarMensaje(
+                respuesta?.mensaje ||
+                "No fue posible guardar.",
+                "error"
+            );
 
-    if(
-        !respuesta ||
-        !respuesta.ok
-    ){
+            return;
+
+        }
+
 
         mostrarMensaje(
-            respuesta?.mensaje ||
-            "No fue posible guardar.",
+            "Elemento guardado correctamente.",
+            "exito"
+        );
+
+
+        const form =
+            document.getElementById(
+                "formElemento"
+            );
+
+
+        if (form) {
+            form.reset();
+        }
+
+
+        if (marcadorNuevo) {
+
+            mapa.removeLayer(
+                marcadorNuevo
+            );
+
+            marcadorNuevo = null;
+
+        }
+
+
+        actualizarTextoAyuda(
+            "Seleccione un punto del mapa para registrar un nuevo elemento."
+        );
+
+
+        await cargarElementos();
+
+    } catch (error) {
+
+        console.error(
+            "Error guardando elemento:",
+            error
+        );
+
+        mostrarMensaje(
+            "No fue posible guardar el elemento.",
             "error"
         );
 
-        return;
-
     }
-
-
-    mostrarMensaje(
-        "Elemento guardado correctamente.",
-        "exito"
-    );
-
-
-    const form =
-        document.getElementById(
-            "formElemento"
-        );
-
-
-    if(form){
-
-        form.reset();
-
-    }
-
-
-    if(marcadorNuevo){
-
-        mapa.removeLayer(
-            marcadorNuevo
-        );
-
-        marcadorNuevo = null;
-
-    }
-
-
-    actualizarTextoAyuda(
-        "Seleccione un punto del mapa para registrar un nuevo elemento."
-    );
-
-
-    await cargarElementos();
 
 }
 
@@ -2756,71 +2329,54 @@ async function guardarElemento(e){
 
 
 //--------------------------------------------------
-// INICIAR DIBUJO
+// INICIAR DIBUJO ZONA
 //--------------------------------------------------
 
-function iniciarDibujoZona(){
+function iniciarDibujoZona() {
 
-    if(!mapa){
-
+    if (!mapa) {
         return;
-
     }
 
 
-    if(dibujandoZona){
-
+    if (dibujandoZona) {
         return;
-
     }
 
 
-    if(dibujandoCordon){
-
+    if (dibujandoCordon) {
         cancelarDibujoCordon();
+    }
+
+
+    dibujandoZona = true;
+    puntosZona = [];
+
+
+    if (lineaZona) {
+
+        mapa.removeLayer(lineaZona);
+        lineaZona = null;
 
     }
 
 
-    dibujandoZona =
-        true;
-
-
-    puntosZona =
-        [];
-
-
-    if(lineaZona){
-
-        mapa.removeLayer(
-            lineaZona
-        );
-
-        lineaZona =
-            null;
-
-    }
-
-
-    if(poligonoZonaTemporal){
+    if (poligonoZonaTemporal) {
 
         mapa.removeLayer(
             poligonoZonaTemporal
         );
 
-        poligonoZonaTemporal =
-            null;
+        poligonoZonaTemporal = null;
 
     }
 
 
     const selectorTipo =
-        document.getElementById(
-            "tipo"
-        );
+        document.getElementById("tipo");
 
 
-    if(selectorTipo){
+    if (selectorTipo) {
 
         selectorTipo.value =
             TIPO_ZONA_ESTACIONAMIENTO;
@@ -2838,12 +2394,10 @@ function iniciarDibujoZona(){
             "btnNuevaZona"
         );
 
-
     const btnCancelarZona =
         document.getElementById(
             "btnCancelarZona"
         );
-
 
     const estadoZona =
         document.getElementById(
@@ -2851,23 +2405,15 @@ function iniciarDibujoZona(){
         );
 
 
-    if(btnNuevaZona){
-
-        btnNuevaZona.style.display =
-            "none";
-
+    if (btnNuevaZona) {
+        btnNuevaZona.style.display = "none";
     }
 
-
-    if(btnCancelarZona){
-
-        btnCancelarZona.style.display =
-            "inline-block";
-
+    if (btnCancelarZona) {
+        btnCancelarZona.style.display = "inline-block";
     }
 
-
-    if(estadoZona){
+    if (estadoZona) {
 
         estadoZona.textContent =
             "Haga clic en el mapa para marcar los vértices. Clic derecho para cerrar.";
@@ -2891,40 +2437,26 @@ function iniciarDibujoZona(){
 
 
 //--------------------------------------------------
-// AGREGAR PUNTO
+// AGREGAR PUNTO ZONA
 //--------------------------------------------------
 
-function agregarPuntoZona(e){
+function agregarPuntoZona(e) {
 
-    if(!dibujandoZona){
-
+    if (!dibujandoZona) {
         return;
-
     }
 
 
-    const lat =
-        e.latlng.lat;
-
-
-    const lng =
-        e.latlng.lng;
-
-
     puntosZona.push([
-        lat,
-        lng
+        e.latlng.lat,
+        e.latlng.lng
     ]);
 
 
-    if(puntosZona.length >= 2){
+    if (puntosZona.length >= 2) {
 
-        if(lineaZona){
-
-            mapa.removeLayer(
-                lineaZona
-            );
-
+        if (lineaZona) {
+            mapa.removeLayer(lineaZona);
         }
 
 
@@ -2932,16 +2464,9 @@ function agregarPuntoZona(e){
             L.polyline(
                 puntosZona,
                 {
-
-                    color:
-                        "#0288d1",
-
-                    weight:
-                        3,
-
-                    dashArray:
-                        "8,6"
-
+                    color: "#0288d1",
+                    weight: 3,
+                    dashArray: "8,6"
                 }
             )
             .addTo(mapa);
@@ -2949,14 +2474,12 @@ function agregarPuntoZona(e){
     }
 
 
-    if(puntosZona.length >= 3){
+    if (puntosZona.length >= 3) {
 
-        if(poligonoZonaTemporal){
-
+        if (poligonoZonaTemporal) {
             mapa.removeLayer(
                 poligonoZonaTemporal
             );
-
         }
 
 
@@ -2964,22 +2487,11 @@ function agregarPuntoZona(e){
             L.polygon(
                 puntosZona,
                 {
-
-                    color:
-                        "#0288d1",
-
-                    weight:
-                        3,
-
-                    fillColor:
-                        "#4fc3f7",
-
-                    fillOpacity:
-                        0.28,
-
-                    interactive:
-                        false
-
+                    color: "#0288d1",
+                    weight: 3,
+                    fillColor: "#4fc3f7",
+                    fillOpacity: 0.28,
+                    interactive: false
                 }
             )
             .addTo(mapa);
@@ -2993,13 +2505,11 @@ function agregarPuntoZona(e){
         );
 
 
-    if(estadoZona){
+    if (estadoZona) {
 
         estadoZona.textContent =
-            "Puntos marcados: "
-            +
-            puntosZona.length
-            +
+            "Puntos marcados: " +
+            puntosZona.length +
             ". Continúe haciendo clic o haga clic derecho para cerrar.";
 
     }
@@ -3011,16 +2521,14 @@ function agregarPuntoZona(e){
 // FINALIZAR ZONA
 //--------------------------------------------------
 
-async function finalizarZona(){
+async function finalizarZona() {
 
-    if(!dibujandoZona){
-
+    if (!dibujandoZona) {
         return;
-
     }
 
 
-    if(puntosZona.length < 3){
+    if (puntosZona.length < 3) {
 
         mostrarMensaje(
             "Una zona necesita al menos 3 puntos.",
@@ -3038,12 +2546,8 @@ async function finalizarZona(){
         );
 
 
-    if(
-        nombre === null
-    ){
-
+    if (nombre === null) {
         return;
-
     }
 
 
@@ -3051,7 +2555,7 @@ async function finalizarZona(){
         nombre.trim();
 
 
-    if(!nombreLimpio){
+    if (!nombreLimpio) {
 
         mostrarMensaje(
             "Debe ingresar un nombre para la zona.",
@@ -3078,9 +2582,9 @@ async function finalizarZona(){
 async function guardarZonaEnServidor(
     nombre,
     puntos
-){
+) {
 
-    try{
+    try {
 
         const estadoZona =
             document.getElementById(
@@ -3088,38 +2592,33 @@ async function guardarZonaEnServidor(
             );
 
 
-        if(estadoZona){
-
+        if (estadoZona) {
             estadoZona.textContent =
                 "Guardando zona...";
-
         }
 
 
         const usuarioActual =
-            JSON.parse(
-                localStorage.getItem(
-                    "usuarioActual"
-                )
-                ||
-                "{}"
+            obtenerUsuarioActual();
+
+
+        const filtroLocalidad =
+            document.getElementById(
+                "filtroLocalidad"
             );
 
 
         const datos = {
 
-            nombre:
-                nombre,
+            nombre: nombre,
 
             localidad:
-                document.getElementById(
-                    "filtroLocalidad"
-                )?.value || "",
+                filtroLocalidad
+                    ? filtroLocalidad.value
+                    : "",
 
             coordenadas:
-                JSON.stringify(
-                    puntos
-                ),
+                JSON.stringify(puntos),
 
             usuario:
                 usuarioActual.nombre ||
@@ -3147,10 +2646,10 @@ async function guardarZonaEnServidor(
         );
 
 
-        if(
+        if (
             !respuesta ||
             !respuesta.ok
-        ){
+        ) {
 
             throw new Error(
                 respuesta?.mensaje ||
@@ -3168,12 +2667,9 @@ async function guardarZonaEnServidor(
 
         limpiarDibujoZona();
 
-
         await cargarZonasEstacionamiento();
 
-
-    }
-    catch(error){
+    } catch (error) {
 
         console.error(
             "Error guardando zona:",
@@ -3187,20 +2683,6 @@ async function guardarZonaEnServidor(
             "error"
         );
 
-
-        const estadoZona =
-            document.getElementById(
-                "estadoZona"
-            );
-
-
-        if(estadoZona){
-
-            estadoZona.textContent =
-                "Error al guardar la zona.";
-
-        }
-
     }
 
 }
@@ -3210,20 +2692,14 @@ async function guardarZonaEnServidor(
 // CARGAR ZONAS
 //--------------------------------------------------
 
-async function cargarZonasEstacionamiento(){
+async function cargarZonasEstacionamiento() {
 
-    if(!capaZonasEstacionamiento){
-
-        console.warn(
-            "No existe capa de zonas."
-        );
-
+    if (!capaZonasEstacionamiento) {
         return;
-
     }
 
 
-    try{
+    try {
 
         const respuesta =
             await apiObtenerZonasEstacionamiento();
@@ -3235,10 +2711,10 @@ async function cargarZonasEstacionamiento(){
         );
 
 
-        if(
+        if (
             !respuesta ||
             !respuesta.ok
-        ){
+        ) {
 
             console.error(
                 "Error cargando zonas:",
@@ -3251,13 +2727,9 @@ async function cargarZonasEstacionamiento(){
 
 
         zonasEstacionamiento =
-            Array.isArray(
-                respuesta.datos
-            )
-            ?
-            respuesta.datos
-            :
-            [];
+            Array.isArray(respuesta.datos)
+                ? respuesta.datos
+                : [];
 
 
         mostrarZonasEstacionamiento();
@@ -3268,9 +2740,7 @@ async function cargarZonasEstacionamiento(){
             zonasEstacionamiento.length
         );
 
-
-    }
-    catch(error){
+    } catch (error) {
 
         console.error(
             "Error cargando zonas:",
@@ -3286,14 +2756,10 @@ async function cargarZonasEstacionamiento(){
 // MOSTRAR ZONAS
 //--------------------------------------------------
 
-function mostrarZonasEstacionamiento(
-    soloFiltrar = false
-){
+function mostrarZonasEstacionamiento() {
 
-    if(!capaZonasEstacionamiento){
-
+    if (!capaZonasEstacionamiento) {
         return;
-
     }
 
 
@@ -3301,52 +2767,27 @@ function mostrarZonasEstacionamiento(
 
 
     zonasEstacionamiento.forEach(
-        function(zona){
+        function (zona) {
 
-            if(
+            if (
                 String(
                     zona.activo || ""
-                )
-                .toUpperCase()
-                !==
-                "SI"
-            ){
+                ).toUpperCase() !== "SI"
+            ) {
 
                 return;
 
             }
 
 
-            let puntos;
-
-
-            try{
-
-                puntos =
-                    JSON.parse(
-                        zona.coordenadas
-                    );
-
-            }
-            catch(error){
-
-                console.error(
-                    "Coordenadas inválidas:",
-                    zona
+            const puntos =
+                leerCoordenadas(
+                    zona.coordenadas
                 );
 
+
+            if (puntos.length < 3) {
                 return;
-
-            }
-
-
-            if(
-                !Array.isArray(puntos) ||
-                puntos.length < 3
-            ){
-
-                return;
-
             }
 
 
@@ -3358,15 +2799,11 @@ function mostrarZonasEstacionamiento(
 
             const localidadSeleccionada =
                 filtroLocalidad
-                ?
-                filtroLocalidad.value
-                :
-                "";
+                    ? filtroLocalidad.value
+                    : "";
 
 
-            if(
-                localidadSeleccionada
-            ){
+            if (localidadSeleccionada) {
 
                 const localidadZona =
                     zona.localidadNombre ||
@@ -3374,13 +2811,10 @@ function mostrarZonasEstacionamiento(
                     "";
 
 
-                if(
-                    normalizar(localidadZona)
-                    !==
-                    normalizar(
-                        localidadSeleccionada
-                    )
-                ){
+                if (
+                    normalizar(localidadZona) !==
+                    normalizar(localidadSeleccionada)
+                ) {
 
                     return;
 
@@ -3393,102 +2827,59 @@ function mostrarZonasEstacionamiento(
                 L.polygon(
                     puntos,
                     {
-
-                        color:
-                            "#0288d1",
-
-                        weight:
-                            3,
-
-                        fillColor:
-                            "#4fc3f7",
-
-                        fillOpacity:
-                            0.28,
-
-                        interactive:
-                            true
-
+                        color: "#0288d1",
+                        weight: 3,
+                        fillColor: "#4fc3f7",
+                        fillOpacity: 0.28,
+                        interactive: true
                     }
                 );
 
 
+            const id =
+                escaparAtributo(
+                    zona.id
+                );
+
+
             poligono.bindPopup(
+                '<div class="popup-zona">' +
 
-                `
+                    '<h3>' +
+                        '<i class="fa-solid fa-square-parking"></i> ' +
+                        escapar(zona.nombre) +
+                    '</h3>' +
 
-                <div class="popup-zona">
+                    '<p>' +
+                        '<strong>Estacionamiento Tarifado</strong>' +
+                    '</p>' +
 
-                    <h3>
-
-                        <i
-                            class="fa-solid fa-square-parking">
-                        </i>
-
-                        ${escapar(
-                            zona.nombre
-                        )}
-
-                    </h3>
-
-
-                    <p>
-
-                        <strong>
-                            Estacionamiento Tarifado
-                        </strong>
-
-                    </p>
-
-
-                    <p>
-
-                        <strong>
-                            Localidad:
-                        </strong>
-
-                        ${escapar(
+                    '<p>' +
+                        '<strong>Localidad:</strong> ' +
+                        escapar(
                             zona.localidadNombre ||
                             zona.localidad ||
                             "Sin localidad"
-                        )}
+                        ) +
+                    '</p>' +
 
-                    </p>
+                    '<p>' +
+                        '<strong>Estado:</strong> Activa' +
+                    '</p>' +
 
+                    '<button ' +
+                        'type="button" ' +
+                        'class="btn-eliminar-zona" ' +
+                        'onclick="eliminarZonaEstacionamiento(\'' +
+                            id +
+                        '\')">' +
 
-                    <p>
+                        '<i class="fa-solid fa-trash"></i> ' +
+                        'Eliminar zona' +
 
-                        <strong>
-                            Estado:
-                        </strong>
+                    '</button>' +
 
-                        Activa
-
-                    </p>
-
-
-                    <button
-                        type="button"
-                        class="btn-eliminar-zona"
-                        onclick="
-                            eliminarZonaEstacionamiento(
-                                '${escaparAtributo(zona.id)}'
-                            )
-                        "
-                    >
-
-                        <i
-                            class="fa-solid fa-trash">
-                        </i>
-
-                        Eliminar zona
-
-                    </button>
-
-                </div>
-
-                `
-
+                '</div>'
             );
 
 
@@ -3506,39 +2897,29 @@ function mostrarZonasEstacionamiento(
 // ELIMINAR ZONA
 //--------------------------------------------------
 
-async function eliminarZonaEstacionamiento(
-    id
-){
+async function eliminarZonaEstacionamiento(id) {
 
-    if(
+    if (
         !confirm(
             "¿Está seguro de eliminar esta zona de estacionamiento?"
         )
-    ){
+    ) {
 
         return;
 
     }
 
 
-    try{
+    try {
 
         const respuesta =
-            await apiEliminarZonaEstacionamiento(
-                id
-            );
+            await apiEliminarZonaEstacionamiento(id);
 
 
-        console.log(
-            "Respuesta eliminar zona:",
-            respuesta
-        );
-
-
-        if(
+        if (
             !respuesta ||
             !respuesta.ok
-        ){
+        ) {
 
             throw new Error(
                 respuesta?.mensaje ||
@@ -3556,9 +2937,7 @@ async function eliminarZonaEstacionamiento(
 
         await cargarZonasEstacionamiento();
 
-
-    }
-    catch(error){
+    } catch (error) {
 
         console.error(
             "Error eliminando zona:",
@@ -3578,10 +2957,10 @@ async function eliminarZonaEstacionamiento(
 
 
 //--------------------------------------------------
-// CANCELAR
+// CANCELAR ZONA
 //--------------------------------------------------
 
-function cancelarDibujoZona(){
+function cancelarDibujoZona() {
 
     limpiarDibujoZona();
 
@@ -3597,13 +2976,12 @@ function cancelarDibujoZona(){
         );
 
 
-    if(estadoZona){
+    if (estadoZona) {
 
         estadoZona.textContent =
             "Dibujo cancelado.";
 
-        estadoZona.className =
-            "";
+        estadoZona.className = "";
 
     }
 
@@ -3617,44 +2995,40 @@ function cancelarDibujoZona(){
 
 
 //--------------------------------------------------
-// LIMPIAR DIBUJO
+// LIMPIAR ZONA
 //--------------------------------------------------
 
-function limpiarDibujoZona(){
+function limpiarDibujoZona() {
 
-    dibujandoZona =
-        false;
-
-
-    puntosZona =
-        [];
+    dibujandoZona = false;
+    puntosZona = [];
 
 
-    if(lineaZona){
+    if (lineaZona) {
 
-        mapa.removeLayer(
-            lineaZona
-        );
+        if (mapa) {
+            mapa.removeLayer(lineaZona);
+        }
 
-        lineaZona =
-            null;
+        lineaZona = null;
 
     }
 
 
-    if(poligonoZonaTemporal){
+    if (poligonoZonaTemporal) {
 
-        mapa.removeLayer(
-            poligonoZonaTemporal
-        );
+        if (mapa) {
+            mapa.removeLayer(
+                poligonoZonaTemporal
+            );
+        }
 
-        poligonoZonaTemporal =
-            null;
+        poligonoZonaTemporal = null;
 
     }
 
 
-    if(mapa){
+    if (mapa) {
 
         mapa.getContainer().style.cursor =
             "";
@@ -3667,26 +3041,20 @@ function limpiarDibujoZona(){
             "btnNuevaZona"
         );
 
-
     const btnCancelarZona =
         document.getElementById(
             "btnCancelarZona"
         );
 
 
-    if(btnNuevaZona){
-
+    if (btnNuevaZona) {
         btnNuevaZona.style.display =
             "inline-block";
-
     }
 
-
-    if(btnCancelarZona){
-
+    if (btnCancelarZona) {
         btnCancelarZona.style.display =
             "none";
-
     }
 
 }
@@ -3698,22 +3066,22 @@ function limpiarDibujoZona(){
 
 document.addEventListener(
     "keydown",
-    function(e){
+    function (e) {
 
-        if(
+        if (
             e.key === "Escape" &&
             dibujandoZona
-        ){
+        ) {
 
             cancelarDibujoZona();
 
         }
 
 
-        if(
+        if (
             e.key === "Escape" &&
             dibujandoCordon
-        ){
+        ) {
 
             cancelarDibujoCordon();
 
@@ -3724,69 +3092,72 @@ document.addEventListener(
 
 
 //==================================================
-// CORDONES ROJOS
+// FINALIZAR DIBUJO GEOMETRICO
 //==================================================
 
-function finalizarDibujoGeometrico(e){
+function finalizarDibujoGeometrico(e) {
 
-    if(e && e.originalEvent){
+    if (
+        e &&
+        e.originalEvent
+    ) {
 
         e.originalEvent.preventDefault();
 
     }
 
 
-    if(dibujandoZona){
+    if (dibujandoZona) {
 
         finalizarZona();
-
         return;
 
     }
 
 
-    if(dibujandoCordon){
+    if (dibujandoCordon) {
 
         finalizarCordon();
+        return;
 
     }
 
 }
 
 
+//==================================================
+// CORDONES ROJOS
+//==================================================
+
+
 //--------------------------------------------------
 // INICIAR CORDON
 //--------------------------------------------------
 
-function iniciarDibujoCordon(){
+function iniciarDibujoCordon() {
 
-    if(
+    if (
         !mapa ||
         dibujandoZona ||
         dibujandoCordon
-    ){
+    ) {
 
         return;
 
     }
 
 
-    dibujandoCordon =
-        true;
+    dibujandoCordon = true;
+    puntosCordon = [];
 
 
-    puntosCordon =
-        [];
-
-
-    if(lineaCordonTemporal){
+    if (lineaCordonTemporal) {
 
         mapa.removeLayer(
             lineaCordonTemporal
         );
 
-        lineaCordonTemporal =
-            null;
+        lineaCordonTemporal = null;
 
     }
 
@@ -3797,7 +3168,7 @@ function iniciarDibujoCordon(){
         );
 
 
-    if(selectorTipo){
+    if (selectorTipo) {
 
         selectorTipo.value =
             TIPO_CORDON_ROJO;
@@ -3815,12 +3186,10 @@ function iniciarDibujoCordon(){
             "btnNuevoCordon"
         );
 
-
     const btnCancelar =
         document.getElementById(
             "btnCancelarCordon"
         );
-
 
     const estado =
         document.getElementById(
@@ -3828,23 +3197,15 @@ function iniciarDibujoCordon(){
         );
 
 
-    if(btnNuevo){
-
-        btnNuevo.style.display =
-            "none";
-
+    if (btnNuevo) {
+        btnNuevo.style.display = "none";
     }
 
-
-    if(btnCancelar){
-
-        btnCancelar.style.display =
-            "inline-block";
-
+    if (btnCancelar) {
+        btnCancelar.style.display = "inline-block";
     }
 
-
-    if(estado){
+    if (estado) {
 
         estado.textContent =
             "Haga clic sobre el borde de la calle. Clic derecho para finalizar.";
@@ -3871,12 +3232,10 @@ function iniciarDibujoCordon(){
 // AGREGAR PUNTO CORDON
 //--------------------------------------------------
 
-function agregarPuntoCordon(e){
+function agregarPuntoCordon(e) {
 
-    if(!dibujandoCordon){
-
+    if (!dibujandoCordon) {
         return;
-
     }
 
 
@@ -3886,7 +3245,7 @@ function agregarPuntoCordon(e){
     ]);
 
 
-    if(lineaCordonTemporal){
+    if (lineaCordonTemporal) {
 
         mapa.removeLayer(
             lineaCordonTemporal
@@ -3899,25 +3258,12 @@ function agregarPuntoCordon(e){
         L.polyline(
             puntosCordon,
             {
-
-                color:
-                    "#d50000",
-
-                weight:
-                    4,
-
-                opacity:
-                    0.9,
-
-                lineCap:
-                    "round",
-
-                lineJoin:
-                    "round",
-
-                interactive:
-                    false
-
+                color: "#d50000",
+                weight: 4,
+                opacity: 0.9,
+                lineCap: "round",
+                lineJoin: "round",
+                interactive: false
             }
         )
         .addTo(mapa);
@@ -3929,13 +3275,11 @@ function agregarPuntoCordon(e){
         );
 
 
-    if(estado){
+    if (estado) {
 
         estado.textContent =
-            "Puntos marcados: "
-            +
-            puntosCordon.length
-            +
+            "Puntos marcados: " +
+            puntosCordon.length +
             ". Continúe o haga clic derecho para finalizar.";
 
     }
@@ -3947,16 +3291,14 @@ function agregarPuntoCordon(e){
 // FINALIZAR CORDON
 //--------------------------------------------------
 
-async function finalizarCordon(){
+async function finalizarCordon() {
 
-    if(!dibujandoCordon){
-
+    if (!dibujandoCordon) {
         return;
-
     }
 
 
-    if(puntosCordon.length < 2){
+    if (puntosCordon.length < 2) {
 
         mostrarMensaje(
             "El cordón rojo necesita al menos 2 puntos.",
@@ -3974,10 +3316,8 @@ async function finalizarCordon(){
         );
 
 
-    if(nombre === null){
-
+    if (nombre === null) {
         return;
-
     }
 
 
@@ -3985,7 +3325,7 @@ async function finalizarCordon(){
         nombre.trim();
 
 
-    if(!nombreLimpio){
+    if (!nombreLimpio) {
 
         mostrarMensaje(
             "Debe ingresar un nombre para el cordón rojo.",
@@ -3997,16 +3337,10 @@ async function finalizarCordon(){
     }
 
 
-    try{
+    try {
 
         const usuarioActual =
-            JSON.parse(
-                localStorage.getItem(
-                    "usuarioActual"
-                )
-                ||
-                "{}"
-            );
+            obtenerUsuarioActual();
 
 
         const filtroLocalidad =
@@ -4023,10 +3357,8 @@ async function finalizarCordon(){
 
                 localidad:
                     filtroLocalidad
-                    ?
-                    filtroLocalidad.value
-                    :
-                    "",
+                        ? filtroLocalidad.value
+                        : "",
 
                 coordenadas:
                     JSON.stringify(
@@ -4041,10 +3373,10 @@ async function finalizarCordon(){
             });
 
 
-        if(
+        if (
             !respuesta ||
             !respuesta.ok
-        ){
+        ) {
 
             throw new Error(
                 respuesta?.mensaje ||
@@ -4056,7 +3388,6 @@ async function finalizarCordon(){
 
         limpiarDibujoCordon();
 
-
         await cargarCordonesRojos();
 
 
@@ -4065,8 +3396,7 @@ async function finalizarCordon(){
             "exito"
         );
 
-    }
-    catch(error){
+    } catch (error) {
 
         console.error(
             "Error guardando cordón rojo:",
@@ -4089,25 +3419,29 @@ async function finalizarCordon(){
 // CARGAR CORDONES
 //--------------------------------------------------
 
-async function cargarCordonesRojos(){
+async function cargarCordonesRojos() {
 
-    if(!capaCordonesRojos){
-
+    if (!capaCordonesRojos) {
         return;
-
     }
 
 
-    try{
+    try {
 
         const respuesta =
             await apiObtenerCordonesRojos();
 
 
-        if(
+        console.log(
+            "Respuesta cordones:",
+            respuesta
+        );
+
+
+        if (
             !respuesta ||
             !respuesta.ok
-        ){
+        ) {
 
             console.error(
                 "Error cargando cordones rojos:",
@@ -4120,19 +3454,14 @@ async function cargarCordonesRojos(){
 
 
         cordonesRojos =
-            Array.isArray(
-                respuesta.datos
-            )
-            ?
-            respuesta.datos
-            :
-            [];
+            Array.isArray(respuesta.datos)
+                ? respuesta.datos
+                : [];
 
 
         mostrarCordonesRojos();
 
-    }
-    catch(error){
+    } catch (error) {
 
         console.error(
             "Error cargando cordones rojos:",
@@ -4148,14 +3477,10 @@ async function cargarCordonesRojos(){
 // MOSTRAR CORDONES
 //--------------------------------------------------
 
-function mostrarCordonesRojos(
-    soloFiltrar = false
-){
+function mostrarCordonesRojos() {
 
-    if(!capaCordonesRojos){
-
+    if (!capaCordonesRojos) {
         return;
-
     }
 
 
@@ -4163,52 +3488,27 @@ function mostrarCordonesRojos(
 
 
     cordonesRojos.forEach(
-        function(cordon){
+        function (cordon) {
 
-            if(
+            if (
                 String(
                     cordon.activo || ""
-                )
-                .toUpperCase()
-                !==
-                "SI"
-            ){
+                ).toUpperCase() !== "SI"
+            ) {
 
                 return;
 
             }
 
 
-            let puntos;
-
-
-            try{
-
-                puntos =
-                    JSON.parse(
-                        cordon.coordenadas
-                    );
-
-            }
-            catch(error){
-
-                console.error(
-                    "Coordenadas inválidas:",
-                    cordon
+            const puntos =
+                leerCoordenadas(
+                    cordon.coordenadas
                 );
 
+
+            if (puntos.length < 2) {
                 return;
-
-            }
-
-
-            if(
-                !Array.isArray(puntos) ||
-                puntos.length < 2
-            ){
-
-                return;
-
             }
 
 
@@ -4220,15 +3520,11 @@ function mostrarCordonesRojos(
 
             const localidadSeleccionada =
                 filtroLocalidad
-                ?
-                filtroLocalidad.value
-                :
-                "";
+                    ? filtroLocalidad.value
+                    : "";
 
 
-            if(
-                localidadSeleccionada
-            ){
+            if (localidadSeleccionada) {
 
                 const localidadCordon =
                     cordon.localidadNombre ||
@@ -4236,13 +3532,10 @@ function mostrarCordonesRojos(
                     "";
 
 
-                if(
-                    normalizar(localidadCordon)
-                    !==
-                    normalizar(
-                        localidadSeleccionada
-                    )
-                ){
+                if (
+                    normalizar(localidadCordon) !==
+                    normalizar(localidadSeleccionada)
+                ) {
 
                     return;
 
@@ -4255,104 +3548,71 @@ function mostrarCordonesRojos(
                 L.polyline(
                     puntos,
                     {
-
-                        color:
-                            "#d50000",
-
-                        weight:
-                            5,
-
-                        opacity:
-                            0.95,
-
-                        lineCap:
-                            "round",
-
-                        lineJoin:
-                            "round",
-
-                        interactive:
-                            true
-
+                        color: "#d50000",
+                        weight: 5,
+                        opacity: 0.95,
+                        lineCap: "round",
+                        lineJoin: "round",
+                        interactive: true
                     }
                 );
 
 
+            const id =
+                escaparAtributo(
+                    cordon.id
+                );
+
+
             linea.bindPopup(
-                `
+                '<div class="popup-zona">' +
 
-                <div class="popup-zona">
+                    '<h3>' +
 
-                    <h3>
+                        '<i class="fa-solid fa-road"></i> ' +
 
-                        <i class="fa-solid fa-road"></i>
+                        escapar(
+                            cordon.codigo || "CR"
+                        ) +
 
-                        ${escapar(
-                            cordon.codigo ||
-                            "CR"
-                        )}
-                        -
-                        ${escapar(
+                        ' - ' +
+
+                        escapar(
                             cordon.nombre
-                        )}
+                        ) +
 
-                    </h3>
+                    '</h3>' +
 
+                    '<p>' +
+                        '<strong>Cordón rojo</strong>' +
+                    '</p>' +
 
-                    <p>
-
-                        <strong>
-                            Cordón rojo
-                        </strong>
-
-                    </p>
-
-
-                    <p>
-
-                        <strong>
-                            Localidad:
-                        </strong>
-
-                        ${escapar(
+                    '<p>' +
+                        '<strong>Localidad:</strong> ' +
+                        escapar(
                             cordon.localidadNombre ||
                             cordon.localidad ||
                             "Sin localidad"
-                        )}
+                        ) +
+                    '</p>' +
 
-                    </p>
+                    '<p>' +
+                        '<strong>Estado:</strong> Activo' +
+                    '</p>' +
 
+                    '<button ' +
+                        'type="button" ' +
+                        'class="btn-eliminar-zona" ' +
+                        'onclick="eliminarCordonRojo(\'' +
+                            id +
+                        '\')">' +
 
-                    <p>
+                        '<i class="fa-solid fa-trash"></i> ' +
+                        'Eliminar cordón' +
 
-                        <strong>
-                            Estado:
-                        </strong>
+                    '</button>' +
 
-                        Activo
-
-                    </p>
-
-
-                    <button
-                        type="button"
-                        class="btn-eliminar-zona"
-                        onclick="
-                            eliminarCordonRojo(
-                                '${escaparAtributo(cordon.id)}'
-                            )
-                        "
-                    >
-
-                        <i class="fa-solid fa-trash"></i>
-
-                        Eliminar cordón
-
-                    </button>
-
-                </div>
-
-                `
+                '</div>'
             );
 
 
@@ -4370,31 +3630,29 @@ function mostrarCordonesRojos(
 // ELIMINAR CORDON
 //--------------------------------------------------
 
-async function eliminarCordonRojo(id){
+async function eliminarCordonRojo(id) {
 
-    if(
+    if (
         !confirm(
             "¿Está seguro de desactivar este cordón rojo?"
         )
-    ){
+    ) {
 
         return;
 
     }
 
 
-    try{
+    try {
 
         const respuesta =
-            await apiEliminarCordonRojo(
-                id
-            );
+            await apiEliminarCordonRojo(id);
 
 
-        if(
+        if (
             !respuesta ||
             !respuesta.ok
-        ){
+        ) {
 
             throw new Error(
                 respuesta?.mensaje ||
@@ -4412,8 +3670,13 @@ async function eliminarCordonRojo(id){
             "exito"
         );
 
-    }
-    catch(error){
+    } catch (error) {
+
+        console.error(
+            "Error eliminando cordón:",
+            error
+        );
+
 
         mostrarMensaje(
             error.message ||
@@ -4430,7 +3693,7 @@ async function eliminarCordonRojo(id){
 // CANCELAR CORDON
 //--------------------------------------------------
 
-function cancelarDibujoCordon(){
+function cancelarDibujoCordon() {
 
     limpiarDibujoCordon();
 
@@ -4452,29 +3715,28 @@ function cancelarDibujoCordon(){
 // LIMPIAR CORDON
 //--------------------------------------------------
 
-function limpiarDibujoCordon(){
+function limpiarDibujoCordon() {
 
-    dibujandoCordon =
-        false;
-
-
-    puntosCordon =
-        [];
+    dibujandoCordon = false;
+    puntosCordon = [];
 
 
-    if(lineaCordonTemporal){
+    if (lineaCordonTemporal) {
 
-        mapa.removeLayer(
-            lineaCordonTemporal
-        );
+        if (mapa) {
 
-        lineaCordonTemporal =
-            null;
+            mapa.removeLayer(
+                lineaCordonTemporal
+            );
+
+        }
+
+        lineaCordonTemporal = null;
 
     }
 
 
-    if(mapa){
+    if (mapa) {
 
         mapa.getContainer().style.cursor =
             "";
@@ -4487,12 +3749,10 @@ function limpiarDibujoCordon(){
             "btnNuevoCordon"
         );
 
-
     const btnCancelar =
         document.getElementById(
             "btnCancelarCordon"
         );
-
 
     const estado =
         document.getElementById(
@@ -4500,29 +3760,18 @@ function limpiarDibujoCordon(){
         );
 
 
-    if(btnNuevo){
-
-        btnNuevo.style.display =
-            "inline-block";
-
+    if (btnNuevo) {
+        btnNuevo.style.display = "inline-block";
     }
 
-
-    if(btnCancelar){
-
-        btnCancelar.style.display =
-            "none";
-
+    if (btnCancelar) {
+        btnCancelar.style.display = "none";
     }
 
+    if (estado) {
 
-    if(estado){
-
-        estado.textContent =
-            "";
-
-        estado.className =
-            "";
+        estado.textContent = "";
+        estado.className = "";
 
     }
 
@@ -4535,8 +3784,8 @@ function limpiarDibujoCordon(){
 
 function mostrarMensaje(
     texto,
-    tipo=""
-){
+    tipo = ""
+) {
 
     const mensaje =
         document.getElementById(
@@ -4544,10 +3793,8 @@ function mostrarMensaje(
         );
 
 
-    if(!mensaje){
-
+    if (!mensaje) {
         return;
-
     }
 
 
@@ -4556,8 +3803,7 @@ function mostrarMensaje(
 
 
     mensaje.className =
-        "mensaje " +
-        tipo;
+        "mensaje " + tipo;
 
 }
 
@@ -4566,7 +3812,7 @@ function mostrarMensaje(
 // NORMALIZAR
 //==================================================
 
-function normalizar(texto){
+function normalizar(texto) {
 
     return String(
         texto || ""
@@ -4586,7 +3832,7 @@ function normalizar(texto){
 // ESCAPAR HTML
 //==================================================
 
-function escapar(valor){
+function escapar(valor) {
 
     return String(
         valor || ""
@@ -4619,7 +3865,7 @@ function escapar(valor){
 // ESCAPAR ATRIBUTO
 //==================================================
 
-function escaparAtributo(valor){
+function escaparAtributo(valor) {
 
     return String(
         valor || ""
@@ -4637,10 +3883,39 @@ function escaparAtributo(valor){
 
 
 //==================================================
+// ESCAPAR ATRIBUTO HTML
+//==================================================
+
+function escaparAtributoHTML(valor) {
+
+    return String(
+        valor || ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    );
+
+}
+
+
+//==================================================
 // COORDENADAS
 //==================================================
 
-function coordenada(valor){
+function coordenada(valor) {
 
     const numero =
         parseFloat(
@@ -4654,11 +3929,37 @@ function coordenada(valor){
         );
 
 
-    return isNaN(numero)
-        ?
-        null
-        :
-        numero;
+    return Number.isNaN(numero)
+        ? null
+        : numero;
+
+}
+
+
+//==================================================
+// USUARIO ACTUAL
+//==================================================
+
+function obtenerUsuarioActual() {
+
+    try {
+
+        return JSON.parse(
+            localStorage.getItem(
+                "usuarioActual"
+            ) || "{}"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error leyendo usuario:",
+            error
+        );
+
+        return {};
+
+    }
 
 }
 
@@ -4667,7 +3968,7 @@ function coordenada(valor){
 // SALIR
 //==================================================
 
-function salir(){
+function salir() {
 
     localStorage.removeItem(
         "usuarioActual"
@@ -4684,12 +3985,10 @@ function salir(){
 // CENTRAR ELEMENTOS
 //==================================================
 
-function centrarEnElementos(){
+function centrarEnElementos() {
 
-    if(!capaMarcadores){
-
+    if (!capaMarcadores || !mapa) {
         return;
-
     }
 
 
@@ -4697,28 +3996,22 @@ function centrarEnElementos(){
         capaMarcadores.getLayers();
 
 
-    if(!capas.length){
-
+    if (!capas.length) {
         return;
-
     }
 
 
     const grupo =
-        L.featureGroup(
-            capas
-        );
+        L.featureGroup(capas);
 
 
     mapa.fitBounds(
         grupo.getBounds(),
         {
-
-            padding:[
+            padding: [
                 40,
                 40
             ]
-
         }
     );
 
@@ -4729,7 +4022,7 @@ function centrarEnElementos(){
 // ACTUALIZAR MAPA
 //==================================================
 
-async function actualizarMapa(){
+async function actualizarMapa() {
 
     mostrarMensaje(
         "Actualizando mapa...",
@@ -4737,21 +4030,34 @@ async function actualizarMapa(){
     );
 
 
-    await cargarCategorias();
+    try {
 
-    await cargarLocalidades();
-
-    await cargarElementos();
-
-    await cargarZonasEstacionamiento();
-
-    await cargarCordonesRojos();
+        await cargarCategorias();
+        await cargarLocalidades();
+        await cargarElementos();
+        await cargarZonasEstacionamiento();
+        await cargarCordonesRojos();
 
 
-    mostrarMensaje(
-        "Mapa actualizado correctamente.",
-        "exito"
-    );
+        mostrarMensaje(
+            "Mapa actualizado correctamente.",
+            "exito"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error actualizando mapa:",
+            error
+        );
+
+
+        mostrarMensaje(
+            "No fue posible actualizar completamente el mapa.",
+            "error"
+        );
+
+    }
 
 }
 
@@ -4761,18 +4067,15 @@ async function actualizarMapa(){
 //==================================================
 
 setInterval(
-    function(){
+    function () {
 
-        if(
-            document.visibilityState
-            ===
+        if (
+            document.visibilityState ===
             "visible"
-        ){
+        ) {
 
             cargarElementos();
-
             cargarZonasEstacionamiento();
-
             cargarCordonesRojos();
 
         }
@@ -4786,73 +4089,61 @@ setInterval(
 // DEBUG
 //==================================================
 
-window.debugMapa =
-    function(){
+window.debugMapa = function () {
 
-        console.log(
-            "Mapa:",
-            mapa
-        );
+    console.log(
+        "Mapa:",
+        mapa
+    );
 
+    console.log(
+        "Categorías:",
+        categorias
+    );
 
-        console.log(
-            "Categorías:",
-            categorias
-        );
+    console.table(
+        categorias
+    );
 
+    console.log(
+        "Localidades:",
+        localidades
+    );
 
-        console.table(
-            categorias
-        );
+    console.table(
+        localidades
+    );
 
+    console.log(
+        "Elementos:",
+        elementos
+    );
 
-        console.log(
-            "Localidades:",
-            localidades
-        );
+    console.table(
+        elementos
+    );
 
+    console.log(
+        "Zonas estacionamiento:",
+        zonasEstacionamiento
+    );
 
-        console.table(
-            localidades
-        );
+    console.table(
+        zonasEstacionamiento
+    );
 
+    console.log(
+        "Cordones rojos:",
+        cordonesRojos
+    );
 
-        console.log(
-            "Elementos:",
-            elementos
-        );
+    console.table(
+        cordonesRojos
+    );
 
-
-        console.table(
-            elementos
-        );
-
-
-        console.log(
-            "Zonas estacionamiento:",
-            zonasEstacionamiento
-        );
-
-
-        console.table(
-            zonasEstacionamiento
-        );
-
-
-        console.log(
-            "Cordones rojos:",
-            cordonesRojos
-        );
-
-
-        console.table(
-            cordonesRojos
-        );
-
-    };
+};
 
 
 //==================================================
 // FIN mapa.js
 //==================================================
-```
