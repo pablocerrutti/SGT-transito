@@ -34,6 +34,21 @@ let poligonoZonaTemporal = null;
 
 
 //==================================================
+// CORDONES ROJOS
+//==================================================
+
+let capaCordonesRojos = null;
+
+let cordonesRojos = [];
+
+let dibujandoCordon = false;
+
+let puntosCordon = [];
+
+let lineaCordonTemporal = null;
+
+
+//==================================================
 // INICIO
 //==================================================
 
@@ -70,6 +85,8 @@ async function iniciarPagina(){
     await cargarElementos();
 
     await cargarZonasEstacionamiento();
+
+    await cargarCordonesRojos();
 
 }
 
@@ -289,6 +306,11 @@ function iniciarMapa(){
         .addTo(mapa);
 
 
+    capaCordonesRojos =
+        L.layerGroup()
+        .addTo(mapa);
+
+
     //==============================================
     // CLICK MAPA
     //==============================================
@@ -305,7 +327,7 @@ function iniciarMapa(){
 
     mapa.on(
         "contextmenu",
-        finalizarZona
+        finalizarDibujoGeometrico
     );
 
 
@@ -669,6 +691,8 @@ function enlazarEventos(){
 
                 await cargarZonasEstacionamiento();
 
+                await cargarCordonesRojos();
+
             }
         );
 
@@ -812,6 +836,38 @@ function enlazarEventos(){
 
     }
 
+
+    const btnNuevoCordon =
+        document.getElementById(
+            "btnNuevoCordon"
+        );
+
+
+    if(btnNuevoCordon){
+
+        btnNuevoCordon.addEventListener(
+            "click",
+            iniciarDibujoCordon
+        );
+
+    }
+
+
+    const btnCancelarCordon =
+        document.getElementById(
+            "btnCancelarCordon"
+        );
+
+
+    if(btnCancelarCordon){
+
+        btnCancelarCordon.addEventListener(
+            "click",
+            cancelarDibujoCordon
+        );
+
+    }
+
 }
 
 
@@ -824,6 +880,17 @@ function seleccionarUbicacion(e){
     if(dibujandoZona){
 
         agregarPuntoZona(
+            e
+        );
+
+        return;
+
+    }
+
+
+    if(dibujandoCordon){
+
+        agregarPuntoCordon(
             e
         );
 
@@ -2388,6 +2455,11 @@ async function guardarZonaEnServidor(
             nombre:
                 nombre,
 
+            localidad:
+                document.getElementById(
+                    "filtroLocalidad"
+                )?.value || "",
+
             coordenadas:
                 JSON.stringify(
                     puntos
@@ -2934,8 +3006,462 @@ document.addEventListener(
 
         }
 
+        if(
+            e.key === "Escape" &&
+            dibujandoCordon
+        ){
+
+            cancelarDibujoCordon();
+
+        }
+
     }
 );
+
+
+//==================================================
+// CORDONES ROJOS
+//==================================================
+
+function finalizarDibujoGeometrico(e){
+
+    if(e && e.originalEvent){
+
+        e.originalEvent.preventDefault();
+
+    }
+
+    if(dibujandoZona){
+
+        finalizarZona();
+
+        return;
+
+    }
+
+    if(dibujandoCordon){
+
+        finalizarCordon();
+
+    }
+
+}
+
+
+function iniciarDibujoCordon(){
+
+    if(!mapa || dibujandoZona || dibujandoCordon){
+
+        return;
+
+    }
+
+    dibujandoCordon = true;
+
+    puntosCordon = [];
+
+    if(lineaCordonTemporal){
+
+        mapa.removeLayer(lineaCordonTemporal);
+
+        lineaCordonTemporal = null;
+
+    }
+
+    const btnNuevo = document.getElementById("btnNuevoCordon");
+    const btnCancelar = document.getElementById("btnCancelarCordon");
+    const estado = document.getElementById("estadoCordon");
+
+    if(btnNuevo){
+        btnNuevo.style.display = "none";
+    }
+
+    if(btnCancelar){
+        btnCancelar.style.display = "inline-block";
+    }
+
+    if(estado){
+
+        estado.textContent =
+            "Haga clic sobre el borde de la calle. Clic derecho para finalizar.";
+
+        estado.className = "dibujando";
+
+    }
+
+    mapa.getContainer().style.cursor = "crosshair";
+
+    mostrarMensaje(
+        "Dibujando cordón rojo...",
+        ""
+    );
+
+}
+
+
+function agregarPuntoCordon(e){
+
+    if(!dibujandoCordon){
+
+        return;
+
+    }
+
+    puntosCordon.push([
+        e.latlng.lat,
+        e.latlng.lng
+    ]);
+
+    if(lineaCordonTemporal){
+
+        mapa.removeLayer(lineaCordonTemporal);
+
+    }
+
+    lineaCordonTemporal =
+        L.polyline(
+            puntosCordon,
+            {
+                color: "#d50000",
+                weight: 4,
+                opacity: 0.9,
+                lineCap: "round",
+                lineJoin: "round",
+                interactive: false
+            }
+        )
+        .addTo(mapa);
+
+    const estado =
+        document.getElementById("estadoCordon");
+
+    if(estado){
+
+        estado.textContent =
+            "Puntos marcados: " +
+            puntosCordon.length +
+            ". Continúe o haga clic derecho para finalizar.";
+
+    }
+
+}
+
+
+async function finalizarCordon(){
+
+    if(!dibujandoCordon){
+
+        return;
+
+    }
+
+    if(puntosCordon.length < 2){
+
+        mostrarMensaje(
+            "El cordón rojo necesita al menos 2 puntos.",
+            "error"
+        );
+
+        return;
+
+    }
+
+    const nombre =
+        prompt("Ingrese el nombre del cordón rojo:");
+
+    if(nombre === null){
+
+        return;
+
+    }
+
+    const nombreLimpio = nombre.trim();
+
+    if(!nombreLimpio){
+
+        mostrarMensaje(
+            "Debe ingresar un nombre para el cordón rojo.",
+            "error"
+        );
+
+        return;
+
+    }
+
+    try{
+
+        const usuarioActual =
+            JSON.parse(
+                localStorage.getItem("usuarioActual") || "{}"
+            );
+
+        const filtroLocalidad =
+            document.getElementById("filtroLocalidad");
+
+        const respuesta =
+            await apiGuardarCordonRojo({
+                nombre: nombreLimpio,
+                localidad: filtroLocalidad ? filtroLocalidad.value : "",
+                coordenadas: JSON.stringify(puntosCordon),
+                usuario:
+                    usuarioActual.nombre ||
+                    usuarioActual.usuario ||
+                    "admin"
+            });
+
+        if(!respuesta || !respuesta.ok){
+
+            throw new Error(
+                respuesta?.mensaje ||
+                "No fue posible guardar el cordón rojo."
+            );
+
+        }
+
+        limpiarDibujoCordon();
+
+        await cargarCordonesRojos();
+
+        mostrarMensaje(
+            "Cordón rojo guardado correctamente.",
+            "exito"
+        );
+
+    }
+    catch(error){
+
+        console.error("Error guardando cordón rojo:", error);
+
+        mostrarMensaje(
+            error.message ||
+            "No fue posible guardar el cordón rojo.",
+            "error"
+        );
+
+    }
+
+}
+
+
+async function cargarCordonesRojos(){
+
+    if(!capaCordonesRojos){
+
+        return;
+
+    }
+
+    try{
+
+        const respuesta =
+            await apiObtenerCordonesRojos();
+
+        if(!respuesta || !respuesta.ok){
+
+            console.error(
+                "Error cargando cordones rojos:",
+                respuesta?.mensaje
+            );
+
+            return;
+
+        }
+
+        cordonesRojos =
+            Array.isArray(respuesta.datos)
+            ? respuesta.datos
+            : [];
+
+        mostrarCordonesRojos();
+
+    }
+    catch(error){
+
+        console.error("Error cargando cordones rojos:", error);
+
+    }
+
+}
+
+
+function mostrarCordonesRojos(){
+
+    if(!capaCordonesRojos){
+
+        return;
+
+    }
+
+    capaCordonesRojos.clearLayers();
+
+    cordonesRojos.forEach(function(cordon){
+
+        if(
+            String(cordon.activo || "").toUpperCase()
+            !== "SI"
+        ){
+
+            return;
+
+        }
+
+        let puntos;
+
+        try{
+
+            puntos = JSON.parse(cordon.coordenadas);
+
+        }
+        catch(error){
+
+            console.error("Coordenadas inválidas:", cordon);
+
+            return;
+
+        }
+
+        if(!Array.isArray(puntos) || puntos.length < 2){
+
+            return;
+
+        }
+
+        const linea =
+            L.polyline(
+                puntos,
+                {
+                    color: "#d50000",
+                    weight: 4,
+                    opacity: 0.9,
+                    lineCap: "round",
+                    lineJoin: "round",
+                    interactive: true
+                }
+            );
+
+        linea.bindPopup(
+            `
+            <div class="popup-zona">
+                <h3>
+                    <i class="fa-solid fa-road"></i>
+                    ${escapar(cordon.codigo || "CR")} -
+                    ${escapar(cordon.nombre)}
+                </h3>
+                <p><strong>Cordón rojo</strong></p>
+                <p>
+                    <strong>Localidad:</strong>
+                    ${escapar(cordon.localidad || "Sin localidad")}
+                </p>
+                <p><strong>Estado:</strong> Activo</p>
+                <button
+                    type="button"
+                    class="btn-eliminar-zona"
+                    onclick="eliminarCordonRojo('${escaparAtributo(cordon.id)}')"
+                >
+                    <i class="fa-solid fa-trash"></i>
+                    Eliminar cordón
+                </button>
+            </div>
+            `
+        );
+
+        linea.addTo(capaCordonesRojos);
+
+    });
+
+}
+
+
+async function eliminarCordonRojo(id){
+
+    if(!confirm("¿Está seguro de desactivar este cordón rojo?")){
+
+        return;
+
+    }
+
+    try{
+
+        const respuesta =
+            await apiEliminarCordonRojo(id);
+
+        if(!respuesta || !respuesta.ok){
+
+            throw new Error(
+                respuesta?.mensaje ||
+                "No fue posible eliminar el cordón rojo."
+            );
+
+        }
+
+        await cargarCordonesRojos();
+
+        mostrarMensaje(
+            "Cordón rojo desactivado correctamente.",
+            "exito"
+        );
+
+    }
+    catch(error){
+
+        mostrarMensaje(
+            error.message ||
+            "No fue posible eliminar el cordón rojo.",
+            "error"
+        );
+
+    }
+
+}
+
+
+function cancelarDibujoCordon(){
+
+    limpiarDibujoCordon();
+
+    mostrarMensaje("Dibujo de cordón cancelado.", "");
+
+}
+
+
+function limpiarDibujoCordon(){
+
+    dibujandoCordon = false;
+
+    puntosCordon = [];
+
+    if(lineaCordonTemporal){
+
+        mapa.removeLayer(lineaCordonTemporal);
+
+        lineaCordonTemporal = null;
+
+    }
+
+    if(mapa){
+
+        mapa.getContainer().style.cursor = "";
+
+    }
+
+    const btnNuevo = document.getElementById("btnNuevoCordon");
+    const btnCancelar = document.getElementById("btnCancelarCordon");
+    const estado = document.getElementById("estadoCordon");
+
+    if(btnNuevo){
+        btnNuevo.style.display = "inline-block";
+    }
+
+    if(btnCancelar){
+        btnCancelar.style.display = "none";
+    }
+
+    if(estado){
+        estado.textContent = "";
+        estado.className = "";
+    }
+
+}
 
 
 //==================================================
@@ -3154,6 +3680,8 @@ async function actualizarMapa(){
 
     await cargarZonasEstacionamiento();
 
+    await cargarCordonesRojos();
+
 }
 
 
@@ -3173,6 +3701,8 @@ setInterval(
             cargarElementos();
 
             cargarZonasEstacionamiento();
+
+            cargarCordonesRojos();
 
         }
 
