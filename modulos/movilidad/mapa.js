@@ -2278,7 +2278,7 @@ function agregarPuntoZona(e){
                 {
 
                     color:
-                        "#1976d2",
+                        "#0288d1",
 
                     weight:
                         3,
@@ -2310,16 +2310,16 @@ function agregarPuntoZona(e){
                 {
 
                     color:
-                        "#1976d2",
+                        "#0288d1",
 
                     weight:
                         3,
 
                     fillColor:
-                        "#42a5f5",
+                        "#4fc3f7",
 
                     fillOpacity:
-                        0.25,
+                        0.28,
 
                     interactive:
                         false
@@ -2698,16 +2698,16 @@ function mostrarZonasEstacionamiento(){
                     {
 
                         color:
-                            "#e65100",
+                            "#0288d1",
 
                         weight:
                             3,
 
                         fillColor:
-                            "#ff9800",
+                            "#4fc3f7",
 
                         fillOpacity:
-                            0.22,
+                            0.28,
 
                         interactive:
                             true
