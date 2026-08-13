@@ -1,3 +1,4 @@
+```javascript
 //==================================================
 // SGT - MOVILIDAD URBANA
 // mapa.js
@@ -14,6 +15,17 @@ let categorias = [];
 let elementos = [];
 
 let localidades = [];
+
+
+//==================================================
+// TIPOS GEOMETRICOS ESPECIALES
+//==================================================
+
+const TIPO_ZONA_ESTACIONAMIENTO =
+    "Estacionamiento Tarifado";
+
+const TIPO_CORDON_ROJO =
+    "Cordón Rojo";
 
 
 //==================================================
@@ -306,6 +318,10 @@ function iniciarMapa(){
         .addTo(mapa);
 
 
+    //==============================================
+    // CAPA CORDONES
+    //==============================================
+
     capaCordonesRojos =
         L.layerGroup()
         .addTo(mapa);
@@ -393,8 +409,88 @@ async function cargarCategorias(){
         );
 
 
+    //================================================
+    // ESTACIONAMIENTO TARIFADO
+    //================================================
+
+    if(
+        !categorias.some(
+            c =>
+                normalizar(c.nombre)
+                ===
+                normalizar(
+                    TIPO_ZONA_ESTACIONAMIENTO
+                )
+        )
+    ){
+
+        categorias.push({
+
+            codigo:
+                "GE001",
+
+            nombre:
+                TIPO_ZONA_ESTACIONAMIENTO,
+
+            icono:
+                "parking",
+
+            color:
+                "naranja",
+
+            activo:
+                "SI",
+
+            geometria:
+                "poligono"
+
+        });
+
+    }
+
+
+    //================================================
+    // CORDON ROJO
+    //================================================
+
+    if(
+        !categorias.some(
+            c =>
+                normalizar(c.nombre)
+                ===
+                normalizar(
+                    TIPO_CORDON_ROJO
+                )
+        )
+    ){
+
+        categorias.push({
+
+            codigo:
+                "GE002",
+
+            nombre:
+                TIPO_CORDON_ROJO,
+
+            icono:
+                "road",
+
+            color:
+                "rojo",
+
+            activo:
+                "SI",
+
+            geometria:
+                "linea"
+
+        });
+
+    }
+
+
     console.log(
-        "Categorías cargadas:",
+        "Categorías finales:",
         categorias
     );
 
@@ -655,6 +751,10 @@ function obtenerCategoria(nombre){
 
 function enlazarEventos(){
 
+    //==============================================
+    // FORMULARIO
+    //==============================================
+
     const form =
         document.getElementById(
             "formElemento"
@@ -671,6 +771,30 @@ function enlazarEventos(){
     }
 
 
+    //==============================================
+    // SELECTOR DE TIPO
+    //==============================================
+
+    const selectorTipo =
+        document.getElementById(
+            "tipo"
+        );
+
+
+    if(selectorTipo){
+
+        selectorTipo.addEventListener(
+            "change",
+            manejarCambioTipo
+        );
+
+    }
+
+
+    //==============================================
+    // ACTUALIZAR
+    //==============================================
+
     const actualizar =
         document.getElementById(
             "btnActualizar"
@@ -681,23 +805,15 @@ function enlazarEventos(){
 
         actualizar.addEventListener(
             "click",
-            async function(){
-
-                await cargarCategorias();
-
-                await cargarLocalidades();
-
-                await cargarElementos();
-
-                await cargarZonasEstacionamiento();
-
-                await cargarCordonesRojos();
-
-            }
+            actualizarMapa
         );
 
     }
 
+
+    //==============================================
+    // BUSCAR
+    //==============================================
 
     const buscar =
         document.getElementById(
@@ -715,6 +831,10 @@ function enlazarEventos(){
     }
 
 
+    //==============================================
+    // FILTRO TIPO
+    //==============================================
+
     const filtro =
         document.getElementById(
             "filtroTipo"
@@ -725,11 +845,15 @@ function enlazarEventos(){
 
         filtro.addEventListener(
             "change",
-            renderizarMarcadores
+            renderizarMapaCompleto
         );
 
     }
 
+
+    //==============================================
+    // FILTRO LOCALIDAD
+    //==============================================
 
     const filtroLocalidad =
         document.getElementById(
@@ -743,7 +867,7 @@ function enlazarEventos(){
             "change",
             function(){
 
-                renderizarMarcadores();
+                renderizarMapaCompleto();
 
                 centrarLocalidadSeleccionada();
 
@@ -752,6 +876,10 @@ function enlazarEventos(){
 
     }
 
+
+    //==============================================
+    // DASHBOARD
+    //==============================================
 
     const dashboard =
         document.getElementById(
@@ -772,6 +900,10 @@ function enlazarEventos(){
     }
 
 
+    //==============================================
+    // INFORMES
+    //==============================================
+
     const informes =
         document.getElementById(
             "btnInformes"
@@ -791,6 +923,10 @@ function enlazarEventos(){
     }
 
 
+    //==============================================
+    // SALIR
+    //==============================================
+
     const salirBtn =
         document.getElementById(
             "btnSalir"
@@ -804,6 +940,10 @@ function enlazarEventos(){
 
     }
 
+
+    //==============================================
+    // NUEVA ZONA
+    //==============================================
 
     const btnNuevaZona =
         document.getElementById(
@@ -821,6 +961,10 @@ function enlazarEventos(){
     }
 
 
+    //==============================================
+    // CANCELAR ZONA
+    //==============================================
+
     const btnCancelarZona =
         document.getElementById(
             "btnCancelarZona"
@@ -836,6 +980,10 @@ function enlazarEventos(){
 
     }
 
+
+    //==============================================
+    // NUEVO CORDON
+    //==============================================
 
     const btnNuevoCordon =
         document.getElementById(
@@ -853,6 +1001,10 @@ function enlazarEventos(){
     }
 
 
+    //==============================================
+    // CANCELAR CORDON
+    //==============================================
+
     const btnCancelarCordon =
         document.getElementById(
             "btnCancelarCordon"
@@ -867,6 +1019,122 @@ function enlazarEventos(){
         );
 
     }
+
+}
+
+
+//==================================================
+// CAMBIO DE TIPO
+//==================================================
+
+function manejarCambioTipo(){
+
+    const selector =
+        document.getElementById(
+            "tipo"
+        );
+
+
+    if(!selector){
+
+        return;
+
+    }
+
+
+    const tipo =
+        selector.value;
+
+
+    //================================================
+    // ESTACIONAMIENTO TARIFADO
+    //================================================
+
+    if(
+        normalizar(tipo)
+        ===
+        normalizar(
+            TIPO_ZONA_ESTACIONAMIENTO
+        )
+    ){
+
+        actualizarTextoAyuda(
+            "Dibuje la zona de estacionamiento tarifado sobre el mapa. Haga clic en los vértices y clic derecho para cerrar."
+        );
+
+
+        if(!dibujandoZona){
+
+            iniciarDibujoZona();
+
+        }
+
+
+        return;
+
+    }
+
+
+    //================================================
+    // CORDON ROJO
+    //================================================
+
+    if(
+        normalizar(tipo)
+        ===
+        normalizar(
+            TIPO_CORDON_ROJO
+        )
+    ){
+
+        actualizarTextoAyuda(
+            "Dibuje el cordón rojo sobre el mapa. Haga clic siguiendo el borde y clic derecho para finalizar."
+        );
+
+
+        if(!dibujandoCordon){
+
+            iniciarDibujoCordon();
+
+        }
+
+
+        return;
+
+    }
+
+
+    //================================================
+    // ELEMENTO NORMAL
+    //================================================
+
+    actualizarTextoAyuda(
+        "Seleccione un punto del mapa para registrar un nuevo elemento."
+    );
+
+}
+
+
+//==================================================
+// TEXTO DE AYUDA
+//==================================================
+
+function actualizarTextoAyuda(texto){
+
+    const elementos =
+        document.querySelectorAll(
+            ".contenido header p"
+        );
+
+
+    elementos.forEach(
+        function(elemento){
+
+            elemento.textContent =
+                texto;
+
+        }
+    );
 
 }
 
@@ -1053,7 +1321,7 @@ async function cargarElementos(){
     );
 
 
-    renderizarMarcadores();
+    renderizarMapaCompleto();
 
 
     mostrarMensaje(
@@ -1061,6 +1329,17 @@ async function cargarElementos(){
         " elementos cargados.",
         "exito"
     );
+
+}
+
+
+//==================================================
+// RENDERIZAR MAPA COMPLETO
+//==================================================
+
+function renderizarMapaCompleto(){
+
+    renderizarMarcadores();
 
 }
 
@@ -1124,6 +1403,65 @@ function renderizarMarcadores(){
             ""
         );
 
+
+    //================================================
+    // FILTRO DE GEOMETRIA ESPECIAL
+    //================================================
+
+    const mostrandoZona =
+        normalizar(filtroTipo)
+        ===
+        normalizar(
+            TIPO_ZONA_ESTACIONAMIENTO
+        );
+
+
+    const mostrandoCordon =
+        normalizar(filtroTipo)
+        ===
+        normalizar(
+            TIPO_CORDON_ROJO
+        );
+
+
+    //================================================
+    // SI SELECCIONÓ ZONA O CORDON
+    // NO MOSTRAR PUNTOS
+    //================================================
+
+    if(
+        mostrandoZona ||
+        mostrandoCordon
+    ){
+
+        if(mostrandoZona){
+
+            mostrarZonasEstacionamiento(
+                true
+            );
+
+        }
+
+
+        if(mostrandoCordon){
+
+            mostrarCordonesRojos(
+                true
+            );
+
+        }
+
+
+        actualizarContadorGeometrias();
+
+        return;
+
+    }
+
+
+    //================================================
+    // ELEMENTOS NORMALES
+    //================================================
 
     const visibles =
         elementos.filter(
@@ -1270,6 +1608,28 @@ function renderizarMarcadores(){
     );
 
 
+    //================================================
+    // MOSTRAR GEOMETRIAS CUANDO NO HAY FILTRO
+    //================================================
+
+    if(!filtroTipo){
+
+        mostrarZonasEstacionamiento(
+            false
+        );
+
+
+        mostrarCordonesRojos(
+            false
+        );
+
+    }
+
+
+    //================================================
+    // CONTADOR
+    //================================================
+
     const contador =
         document.getElementById(
             "contadorResultados"
@@ -1278,11 +1638,140 @@ function renderizarMarcadores(){
 
     if(contador){
 
-        contador.textContent =
-            visibles.length +
-            " elementos";
+        if(!filtroTipo){
+
+            contador.textContent =
+                visibles.length +
+                " elementos + " +
+                contarZonasActivas() +
+                " zonas + " +
+                contarCordonesActivos() +
+                " cordones";
+
+        }else{
+
+            contador.textContent =
+                visibles.length +
+                " elementos";
+
+        }
 
     }
+
+}
+
+
+//==================================================
+// CONTADOR GEOMETRIAS
+//==================================================
+
+function actualizarContadorGeometrias(){
+
+    const contador =
+        document.getElementById(
+            "contadorResultados"
+        );
+
+
+    if(!contador){
+
+        return;
+
+    }
+
+
+    const filtro =
+        document.getElementById(
+            "filtroTipo"
+        );
+
+
+    const valor =
+        filtro
+        ?
+        filtro.value
+        :
+        "";
+
+
+    if(
+        normalizar(valor)
+        ===
+        normalizar(
+            TIPO_ZONA_ESTACIONAMIENTO
+        )
+    ){
+
+        contador.textContent =
+            contarZonasActivas() +
+            " zonas de estacionamiento";
+
+        return;
+
+    }
+
+
+    if(
+        normalizar(valor)
+        ===
+        normalizar(
+            TIPO_CORDON_ROJO
+        )
+    ){
+
+        contador.textContent =
+            contarCordonesActivos() +
+            " cordones rojos";
+
+    }
+
+}
+
+
+//==================================================
+// CONTAR ZONAS ACTIVAS
+//==================================================
+
+function contarZonasActivas(){
+
+    return zonasEstacionamiento.filter(
+        function(z){
+
+            return (
+                String(
+                    z.activo || ""
+                )
+                .toUpperCase()
+                ===
+                "SI"
+            );
+
+        }
+    ).length;
+
+}
+
+
+//==================================================
+// CONTAR CORDONES ACTIVOS
+//==================================================
+
+function contarCordonesActivos(){
+
+    return cordonesRojos.filter(
+        function(c){
+
+            return (
+                String(
+                    c.activo || ""
+                )
+                .toUpperCase()
+                ===
+                "SI"
+            );
+
+        }
+    ).length;
 
 }
 
@@ -1322,9 +1811,9 @@ function centrarLocalidadSeleccionada(){
         );
 
 
-    //==================================================
-    // BUSCAR ELEMENTOS DE ESA LOCALIDAD
-    //==================================================
+    //================================================
+    // ELEMENTOS
+    //================================================
 
     const elementosLocalidad =
         elementos.filter(
@@ -1346,10 +1835,6 @@ function centrarLocalidadSeleccionada(){
             }
         );
 
-
-    //==================================================
-    // OBTENER COORDENADAS
-    //==================================================
 
     const puntos = [];
 
@@ -1385,9 +1870,181 @@ function centrarLocalidadSeleccionada(){
     );
 
 
-    //==================================================
-    // SI HAY ELEMENTOS
-    //==================================================
+    //================================================
+    // ZONAS
+    //================================================
+
+    zonasEstacionamiento.forEach(
+        function(zona){
+
+            if(
+                String(
+                    zona.activo || ""
+                )
+                .toUpperCase()
+                !==
+                "SI"
+            ){
+
+                return;
+
+            }
+
+
+            const localidad =
+                zona.localidadNombre ||
+                zona.localidad ||
+                "";
+
+
+            if(
+                normalizar(localidad)
+                !==
+                localidadSeleccionada
+            ){
+
+                return;
+
+            }
+
+
+            try{
+
+                const coordenadas =
+                    JSON.parse(
+                        zona.coordenadas
+                    );
+
+
+                if(
+                    Array.isArray(
+                        coordenadas
+                    )
+                ){
+
+                    coordenadas.forEach(
+                        function(p){
+
+                            if(
+                                Array.isArray(p) &&
+                                p.length >= 2
+                            ){
+
+                                puntos.push([
+                                    Number(p[0]),
+                                    Number(p[1])
+                                ]);
+
+                            }
+
+                        }
+                    );
+
+                }
+
+            }
+            catch(error){
+
+                console.warn(
+                    "No se pudieron leer coordenadas de zona.",
+                    zona
+                );
+
+            }
+
+        }
+    );
+
+
+    //================================================
+    // CORDONES
+    //================================================
+
+    cordonesRojos.forEach(
+        function(cordon){
+
+            if(
+                String(
+                    cordon.activo || ""
+                )
+                .toUpperCase()
+                !==
+                "SI"
+            ){
+
+                return;
+
+            }
+
+
+            const localidad =
+                cordon.localidadNombre ||
+                cordon.localidad ||
+                "";
+
+
+            if(
+                normalizar(localidad)
+                !==
+                localidadSeleccionada
+            ){
+
+                return;
+
+            }
+
+
+            try{
+
+                const coordenadas =
+                    JSON.parse(
+                        cordon.coordenadas
+                    );
+
+
+                if(
+                    Array.isArray(
+                        coordenadas
+                    )
+                ){
+
+                    coordenadas.forEach(
+                        function(p){
+
+                            if(
+                                Array.isArray(p) &&
+                                p.length >= 2
+                            ){
+
+                                puntos.push([
+                                    Number(p[0]),
+                                    Number(p[1])
+                                ]);
+
+                            }
+
+                        }
+                    );
+
+                }
+
+            }
+            catch(error){
+
+                console.warn(
+                    "No se pudieron leer coordenadas de cordón.",
+                    cordon
+                );
+
+            }
+
+        }
+    );
+
+
+    //================================================
+    // CENTRAR
+    //================================================
 
     if(puntos.length){
 
@@ -1421,10 +2078,6 @@ function centrarLocalidadSeleccionada(){
     }
 
 
-    //==================================================
-    // SI NO HAY ELEMENTOS
-    //==================================================
-
     console.warn(
         "No hay elementos para la localidad:",
         filtroLocalidad.value
@@ -1438,6 +2091,7 @@ function centrarLocalidadSeleccionada(){
 
 }
 
+
 //==================================================
 // ICONO POI
 //==================================================
@@ -1447,10 +2101,6 @@ function crearIcono(tipo){
     const categoria =
         obtenerCategoria(tipo);
 
-
-    //================================================
-    // MAPA DE ICONOS
-    //================================================
 
     const iconos = {
 
@@ -1481,10 +2131,6 @@ function crearIcono(tipo){
         "disc. parking":
             "fa-solid fa-wheelchair",
 
-        //============================================
-        // PARADA DE BUS
-        //============================================
-
         "bus":
             "fa-solid fa-bus",
 
@@ -1503,10 +2149,6 @@ function crearIcono(tipo){
         "parada de ómnibus":
             "fa-solid fa-bus",
 
-        //============================================
-        // SONDA DE VELOCIDAD
-        //============================================
-
         "speed":
             "fa-solid fa-gauge-high",
 
@@ -1522,19 +2164,11 @@ function crearIcono(tipo){
         "radar":
             "fa-solid fa-camera",
 
-        //============================================
-        // OTROS
-        //============================================
-
         "otros":
             "fa-solid fa-location-dot"
 
     };
 
-
-    //================================================
-    // POR DEFECTO
-    //================================================
 
     let claseIcono =
         "fa-solid fa-location-dot";
@@ -1543,10 +2177,6 @@ function crearIcono(tipo){
     let color =
         "gris";
 
-
-    //================================================
-    // CATEGORIA ENCONTRADA
-    //================================================
 
     if(categoria){
 
@@ -1570,39 +2200,6 @@ function crearIcono(tipo){
             );
 
 
-        console.log(
-            "================================"
-        );
-
-
-        console.log(
-            "TIPO:",
-            tipo
-        );
-
-
-        console.log(
-            "CATEGORIA:",
-            categoria
-        );
-
-
-        console.log(
-            "ICONO:",
-            iconoOriginal
-        );
-
-
-        console.log(
-            "ICONO NORMALIZADO:",
-            iconoNormalizado
-        );
-
-
-        //============================================
-        // BUSCAR POR ICONO
-        //============================================
-
         if(
             iconos[
                 iconoNormalizado
@@ -1616,10 +2213,6 @@ function crearIcono(tipo){
 
         }
 
-
-        //============================================
-        // BUSCAR POR NOMBRE
-        //============================================
 
         else if(
             nombreNormalizado.includes(
@@ -1671,10 +2264,6 @@ function crearIcono(tipo){
         }
 
 
-        //============================================
-        // COLOR
-        //============================================
-
         color =
             String(
                 categoria.color ||
@@ -1685,10 +2274,6 @@ function crearIcono(tipo){
 
     }
 
-
-    //================================================
-    // CREAR ICONO
-    //================================================
 
     return L.divIcon({
 
@@ -1975,6 +2560,46 @@ async function guardarElemento(e){
         ).value;
 
 
+    //================================================
+    // PROTECCION GEOMETRIAS ESPECIALES
+    //================================================
+
+    if(
+        normalizar(tipo)
+        ===
+        normalizar(
+            TIPO_ZONA_ESTACIONAMIENTO
+        )
+    ){
+
+        mostrarMensaje(
+            "El Estacionamiento Tarifado se registra dibujando la zona sobre el mapa.",
+            ""
+        );
+
+        return;
+
+    }
+
+
+    if(
+        normalizar(tipo)
+        ===
+        normalizar(
+            TIPO_CORDON_ROJO
+        )
+    ){
+
+        mostrarMensaje(
+            "El Cordón Rojo se registra dibujando el tramo sobre el mapa.",
+            ""
+        );
+
+        return;
+
+    }
+
+
     const categoria =
         obtenerCategoria(tipo);
 
@@ -2115,6 +2740,11 @@ async function guardarElemento(e){
     }
 
 
+    actualizarTextoAyuda(
+        "Seleccione un punto del mapa para registrar un nuevo elemento."
+    );
+
+
     await cargarElementos();
 
 }
@@ -2141,6 +2771,13 @@ function iniciarDibujoZona(){
     if(dibujandoZona){
 
         return;
+
+    }
+
+
+    if(dibujandoCordon){
+
+        cancelarDibujoCordon();
 
     }
 
@@ -2175,6 +2812,25 @@ function iniciarDibujoZona(){
             null;
 
     }
+
+
+    const selectorTipo =
+        document.getElementById(
+            "tipo"
+        );
+
+
+    if(selectorTipo){
+
+        selectorTipo.value =
+            TIPO_ZONA_ESTACIONAMIENTO;
+
+    }
+
+
+    actualizarTextoAyuda(
+        "Dibuje la zona de estacionamiento tarifado sobre el mapa. Haga clic en los vértices y clic derecho para cerrar."
+    );
 
 
     const btnNuevaZona =
@@ -2227,7 +2883,7 @@ function iniciarDibujoZona(){
 
 
     mostrarMensaje(
-        "Dibujando zona de estacionamiento...",
+        "Dibujando zona de estacionamiento tarifado...",
         ""
     );
 
@@ -2630,7 +3286,9 @@ async function cargarZonasEstacionamiento(){
 // MOSTRAR ZONAS
 //--------------------------------------------------
 
-function mostrarZonasEstacionamiento(){
+function mostrarZonasEstacionamiento(
+    soloFiltrar = false
+){
 
     if(!capaZonasEstacionamiento){
 
@@ -2692,6 +3350,45 @@ function mostrarZonasEstacionamiento(){
             }
 
 
+            const filtroLocalidad =
+                document.getElementById(
+                    "filtroLocalidad"
+                );
+
+
+            const localidadSeleccionada =
+                filtroLocalidad
+                ?
+                filtroLocalidad.value
+                :
+                "";
+
+
+            if(
+                localidadSeleccionada
+            ){
+
+                const localidadZona =
+                    zona.localidadNombre ||
+                    zona.localidad ||
+                    "";
+
+
+                if(
+                    normalizar(localidadZona)
+                    !==
+                    normalizar(
+                        localidadSeleccionada
+                    )
+                ){
+
+                    return;
+
+                }
+
+            }
+
+
             const poligono =
                 L.polygon(
                     puntos,
@@ -2738,7 +3435,7 @@ function mostrarZonasEstacionamiento(){
                     <p>
 
                         <strong>
-                            Zona de estacionamiento tarifado
+                            Estacionamiento Tarifado
                         </strong>
 
                     </p>
@@ -2752,6 +3449,7 @@ function mostrarZonasEstacionamiento(){
 
                         ${escapar(
                             zona.localidadNombre ||
+                            zona.localidad ||
                             "Sin localidad"
                         )}
 
@@ -2888,6 +3586,11 @@ function cancelarDibujoZona(){
     limpiarDibujoZona();
 
 
+    actualizarTextoAyuda(
+        "Seleccione un punto del mapa para registrar un nuevo elemento."
+    );
+
+
     const estadoZona =
         document.getElementById(
             "estadoZona"
@@ -2990,7 +3693,7 @@ function limpiarDibujoZona(){
 
 
 //==================================================
-// ESC = CANCELAR ZONA
+// ESC
 //==================================================
 
 document.addEventListener(
@@ -3005,6 +3708,7 @@ document.addEventListener(
             cancelarDibujoZona();
 
         }
+
 
         if(
             e.key === "Escape" &&
@@ -3031,6 +3735,7 @@ function finalizarDibujoGeometrico(e){
 
     }
 
+
     if(dibujandoZona){
 
         finalizarZona();
@@ -3038,6 +3743,7 @@ function finalizarDibujoGeometrico(e){
         return;
 
     }
+
 
     if(dibujandoCordon){
 
@@ -3048,48 +3754,110 @@ function finalizarDibujoGeometrico(e){
 }
 
 
+//--------------------------------------------------
+// INICIAR CORDON
+//--------------------------------------------------
+
 function iniciarDibujoCordon(){
 
-    if(!mapa || dibujandoZona || dibujandoCordon){
+    if(
+        !mapa ||
+        dibujandoZona ||
+        dibujandoCordon
+    ){
 
         return;
 
     }
 
-    dibujandoCordon = true;
 
-    puntosCordon = [];
+    dibujandoCordon =
+        true;
+
+
+    puntosCordon =
+        [];
+
 
     if(lineaCordonTemporal){
 
-        mapa.removeLayer(lineaCordonTemporal);
+        mapa.removeLayer(
+            lineaCordonTemporal
+        );
 
-        lineaCordonTemporal = null;
+        lineaCordonTemporal =
+            null;
 
     }
 
-    const btnNuevo = document.getElementById("btnNuevoCordon");
-    const btnCancelar = document.getElementById("btnCancelarCordon");
-    const estado = document.getElementById("estadoCordon");
+
+    const selectorTipo =
+        document.getElementById(
+            "tipo"
+        );
+
+
+    if(selectorTipo){
+
+        selectorTipo.value =
+            TIPO_CORDON_ROJO;
+
+    }
+
+
+    actualizarTextoAyuda(
+        "Dibuje el cordón rojo sobre el mapa. Haga clic siguiendo el borde y clic derecho para finalizar."
+    );
+
+
+    const btnNuevo =
+        document.getElementById(
+            "btnNuevoCordon"
+        );
+
+
+    const btnCancelar =
+        document.getElementById(
+            "btnCancelarCordon"
+        );
+
+
+    const estado =
+        document.getElementById(
+            "estadoCordon"
+        );
+
 
     if(btnNuevo){
-        btnNuevo.style.display = "none";
+
+        btnNuevo.style.display =
+            "none";
+
     }
 
+
     if(btnCancelar){
-        btnCancelar.style.display = "inline-block";
+
+        btnCancelar.style.display =
+            "inline-block";
+
     }
+
 
     if(estado){
 
         estado.textContent =
             "Haga clic sobre el borde de la calle. Clic derecho para finalizar.";
 
-        estado.className = "dibujando";
+        estado.className =
+            "dibujando";
 
     }
 
-    mapa.getContainer().style.cursor = "crosshair";
+
+    mapa.getContainer().style.cursor =
+        "crosshair";
+
 
     mostrarMensaje(
         "Dibujando cordón rojo...",
@@ -3099,6 +3867,10 @@ function iniciarDibujoCordon(){
 }
 
 
+//--------------------------------------------------
+// AGREGAR PUNTO CORDON
+//--------------------------------------------------
+
 function agregarPuntoCordon(e){
 
     if(!dibujandoCordon){
@@ -3107,45 +3879,73 @@ function agregarPuntoCordon(e){
 
     }
 
+
     puntosCordon.push([
         e.latlng.lat,
         e.latlng.lng
     ]);
 
+
     if(lineaCordonTemporal){
 
-        mapa.removeLayer(lineaCordonTemporal);
+        mapa.removeLayer(
+            lineaCordonTemporal
+        );
 
     }
+
 
     lineaCordonTemporal =
         L.polyline(
             puntosCordon,
             {
-                color: "#d50000",
-                weight: 4,
-                opacity: 0.9,
-                lineCap: "round",
-                lineJoin: "round",
-                interactive: false
+
+                color:
+                    "#d50000",
+
+                weight:
+                    4,
+
+                opacity:
+                    0.9,
+
+                lineCap:
+                    "round",
+
+                lineJoin:
+                    "round",
+
+                interactive:
+                    false
+
             }
         )
         .addTo(mapa);
 
+
     const estado =
-        document.getElementById("estadoCordon");
+        document.getElementById(
+            "estadoCordon"
+        );
+
 
     if(estado){
 
         estado.textContent =
-            "Puntos marcados: " +
-            puntosCordon.length +
+            "Puntos marcados: "
+            +
+            puntosCordon.length
+            +
             ". Continúe o haga clic derecho para finalizar.";
 
     }
 
 }
 
+
+//--------------------------------------------------
+// FINALIZAR CORDON
+//--------------------------------------------------
 
 async function finalizarCordon(){
 
@@ -3154,6 +3954,7 @@ async function finalizarCordon(){
         return;
 
     }
+
 
     if(puntosCordon.length < 2){
 
@@ -3166,8 +3967,12 @@ async function finalizarCordon(){
 
     }
 
+
     const nombre =
-        prompt("Ingrese el nombre del cordón rojo:");
+        prompt(
+            "Ingrese el nombre del cordón rojo:"
+        );
+
 
     if(nombre === null){
 
@@ -3175,7 +3980,10 @@ async function finalizarCordon(){
 
     }
 
-    const nombreLimpio = nombre.trim();
+
+    const nombreLimpio =
+        nombre.trim();
+
 
     if(!nombreLimpio){
 
@@ -3188,28 +3996,55 @@ async function finalizarCordon(){
 
     }
 
+
     try{
 
         const usuarioActual =
             JSON.parse(
-                localStorage.getItem("usuarioActual") || "{}"
+                localStorage.getItem(
+                    "usuarioActual"
+                )
+                ||
+                "{}"
             );
 
+
         const filtroLocalidad =
-            document.getElementById("filtroLocalidad");
+            document.getElementById(
+                "filtroLocalidad"
+            );
+
 
         const respuesta =
             await apiGuardarCordonRojo({
-                nombre: nombreLimpio,
-                localidad: filtroLocalidad ? filtroLocalidad.value : "",
-                coordenadas: JSON.stringify(puntosCordon),
+
+                nombre:
+                    nombreLimpio,
+
+                localidad:
+                    filtroLocalidad
+                    ?
+                    filtroLocalidad.value
+                    :
+                    "",
+
+                coordenadas:
+                    JSON.stringify(
+                        puntosCordon
+                    ),
+
                 usuario:
                     usuarioActual.nombre ||
                     usuarioActual.usuario ||
                     "admin"
+
             });
 
-        if(!respuesta || !respuesta.ok){
+
+        if(
+            !respuesta ||
+            !respuesta.ok
+        ){
 
             throw new Error(
                 respuesta?.mensaje ||
@@ -3218,9 +4053,12 @@ async function finalizarCordon(){
 
         }
 
+
         limpiarDibujoCordon();
 
+
         await cargarCordonesRojos();
+
 
         mostrarMensaje(
             "Cordón rojo guardado correctamente.",
@@ -3230,7 +4068,11 @@ async function finalizarCordon(){
     }
     catch(error){
 
-        console.error("Error guardando cordón rojo:", error);
+        console.error(
+            "Error guardando cordón rojo:",
+            error
+        );
+
 
         mostrarMensaje(
             error.message ||
@@ -3243,6 +4085,10 @@ async function finalizarCordon(){
 }
 
 
+//--------------------------------------------------
+// CARGAR CORDONES
+//--------------------------------------------------
+
 async function cargarCordonesRojos(){
 
     if(!capaCordonesRojos){
@@ -3251,12 +4097,17 @@ async function cargarCordonesRojos(){
 
     }
 
+
     try{
 
         const respuesta =
             await apiObtenerCordonesRojos();
 
-        if(!respuesta || !respuesta.ok){
+
+        if(
+            !respuesta ||
+            !respuesta.ok
+        ){
 
             console.error(
                 "Error cargando cordones rojos:",
@@ -3267,24 +4118,39 @@ async function cargarCordonesRojos(){
 
         }
 
+
         cordonesRojos =
-            Array.isArray(respuesta.datos)
-            ? respuesta.datos
-            : [];
+            Array.isArray(
+                respuesta.datos
+            )
+            ?
+            respuesta.datos
+            :
+            [];
+
 
         mostrarCordonesRojos();
 
     }
     catch(error){
 
-        console.error("Error cargando cordones rojos:", error);
+        console.error(
+            "Error cargando cordones rojos:",
+            error
+        );
 
     }
 
 }
 
 
-function mostrarCordonesRojos(){
+//--------------------------------------------------
+// MOSTRAR CORDONES
+//--------------------------------------------------
+
+function mostrarCordonesRojos(
+    soloFiltrar = false
+){
 
     if(!capaCordonesRojos){
 
@@ -3292,100 +4158,243 @@ function mostrarCordonesRojos(){
 
     }
 
+
     capaCordonesRojos.clearLayers();
 
-    cordonesRojos.forEach(function(cordon){
 
-        if(
-            String(cordon.activo || "").toUpperCase()
-            !== "SI"
-        ){
+    cordonesRojos.forEach(
+        function(cordon){
 
-            return;
+            if(
+                String(
+                    cordon.activo || ""
+                )
+                .toUpperCase()
+                !==
+                "SI"
+            ){
 
-        }
+                return;
 
-        let puntos;
+            }
 
-        try{
 
-            puntos = JSON.parse(cordon.coordenadas);
+            let puntos;
 
-        }
-        catch(error){
 
-            console.error("Coordenadas inválidas:", cordon);
+            try{
 
-            return;
+                puntos =
+                    JSON.parse(
+                        cordon.coordenadas
+                    );
 
-        }
+            }
+            catch(error){
 
-        if(!Array.isArray(puntos) || puntos.length < 2){
+                console.error(
+                    "Coordenadas inválidas:",
+                    cordon
+                );
 
-            return;
+                return;
 
-        }
+            }
 
-        const linea =
-            L.polyline(
-                puntos,
-                {
-                    color: "#d50000",
-                    weight: 4,
-                    opacity: 0.9,
-                    lineCap: "round",
-                    lineJoin: "round",
-                    interactive: true
+
+            if(
+                !Array.isArray(puntos) ||
+                puntos.length < 2
+            ){
+
+                return;
+
+            }
+
+
+            const filtroLocalidad =
+                document.getElementById(
+                    "filtroLocalidad"
+                );
+
+
+            const localidadSeleccionada =
+                filtroLocalidad
+                ?
+                filtroLocalidad.value
+                :
+                "";
+
+
+            if(
+                localidadSeleccionada
+            ){
+
+                const localidadCordon =
+                    cordon.localidadNombre ||
+                    cordon.localidad ||
+                    "";
+
+
+                if(
+                    normalizar(localidadCordon)
+                    !==
+                    normalizar(
+                        localidadSeleccionada
+                    )
+                ){
+
+                    return;
+
                 }
+
+            }
+
+
+            const linea =
+                L.polyline(
+                    puntos,
+                    {
+
+                        color:
+                            "#d50000",
+
+                        weight:
+                            5,
+
+                        opacity:
+                            0.95,
+
+                        lineCap:
+                            "round",
+
+                        lineJoin:
+                            "round",
+
+                        interactive:
+                            true
+
+                    }
+                );
+
+
+            linea.bindPopup(
+                `
+
+                <div class="popup-zona">
+
+                    <h3>
+
+                        <i class="fa-solid fa-road"></i>
+
+                        ${escapar(
+                            cordon.codigo ||
+                            "CR"
+                        )}
+                        -
+                        ${escapar(
+                            cordon.nombre
+                        )}
+
+                    </h3>
+
+
+                    <p>
+
+                        <strong>
+                            Cordón rojo
+                        </strong>
+
+                    </p>
+
+
+                    <p>
+
+                        <strong>
+                            Localidad:
+                        </strong>
+
+                        ${escapar(
+                            cordon.localidadNombre ||
+                            cordon.localidad ||
+                            "Sin localidad"
+                        )}
+
+                    </p>
+
+
+                    <p>
+
+                        <strong>
+                            Estado:
+                        </strong>
+
+                        Activo
+
+                    </p>
+
+
+                    <button
+                        type="button"
+                        class="btn-eliminar-zona"
+                        onclick="
+                            eliminarCordonRojo(
+                                '${escaparAtributo(cordon.id)}'
+                            )
+                        "
+                    >
+
+                        <i class="fa-solid fa-trash"></i>
+
+                        Eliminar cordón
+
+                    </button>
+
+                </div>
+
+                `
             );
 
-        linea.bindPopup(
-            `
-            <div class="popup-zona">
-                <h3>
-                    <i class="fa-solid fa-road"></i>
-                    ${escapar(cordon.codigo || "CR")} -
-                    ${escapar(cordon.nombre)}
-                </h3>
-                <p><strong>Cordón rojo</strong></p>
-                <p>
-                    <strong>Localidad:</strong>
-                    ${escapar(cordon.localidad || "Sin localidad")}
-                </p>
-                <p><strong>Estado:</strong> Activo</p>
-                <button
-                    type="button"
-                    class="btn-eliminar-zona"
-                    onclick="eliminarCordonRojo('${escaparAtributo(cordon.id)}')"
-                >
-                    <i class="fa-solid fa-trash"></i>
-                    Eliminar cordón
-                </button>
-            </div>
-            `
-        );
 
-        linea.addTo(capaCordonesRojos);
+            linea.addTo(
+                capaCordonesRojos
+            );
 
-    });
+        }
+    );
 
 }
 
 
+//--------------------------------------------------
+// ELIMINAR CORDON
+//--------------------------------------------------
+
 async function eliminarCordonRojo(id){
 
-    if(!confirm("¿Está seguro de desactivar este cordón rojo?")){
+    if(
+        !confirm(
+            "¿Está seguro de desactivar este cordón rojo?"
+        )
+    ){
 
         return;
 
     }
 
+
     try{
 
         const respuesta =
-            await apiEliminarCordonRojo(id);
+            await apiEliminarCordonRojo(
+                id
+            );
 
-        if(!respuesta || !respuesta.ok){
+
+        if(
+            !respuesta ||
+            !respuesta.ok
+        ){
 
             throw new Error(
                 respuesta?.mensaje ||
@@ -3394,7 +4403,9 @@ async function eliminarCordonRojo(id){
 
         }
 
+
         await cargarCordonesRojos();
+
 
         mostrarMensaje(
             "Cordón rojo desactivado correctamente.",
@@ -3415,50 +4426,104 @@ async function eliminarCordonRojo(id){
 }
 
 
+//--------------------------------------------------
+// CANCELAR CORDON
+//--------------------------------------------------
+
 function cancelarDibujoCordon(){
 
     limpiarDibujoCordon();
 
-    mostrarMensaje("Dibujo de cordón cancelado.", "");
+
+    actualizarTextoAyuda(
+        "Seleccione un punto del mapa para registrar un nuevo elemento."
+    );
+
+
+    mostrarMensaje(
+        "Dibujo de cordón cancelado.",
+        ""
+    );
 
 }
 
 
+//--------------------------------------------------
+// LIMPIAR CORDON
+//--------------------------------------------------
+
 function limpiarDibujoCordon(){
 
-    dibujandoCordon = false;
+    dibujandoCordon =
+        false;
 
-    puntosCordon = [];
+
+    puntosCordon =
+        [];
+
 
     if(lineaCordonTemporal){
 
-        mapa.removeLayer(lineaCordonTemporal);
+        mapa.removeLayer(
+            lineaCordonTemporal
+        );
 
-        lineaCordonTemporal = null;
+        lineaCordonTemporal =
+            null;
 
     }
+
 
     if(mapa){
 
-        mapa.getContainer().style.cursor = "";
+        mapa.getContainer().style.cursor =
+            "";
 
     }
 
-    const btnNuevo = document.getElementById("btnNuevoCordon");
-    const btnCancelar = document.getElementById("btnCancelarCordon");
-    const estado = document.getElementById("estadoCordon");
+
+    const btnNuevo =
+        document.getElementById(
+            "btnNuevoCordon"
+        );
+
+
+    const btnCancelar =
+        document.getElementById(
+            "btnCancelarCordon"
+        );
+
+
+    const estado =
+        document.getElementById(
+            "estadoCordon"
+        );
+
 
     if(btnNuevo){
-        btnNuevo.style.display = "inline-block";
+
+        btnNuevo.style.display =
+            "inline-block";
+
     }
+
 
     if(btnCancelar){
-        btnCancelar.style.display = "none";
+
+        btnCancelar.style.display =
+            "none";
+
     }
 
+
     if(estado){
-        estado.textContent = "";
-        estado.className = "";
+
+        estado.textContent =
+            "";
+
+        estado.className =
+            "";
+
     }
 
 }
@@ -3682,11 +4747,17 @@ async function actualizarMapa(){
 
     await cargarCordonesRojos();
 
+
+    mostrarMensaje(
+        "Mapa actualizado correctamente.",
+        "exito"
+    );
+
 }
 
 
 //==================================================
-// REFRESCO AUTOMÁTICO
+// REFRESCO AUTOMATICO
 //==================================================
 
 setInterval(
@@ -3767,9 +4838,21 @@ window.debugMapa =
             zonasEstacionamiento
         );
 
+
+        console.log(
+            "Cordones rojos:",
+            cordonesRojos
+        );
+
+
+        console.table(
+            cordonesRojos
+        );
+
     };
 
 
 //==================================================
 // FIN mapa.js
 //==================================================
+```
