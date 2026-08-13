@@ -399,40 +399,53 @@ async function apiEliminarZonaEstacionamiento(
     );
 
 }
-//==================================================
-// ZONAS DE ESTACIONAMIENTO TARIFADO
-//==================================================
+//======================================================
+// CORDONES ROJOS
+//======================================================
 
-async function apiObtenerZonasEstacionamiento(){
+async function apiObtenerCordonesRojos() {
 
     return api(
-        'obtenerZonasEstacionamiento'
+        'obtenerCordonesRojos'
     );
 
 }
 
 
-async function apiGuardarZonaEstacionamiento(
-    datos
-){
+async function apiGuardarCordonRojo(
+    cordon
+) {
 
     return api(
-        'guardarZonaEstacionamiento',
-        datos
+        'guardarCordonRojo',
+        cordon
     );
 
 }
 
 
-async function apiEliminarZonaEstacionamiento(
+async function apiEliminarCordonRojo(
     id
-){
+) {
 
     return api(
-        'eliminarZonaEstacionamiento',
+        'eliminarCordonRojo',
         {
-            id:id
+            id
         }
+    );
+
+}
+
+
+//======================================================
+// CATÁLOGO PARA INFORMES
+//======================================================
+
+async function apiObtenerCatalogoElementosInformables() {
+
+    return api(
+        'obtenerCatalogoElementosInformables'
     );
 
 }
