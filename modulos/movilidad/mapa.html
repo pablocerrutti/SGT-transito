@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -162,7 +162,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 
 <!--================================================
-    CONTROLES DE ZONA
+    CONTROLES DE DIBUJO
 =================================================-->
 
 <div class="zonaEstacionamientoBarra">
@@ -185,12 +185,44 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
         <i class="fa-solid fa-xmark"></i>
 
-        Cancelar dibujo
+        Cancelar zona
 
     </button>
 
 
     <span id="estadoZona">
+
+    </span>
+
+</div>
+
+
+<div class="zonaEstacionamientoBarra">
+
+    <button
+        type="button"
+        id="btnNuevoCordon">
+
+        <i class="fa-solid fa-road"></i>
+
+        Dibujar cordón rojo
+
+    </button>
+
+
+    <button
+        type="button"
+        id="btnCancelarCordon"
+        style="display:none;">
+
+        <i class="fa-solid fa-xmark"></i>
+
+        Cancelar cordón
+
+    </button>
+
+
+    <span id="estadoCordon">
 
     </span>
 
