@@ -2693,63 +2693,74 @@ async function guardarZonaEnServidor(
 //--------------------------------------------------
 
 async function cargarZonasEstacionamiento() {
+zonasEstacionamiento =
+    Array.isArray(respuesta.datos)
+        ? respuesta.datos
+        : [];
 
-    if (!capaZonasEstacionamiento) {
-        return;
-    }
+console.log(
+    "===================================="
+);
 
+console.log(
+    "ZONAS ESTACIONAMIENTO RECIBIDAS"
+);
 
-    try {
+console.log(
+    "Cantidad:",
+    zonasEstacionamiento.length
+);
 
-        const respuesta =
-            await apiObtenerZonasEstacionamiento();
+console.table(
+    zonasEstacionamiento
+);
 
+if (zonasEstacionamiento.length > 0) {
 
-        console.log(
-            "Respuesta zonas:",
-            respuesta
-        );
+    console.log(
+        "PRIMERA ZONA:",
+        zonasEstacionamiento[0]
+    );
 
+    console.log(
+        "ID:",
+        zonasEstacionamiento[0].id
+    );
 
-        if (
-            !respuesta ||
-            !respuesta.ok
-        ) {
+    console.log(
+        "Código:",
+        zonasEstacionamiento[0].codigo
+    );
 
-            console.error(
-                "Error cargando zonas:",
-                respuesta?.mensaje
-            );
+    console.log(
+        "Activo:",
+        zonasEstacionamiento[0].activo
+    );
 
-            return;
+    console.log(
+        "Coordenadas:",
+        zonasEstacionamiento[0].coordenadas
+    );
 
-        }
-
-
-        zonasEstacionamiento =
-            Array.isArray(respuesta.datos)
-                ? respuesta.datos
-                : [];
-
-
-        mostrarZonasEstacionamiento();
-
-
-        console.log(
-            "Zonas cargadas:",
-            zonasEstacionamiento.length
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Error cargando zonas:",
-            error
-        );
-
-    }
+    console.log(
+        "Coordenadas interpretadas:",
+        leerCoordenadas(
+            zonasEstacionamiento[0].coordenadas
+        )
+    );
 
 }
+
+console.log(
+    "===================================="
+);
+
+mostrarZonasEstacionamiento();
+
+console.log(
+    "Zonas cargadas:",
+    zonasEstacionamiento.length
+);
 
 
 //--------------------------------------------------
