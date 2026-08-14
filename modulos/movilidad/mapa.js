@@ -3046,8 +3046,6 @@ async function guardarZonaEnServidor(
     }
 
 }
-
-
 //--------------------------------------------------
 // CARGAR ZONAS
 //--------------------------------------------------
@@ -3055,15 +3053,8 @@ async function guardarZonaEnServidor(
 async function cargarZonasEstacionamiento() {
 
     if (!capaZonasEstacionamiento) {
-
-        console.warn(
-            "La capa de zonas de estacionamiento todavía no existe."
-        );
-
         return;
-
     }
-
 
     try {
 
@@ -3072,19 +3063,16 @@ async function cargarZonasEstacionamiento() {
         );
 
         console.log(
-            "CARGANDO ZONAS ESTACIONAMIENTO"
+            "CARGANDO ZONAS DE ESTACIONAMIENTO"
         );
-
 
         const respuesta =
             await apiObtenerZonasEstacionamiento();
-
 
         console.log(
             "Respuesta zonas estacionamiento:",
             respuesta
         );
-
 
         if (
             !respuesta ||
@@ -3101,17 +3089,12 @@ async function cargarZonasEstacionamiento() {
             mostrarZonasEstacionamiento();
 
             return;
-
         }
 
-
         zonasEstacionamiento =
-            Array.isArray(
-                respuesta.datos
-            )
+            Array.isArray(respuesta.datos)
                 ? respuesta.datos
                 : [];
-
 
         console.log(
             "===================================="
@@ -3129,7 +3112,6 @@ async function cargarZonasEstacionamiento() {
         console.table(
             zonasEstacionamiento
         );
-
 
         if (
             zonasEstacionamiento.length > 0
@@ -3151,8 +3133,18 @@ async function cargarZonasEstacionamiento() {
             );
 
             console.log(
+                "Nombre:",
+                zonasEstacionamiento[0].nombre
+            );
+
+            console.log(
                 "Activo:",
                 zonasEstacionamiento[0].activo
+            );
+
+            console.log(
+                "Localidad:",
+                zonasEstacionamiento[0].localidad
             );
 
             console.log(
@@ -3169,25 +3161,23 @@ async function cargarZonasEstacionamiento() {
 
         }
 
-
         console.log(
             "===================================="
         );
 
-
         mostrarZonasEstacionamiento();
 
+        actualizarContadorGeometrias();
 
         console.log(
             "Zonas cargadas:",
             zonasEstacionamiento.length
         );
 
-
     } catch (error) {
 
         console.error(
-            "Error cargando zonas de estacionamiento:",
+            "ERROR CARGANDO ZONAS DE ESTACIONAMIENTO:",
             error
         );
 
@@ -3199,7 +3189,7 @@ async function cargarZonasEstacionamiento() {
 
 }
 
-
+/
 //--------------------------------------------------
 // MOSTRAR ZONAS
 //--------------------------------------------------
