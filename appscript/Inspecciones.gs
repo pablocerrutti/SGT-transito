@@ -2,9 +2,14 @@
  * SGT - ACTUACIONES DE TRANSITO
  * Fiscalizacion + Movilidad
  * Compatible con registros existentes.
+ * PDF con marca de agua SGT + logo en pie.
  ********************************************************/
 
 const CARPETA_ACTUACIONES_ID_ = "1sUXE34S_Vnt2c55HmkB3M9l18tPXfZJP";
+
+// Recursos gráficos públicos del repositorio SGT.
+const SGT_ICON_URL_ = "https://raw.githubusercontent.com/pablocerrutti/SGT-transito/main/img/sgt.ico";
+const SGT_LOGO_URL_ = "https://raw.githubusercontent.com/pablocerrutti/SGT-transito/main/img/logo.png";
 
 function hojaInspecciones_(){
   const ss = bd();
@@ -110,8 +115,6 @@ function guardarInspeccion(e){
     const estado=String(p.estado||"Registrada").trim();
 
     if(!tipoActuacion) return {ok:false,mensaje:"Debe seleccionar el tipo de actuación."};
-
-    // Fiscalización mantiene sus campos obligatorios originales.
     if(rol==="fiscalizacion"){
       if(!beta) return {ok:false,mensaje:"No tiene Número Beta asignado."};
       if(!matricula) return {ok:false,mensaje:"Debe ingresar la matrícula."};
@@ -150,20 +153,12 @@ function guardarInspeccion(e){
         if(mapa["PDF URL"]) sh.getRange(sh.getLastRow(),mapa["PDF URL"]).setValue(pdf.url);
       }catch(pdfError){
         console.error("PDF actuación:",pdfError);
-        return {
-          ok:false,
-          mensaje:"La actuación fue guardada, pero no se pudo generar el PDF: "+(pdfError.message||pdfError),
-          id:id, numeroSerie:numeroSerie
-        };
+        return {ok:false,mensaje:"La actuación fue guardada, pero no se pudo generar el PDF: "+(pdfError.message||pdfError),id:id,numeroSerie:numeroSerie};
       }
       SpreadsheetApp.flush();
       return {
-        ok:true,
-        mensaje:"Actuación registrada y reporte PDF generado correctamente.",
-        id:id, numeroSerie:numeroSerie, pdfUrl:pdf.url,
-        datos:{id:id,numeroSerie:numeroSerie,matricula:matricula,tipoActuacion:tipoActuacion,
-          inspector:inspectorFinal,beta:betaFinal,rol:rol,usuario:usuario||inspectorFinal,
-          videoUrl:videoUrl,documentoUrl:documentoUrl,pdfUrl:pdf.url}
+        ok:true,mensaje:"Actuación registrada y reporte PDF generado correctamente.",id:id,numeroSerie:numeroSerie,pdfUrl:pdf.url,
+        datos:{id:id,numeroSerie:numeroSerie,matricula:matricula,tipoActuacion:tipoActuacion,inspector:inspectorFinal,beta:betaFinal,rol:rol,usuario:usuario||inspectorFinal,videoUrl:videoUrl,documentoUrl:documentoUrl,pdfUrl:pdf.url}
       };
     }finally{ lock.releaseLock(); }
   }catch(error){
@@ -174,6 +169,7 @@ function guardarInspeccion(e){
 
 function generarNumeroSerieActuacion_(){
   const props=PropertiesService.getScriptProperties();
+  const lock=LockService.getScriptLock();
   const actual=Number(props.getProperty("SGT_CONTADOR_ACTUACIONES")||"0");
   const siguiente=actual+1;
   props.setProperty("SGT_CONTADOR_ACTUACIONES",String(siguiente));
@@ -184,54 +180,138 @@ function normalizarRolInspeccion_(valor){
   return String(valor||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 }
 
+//==================================================
+// PDF DE ACTUACIÓN
+//==================================================
+// Se genera como HTML convertido a PDF para poder colocar:
+//  - sgt.ico como marca de agua a todo el ancho de la página
+//  - logo.png en el pie de página
+//  - fotografía embebida dentro del PDF
+//  - links clickeables para fotos/videos
+//==================================================
 function generarPdfActuacion_(datos){
   const folder=DriveApp.getFolderById(CARPETA_ACTUACIONES_ID_);
   const serie=String(datos["Número serie"]||"ACT");
   const tipo=String(datos["Tipo actuación"]||datos.tipoActuacion||"Actuación");
   const titulo=tipo+" - "+serie;
-  const doc=DocumentApp.create(titulo);
-  const docFile=DriveApp.getFileById(doc.getId());
+
+  const watermark=dataUriRepositorio_(SGT_ICON_URL_,"image/x-icon");
+  const logo=dataUriRepositorio_(SGT_LOGO_URL_,"image/png");
+  const fotoHtml=construirFotosPdf_(datos["Foto/boleta URL"]||"");
+  const videoHtml=construirLinksPdf_(datos["Video URL"]||"","Video / multimedia");
+  const fotoLinksHtml=construirLinksPdf_(datos["Foto/boleta URL"]||"","Abrir fotografía / documento en Drive");
+
+  const esc=escHtml_;
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8">'+
+    '<style>'+ 
+    '@page{size:A4;margin:18mm 15mm 25mm 15mm;}'+
+    'body{font-family:Arial,sans-serif;color:#1f2937;font-size:11px;line-height:1.45;margin:0;}'+
+    '.watermark{position:fixed;z-index:-1;top:45mm;left:0;width:100%;opacity:.055;}'+
+    '.header{border-bottom:2px solid #1f2937;padding-bottom:8px;margin-bottom:14px;}'+
+    '.title{font-size:19px;font-weight:bold;margin:0 0 4px;}'+
+    '.sub{font-size:11px;color:#4b5563;}'+
+    '.section{font-size:13px;font-weight:bold;margin:16px 0 7px;border-bottom:1px solid #9ca3af;padding-bottom:3px;}'+
+    'table{width:100%;border-collapse:collapse;margin-bottom:10px;}'+
+    'td{border:1px solid #d1d5db;padding:6px;vertical-align:top;}'+
+    'td.label{width:32%;font-weight:bold;background:#f3f4f6;}'+
+    '.description{border:1px solid #d1d5db;padding:9px;white-space:pre-wrap;min-height:35px;}'+
+    '.photo{display:block;max-width:170mm;max-height:105mm;width:auto;height:auto;margin:8px auto 3px;object-fit:contain;}'+
+    '.photo-caption{text-align:center;font-size:9px;color:#4b5563;margin-bottom:10px;}'+
+    '.links a{color:#1155cc;text-decoration:underline;}'+
+    '.footer{position:fixed;bottom:-17mm;left:0;right:0;height:13mm;border-top:1px solid #9ca3af;font-size:8px;color:#4b5563;text-align:center;padding-top:3px;}'+
+    '.footer img{height:9mm;width:auto;vertical-align:middle;margin-right:8px;}'+
+    '.page{page-break-after:auto;}'+
+    '</style></head><body>'+ 
+    '<img class="watermark" src="'+watermark+'">'+
+    '<div class="header"><div class="title">'+esc(titulo)+'</div><div class="sub">SGT - SISTEMA DE GESTIÓN DE TRÁNSITO</div></div>'+ 
+    '<table><tr><td class="label">Número de serie</td><td>'+esc(serie)+'</td></tr>'+ 
+    '<tr><td class="label">Fecha y hora</td><td>'+esc(datos.Fecha||"")+'</td></tr>'+ 
+    '<tr><td class="label">Responsable</td><td>'+esc(datos.Inspector||"")+'</td></tr>'+ 
+    '<tr><td class="label">Usuario</td><td>'+esc(datos.Usuario||"")+'</td></tr>'+ 
+    '<tr><td class="label">Rol</td><td>'+esc(datos.Rol||"")+'</td></tr></table>'+ 
+    '<div class="section">DATOS DE LA ACTUACIÓN</div>'+ 
+    '<table><tr><td class="label">Tipo de actuación</td><td>'+esc(tipo)+'</td></tr>'+ 
+    '<tr><td class="label">Número Beta</td><td>'+esc(datos.Beta||"No posee")+'</td></tr>'+ 
+    '<tr><td class="label">Matrícula</td><td>'+esc(datos["Matrícula"]||"No informada")+'</td></tr>'+ 
+    '<tr><td class="label">Número de boleta</td><td>'+esc(datos["Número boleta"]||"No informado")+'</td></tr>'+ 
+    '<tr><td class="label">Nombre del infractor</td><td>'+esc(datos["Nombre infractor"]||"No informado")+'</td></tr>'+ 
+    '<tr><td class="label">Cédula</td><td>'+esc(datos["Cédula"]||"No informada")+'</td></tr></table>'+ 
+    '<div class="section">DESCRIPCIÓN / DETALLE</div>'+ 
+    '<div class="description">'+esc(datos.Incidencia||"Sin descripción adicional.")+'</div>'+ 
+    '<div class="section">EVIDENCIA FOTOGRÁFICA</div>'+ 
+    (fotoHtml||'<p>No se adjuntaron fotografías.</p>')+
+    '<div class="section">ENLACES A MULTIMEDIA</div>'+ 
+    '<div class="links">'+(fotoLinksHtml||'')+(videoHtml||'')+(fotoLinksHtml||videoHtml?'':'No se adjuntó multimedia.')+'</div>'+ 
+    '<div class="footer"><img src="'+logo+'"><span>SGT - Sistema de Gestión de Tránsito | Documento generado automáticamente para auditoría</span></div>'+ 
+    '</body></html>';
+
   try{
-    docFile.moveTo(folder);
-    const body=doc.getBody();
-    body.clear();
-    body.appendParagraph("SGT - SISTEMA DE GESTIÓN DE TRÁNSITO").setHeading(DocumentApp.ParagraphHeading.TITLE);
-    body.appendParagraph(titulo).setHeading(DocumentApp.ParagraphHeading.HEADING1);
-    body.appendParagraph("Número de serie: "+serie);
-    body.appendParagraph("Fecha y hora: "+(datos.Fecha||""));
-    body.appendParagraph("Responsable: "+(datos.Inspector||""));
-    body.appendParagraph("Usuario: "+(datos.Usuario||""));
-    body.appendParagraph("Rol: "+(datos.Rol||""));
-    body.appendHorizontalRule();
-    body.appendParagraph("DATOS DE LA ACTUACIÓN").setHeading(DocumentApp.ParagraphHeading.HEADING2);
-    body.appendParagraph("Tipo de actuación: "+tipo);
-    body.appendParagraph("Número Beta: "+(datos.Beta||"No posee"));
-    body.appendParagraph("Matrícula: "+(datos["Matrícula"]||"No informada"));
-    body.appendParagraph("Número de boleta: "+(datos["Número boleta"]||"No informado"));
-    body.appendParagraph("Nombre del infractor: "+(datos["Nombre infractor"]||"No informado"));
-    body.appendParagraph("Cédula: "+(datos["Cédula"]||"No informada"));
-    body.appendParagraph("DESCRIPCIÓN / DETALLE").setHeading(DocumentApp.ParagraphHeading.HEADING2);
-    body.appendParagraph(datos.Incidencia||"Sin descripción adicional.");
-    body.appendParagraph("EVIDENCIA MULTIMEDIA").setHeading(DocumentApp.ParagraphHeading.HEADING2);
-    if(datos["Foto/boleta URL"]){
-      const pf=body.appendParagraph("Fotografía / boleta - abrir en Drive");
-      pf.setLinkUrl(datos["Foto/boleta URL"]);
-    }else body.appendParagraph("Fotografía / boleta: No adjunta");
-    if(datos["Video URL"]){
-      const pv=body.appendParagraph("Video - abrir en Drive");
-      pv.setLinkUrl(datos["Video URL"]);
-    }else body.appendParagraph("Video: No adjunto");
-    body.appendHorizontalRule();
-    body.appendParagraph("Documento generado automáticamente por SGT para auditoría de actuaciones.");
-    doc.saveAndClose();
-    const pdfBlob=docFile.getAs(MimeType.PDF).setName(titulo+".pdf");
+    const htmlBlob=Utilities.newBlob(html,'text/html',titulo+'.html');
+    const pdfBlob=htmlBlob.getAs(MimeType.PDF).setName(titulo+'.pdf');
     const pdfFile=folder.createFile(pdfBlob);
-    docFile.setTrashed(true);
     return {ok:true,id:pdfFile.getId(),url:pdfFile.getUrl(),nombre:pdfFile.getName()};
   }catch(error){
-    try{docFile.setTrashed(true);}catch(_){ }
     throw new Error("No fue posible generar el PDF de la actuación: "+(error.message||error));
   }
+}
+
+function dataUriRepositorio_(url,mimeFallback){
+  try{
+    const response=UrlFetchApp.fetch(url,{muteHttpExceptions:true,followRedirects:true});
+    const code=response.getResponseCode();
+    if(code<200||code>=300) throw new Error("HTTP "+code+" al cargar "+url);
+    const blob=response.getBlob();
+    const mime=blob.getContentType()||mimeFallback;
+    return 'data:'+mime+';base64,'+Utilities.base64Encode(blob.getBytes());
+  }catch(error){
+    console.error("No se pudo cargar recurso gráfico:",url,error);
+    return '';
+  }
+}
+
+function extraerIdDrive_(url){
+  const s=String(url||"").trim();
+  if(!s) return "";
+  let m=s.match(/\/d\/([a-zA-Z0-9_-]{10,})/); if(m) return m[1];
+  m=s.match(/[?&]id=([a-zA-Z0-9_-]{10,})/); if(m) return m[1];
+  m=s.match(/[-_a-zA-Z0-9]{20,}/); return m?m[0]:"";
+}
+
+function listaUrls_(texto){
+  return String(texto||"").split(/[\n,;]+/).map(v=>v.trim()).filter(Boolean);
+}
+
+function construirFotosPdf_(texto){
+  const urls=listaUrls_(texto);
+  const partes=[];
+  urls.forEach(function(url){
+    try{
+      const id=extraerIdDrive_(url);
+      if(!id) return;
+      const file=DriveApp.getFileById(id);
+      const blob=file.getBlob();
+      const mime=blob.getContentType()||"image/jpeg";
+      if(mime.indexOf("image/")!==0) return;
+      const data='data:'+mime+';base64,'+Utilities.base64Encode(blob.getBytes());
+      partes.push('<img class="photo" src="'+data+'"><div class="photo-caption">'+escHtml_(file.getName())+'<br>Descripción: '+escHtml_("")+'</div>');
+    }catch(error){
+      console.error("No se pudo insertar foto en PDF:",url,error);
+    }
+  });
+  return partes.join('');
+}
+
+function construirLinksPdf_(texto,etiqueta){
+  const urls=listaUrls_(texto);
+  if(!urls.length) return '';
+  return urls.map(function(url,i){
+    const nombre=etiqueta+(urls.length>1?' '+(i+1):'');
+    return '<p><a href="'+escHtml_(url)+'">'+escHtml_(nombre)+'</a></p>';
+  }).join('');
+}
+
+function escHtml_(valor){
+  return String(valor==null?"":valor).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,'<br>');
 }
 
 function subirArchivo(e){
