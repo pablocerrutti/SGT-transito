@@ -105,22 +105,7 @@ async function guardar(ev){
     const r=await apiGuardarInspeccion(datos);
     if(!r||!r.ok) throw new Error(r?.mensaje||"No fue posible guardar la actuación.");
 
-    let texto=(r.mensaje||"Actuación guardada correctamente.");
-    if(r.numeroSerie) texto+=" Serie: "+r.numeroSerie+".";
-    if(r.pdfUrl) texto+=" PDF generado correctamente.";
-    mensaje(texto,"exito");
-
-    if(r.pdfUrl){
-      const enlace=document.createElement("a");
-      enlace.href=r.pdfUrl;
-      enlace.target="_blank";
-      enlace.rel="noopener noreferrer";
-      enlace.textContent=" Abrir reporte PDF";
-      enlace.style.display="inline-block";
-      enlace.style.marginLeft="8px";
-      enlace.style.fontWeight="bold";
-      document.getElementById("mensaje").appendChild(enlace);
-    }
+    mostrarReporteGuardado(r);
 
     ev.target.reset();
     cargarInspector();
@@ -132,6 +117,55 @@ async function guardar(ev){
   }finally{
     if(boton) boton.disabled=false;
   }
+}
+
+function mostrarReporteGuardado(r){
+  const existente=document.getElementById("reporteGuardadoOverlay");
+  if(existente) existente.remove();
+
+  const overlay=document.createElement("div");
+  overlay.id="reporteGuardadoOverlay";
+  overlay.className="reporte-guardado-overlay";
+
+  const caja=document.createElement("div");
+  caja.className="reporte-guardado-caja";
+
+  const icono=document.createElement("div");
+  icono.className="reporte-guardado-icono";
+  icono.textContent="✓";
+
+  const titulo=document.createElement("div");
+  titulo.className="reporte-guardado-titulo";
+  titulo.textContent="REPORTE GUARDADO CON ÉXITO";
+
+  const detalle=document.createElement("div");
+  detalle.className="reporte-guardado-detalle";
+  let texto=r.mensaje||"La actuación fue registrada correctamente.";
+  if(r.numeroSerie) texto+="\nSerie: "+r.numeroSerie;
+  if(r.pdfUrl) texto+="\nPDF generado correctamente.";
+  detalle.textContent=texto;
+
+  caja.appendChild(icono);
+  caja.appendChild(titulo);
+  caja.appendChild(detalle);
+
+  if(r.pdfUrl){
+    const enlace=document.createElement("a");
+    enlace.href=r.pdfUrl;
+    enlace.target="_blank";
+    enlace.rel="noopener noreferrer";
+    enlace.className="reporte-guardado-pdf";
+    enlace.textContent="Abrir reporte PDF";
+    caja.appendChild(enlace);
+  }
+
+  overlay.appendChild(caja);
+  document.body.appendChild(overlay);
+
+  window.setTimeout(()=>{
+    overlay.classList.add("ocultando");
+    window.setTimeout(()=>overlay.remove(),350);
+  },4000);
 }
 
 async function cargar(){
