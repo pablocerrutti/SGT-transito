@@ -7,7 +7,11 @@ const CONFIG = {
   NOMBRE_SISTEMA: "SGT",
   VERSION: "1.0",
   SHEET_ID: "1DX0h1qcETpRUL_dwiEq6k6i0VS43YLrfK3ei5YXTuwU",
-  DRIVE_ID: "1sUXE34S_Vnt2c55HmkB3M9l18tPXfZJP"
+
+  // Carpeta principal de actuaciones y archivos multimedia
+  // Google Drive:
+  // https://drive.google.com/drive/folders/1MdujvY_US_TrcUi8PrEYy4YzjRsO9-PY
+  DRIVE_ID: "1MdujvY_US_TrcUi8PrEYy4YzjRsO9-PY"
 };
 
 function bd(){
@@ -32,10 +36,6 @@ function fecha(){
 
 //======================================================
 // AUTORIZACIÓN / DIAGNÓSTICO DE DRIVE
-//======================================================
-// Ejecutar MANUALMENTE una vez desde Apps Script con la cuenta
-// propietaria/autorizada del Web App. Esto fuerza la solicitud de
-// permisos de Drive antes de utilizar el Web App.
 //======================================================
 
 function autorizarDriveSGT(){
