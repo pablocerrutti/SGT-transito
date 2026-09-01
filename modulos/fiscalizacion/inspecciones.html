@@ -22,11 +22,9 @@
 <input type="text" id="beta" readonly>
 <label>Inspector</label>
 <input type="text" id="inspector" readonly>
-
 <h3>Datos del vehículo</h3>
 <label>Matrícula <small>(opcional para Movilidad)</small></label>
 <input type="text" id="matricula" maxlength="10">
-
 <label>Tipo de actuación</label>
 <select id="tipoActuacion" required>
 <option value="">Seleccione...</option>
@@ -37,29 +35,25 @@
 <option value="Notificacion">Notificación</option>
 <option value="Est. Autorizado">Estacionamiento Autorizado</option>
 </select>
-
 <div id="datosBoleta" style="display:none;">
 <label>Número de boleta</label>
 <input type="text" id="numeroBoleta">
 </div>
-
 <h3>Datos del infractor</h3>
 <label>Nombre completo <small>(opcional para Movilidad)</small></label>
 <input type="text" id="nombreInfractor">
 <label>Cédula de identidad <small>(opcional para Movilidad)</small></label>
 <input type="text" id="cedula">
-
 <h3>Detalle de la actuación</h3>
 <label>Descripción</label>
 <textarea id="detalle" maxlength="3000" placeholder="Describa la actuación para facilitar su comprensión y auditoría."></textarea>
-
 <h3>Evidencia multimedia</h3>
 <label>Video de la actuación <small>(máx. 30 MB)</small></label>
 <input id="video" type="file" accept="video/*">
-<label id="fotoActuacion">Fotografía de la actuación / Boleta <small>(obligatoria para multas y apercibimientos)</small>
+<div id="fotoActuacion">
+<label>Fotografía de la actuación / Boleta <small>(obligatoria para multas y apercibimientos en Fiscalización)</small></label>
 <input id="documento" type="file" accept="image/*">
-</label>
-
+</div>
 <button type="submit">Guardar actuación</button>
 </form>
 <p id="mensaje" aria-live="polite"></p>
@@ -80,7 +74,8 @@ tipo.addEventListener("change",()=>{
  const requiere=tipo.value==="Multa"||tipo.value==="Apercibimiento";
  boleta.style.display=requiere?"block":"none";
  fotoActuacion.style.display="block";
- documento.required=requiere && String((window.usuario||{}).rol||"").toLowerCase()!=="movilidad";
+ const esMovilidad=typeof rol!=="undefined" && rol==="movilidad";
+ documento.required=requiere && !esMovilidad;
 });
 </script>
 </body>
