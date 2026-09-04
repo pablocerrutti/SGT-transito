@@ -10,27 +10,11 @@
 </head>
 <body>
 <aside class="sidebar">
-    <div class="logo">
-        <img src="../img/logo.png" width="90" alt="SGT">
-        <h2>SGT</h2>
-        <p>Dirección de Tránsito y Transportes</p>
-    </div>
-    <ul>
-        <li class="activo"><i class="fa-solid fa-clipboard-list"></i> Auditoría</li>
-        <li id="btnDashboard"><i class="fa-solid fa-house"></i> Dashboard</li>
-        <li id="btnSalir"><i class="fa-solid fa-right-from-bracket"></i> Salir</li>
-    </ul>
+    <div class="logo"><img src="../img/logo.png" width="90" alt="SGT"><h2>SGT</h2><p>Dirección de Tránsito y Transportes</p></div>
+    <ul><li class="activo"><i class="fa-solid fa-clipboard-list"></i> Auditoría</li><li id="btnDashboard"><i class="fa-solid fa-house"></i> Dashboard</li><li id="btnSalir"><i class="fa-solid fa-right-from-bracket"></i> Salir</li></ul>
 </aside>
 <main class="contenido auditoria-page">
-    <header class="auditoria-header">
-        <div>
-            <div class="eyebrow"><i class="fa-solid fa-shield-halved"></i> CONTROL Y TRAZABILIDAD</div>
-            <h1>Auditoría del sistema</h1>
-            <p>Registro de actuaciones, informes y operaciones realizadas en SGT.</p>
-            <div class="usuario-auditoria"><i class="fa-solid fa-user-shield"></i> <span id="usuarioNombre">Usuario</span></div>
-        </div>
-        <button id="btnActualizar" class="btn-actualizar" type="button"><i class="fa-solid fa-rotate"></i> Actualizar</button>
-    </header>
+    <header class="auditoria-header"><div><div class="eyebrow"><i class="fa-solid fa-shield-halved"></i> CONTROL Y TRAZABILIDAD</div><h1>Auditoría del sistema</h1><p>Registro detallado de ingresos, salidas y operaciones realizadas en SGT.</p><div class="usuario-auditoria"><i class="fa-solid fa-user-shield"></i> <span id="usuarioNombre">Usuario</span></div></div><button id="btnActualizar" class="btn-actualizar" type="button"><i class="fa-solid fa-rotate"></i> Actualizar</button></header>
 
     <section class="tarjetas auditoria-stats">
         <div class="card stat-card stat-blue"><div class="stat-icon"><i class="fa-solid fa-file-lines"></i></div><div><span class="stat-label">Informes registrados</span><strong id="contadorInformes">0</strong></div></div>
@@ -39,47 +23,36 @@
     </section>
 
     <section class="auditoria-panel">
-        <div class="panel-heading">
-            <div><span class="section-kicker">ACTUACIONES</span><h2><i class="fa-solid fa-file-signature"></i> Informes y actuaciones</h2><p>Movilidad, inspecciones de elementos y Fiscalización.</p></div>
-            <span class="resultado-count" id="contadorInformesFiltrados">0 resultados</span>
-        </div>
+        <div class="panel-heading"><div><span class="section-kicker">ACTUACIONES</span><h2><i class="fa-solid fa-file-signature"></i> Informes y actuaciones</h2><p>Movilidad, inspecciones de elementos y Fiscalización.</p></div><span class="resultado-count" id="contadorInformesFiltrados">0 resultados</span></div>
         <div class="filtros">
             <div class="filtro filtro-busqueda"><label for="buscarInforme">Buscar</label><div class="input-icon"><i class="fa-solid fa-magnifying-glass"></i><input id="buscarInforme" type="search" placeholder="Serie, usuario, matrícula, elemento..." autocomplete="off"></div></div>
             <div class="filtro"><label for="filtroCategoria">Categoría</label><select id="filtroCategoria"><option value="">Todas</option><option value="informe de movilidad">Informe de Movilidad</option><option value="inspección de elemento">Inspección de elemento</option><option value="reporte de fiscalización">Reporte de Fiscalización</option></select></div>
-            <div class="filtro"><label for="fechaDesdeInforme">Desde</label><input id="fechaDesdeInforme" type="date"></div>
-            <div class="filtro"><label for="fechaHastaInforme">Hasta</label><input id="fechaHastaInforme" type="date"></div>
+            <div class="filtro"><label for="fechaDesdeInforme">Desde</label><input id="fechaDesdeInforme" type="date"></div><div class="filtro"><label for="fechaHastaInforme">Hasta</label><input id="fechaHastaInforme" type="date"></div>
             <button id="btnLimpiarInformes" class="btn-secundario" type="button"><i class="fa-solid fa-eraser"></i> Limpiar</button>
         </div>
-        <div class="tabla-wrap">
-            <table class="tabla-auditoria tabla-informes">
-                <thead><tr><th>Fecha</th><th>Categoría</th><th>Serie</th><th>Usuario</th><th>Rol</th><th>Elemento / matrícula</th><th>Actuación</th><th>Documento</th></tr></thead>
-                <tbody id="tablaInformes"></tbody>
-            </table>
-        </div>
+        <div class="tabla-wrap"><table class="tabla-auditoria tabla-informes"><thead><tr><th>Fecha</th><th>Categoría</th><th>Serie</th><th>Usuario</th><th>Rol</th><th>Elemento / matrícula</th><th>Actuación</th><th>Documento</th></tr></thead><tbody id="tablaInformes"></tbody></table></div>
     </section>
 
     <section class="auditoria-panel">
-        <div class="panel-heading">
-            <div><span class="section-kicker">TRAZABILIDAD</span><h2><i class="fa-solid fa-user-clock"></i> Registro de acciones</h2><p>Historial de operaciones realizadas por los usuarios.</p></div>
-            <span class="resultado-count" id="contadorAccionesFiltradas">0 resultados</span>
-        </div>
+        <div class="panel-heading"><div><span class="section-kicker">TRAZABILIDAD</span><h2><i class="fa-solid fa-user-clock"></i> Registro de acciones</h2><p>Historial completo por usuario, rol, fecha y hora.</p></div><span class="resultado-count" id="contadorAccionesFiltradas">0 resultados</span></div>
         <div class="filtros">
             <div class="filtro filtro-busqueda"><label for="buscarAuditoria">Buscar</label><div class="input-icon"><i class="fa-solid fa-magnifying-glass"></i><input id="buscarAuditoria" type="search" placeholder="Usuario, acción, módulo, detalle..." autocomplete="off"></div></div>
+            <div class="filtro"><label for="filtroUsuario">Usuario</label><select id="filtroUsuario"><option value="">Todos los usuarios</option></select></div>
+            <div class="filtro"><label for="filtroRol">Rol</label><select id="filtroRol"><option value="">Todos los roles</option></select></div>
             <div class="filtro"><label for="filtroModulo">Módulo</label><select id="filtroModulo"><option value="">Todos</option></select></div>
             <div class="filtro"><label for="filtroAccion">Acción</label><select id="filtroAccion"><option value="">Todas</option></select></div>
-            <div class="filtro"><label for="filtroUsuario">Usuario</label><select id="filtroUsuario"><option value="">Todos</option></select></div>
             <button id="btnLimpiarAuditoria" class="btn-secundario" type="button"><i class="fa-solid fa-eraser"></i> Limpiar</button>
         </div>
-        <div class="tabla-wrap">
-            <table class="tabla-auditoria tabla-acciones">
-                <thead><tr><th>Fecha</th><th>Usuario</th><th>Rol</th><th>Acción</th><th>Módulo</th><th>Detalle</th><th>Referencia</th></tr></thead>
-                <tbody id="tablaAuditoria"></tbody>
-            </table>
+        <div class="auditoria-reportes">
+            <div class="reporte-ayuda"><i class="fa-solid fa-file-pdf"></i><span>Generar reporte de auditoría con los filtros actuales.</span></div>
+            <button id="btnPdfUsuario" class="btn-secundario" type="button"><i class="fa-solid fa-user-check"></i> PDF del usuario seleccionado</button>
+            <button id="btnPdfTodos" class="btn-actualizar" type="button"><i class="fa-solid fa-users"></i> PDF de todos los usuarios</button>
+            <span id="estadoPdfAuditoria" class="estado-pdf-auditoria"></span>
         </div>
+        <div class="tabla-wrap"><table class="tabla-auditoria tabla-acciones"><thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Acción</th><th>Módulo</th><th>Detalle</th><th>Referencia</th></tr></thead><tbody id="tablaAuditoria"></tbody></table></div>
     </section>
     <footer class="footer-institucional">SGT - Sistema desarrollado por la Dirección de Tránsito y Transporte</footer>
 </main>
-<script src="../js/api.js"></script>
-<script src="../js/auditoria.js"></script>
+<script src="../js/api.js"></script><script src="../js/auditoria.js"></script>
 </body>
 </html>
