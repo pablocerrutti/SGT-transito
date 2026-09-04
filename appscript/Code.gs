@@ -30,6 +30,9 @@ function doGet(e) {
       case "obtenerInspecciones": return json(obtenerInspecciones(e));
       case "guardarInspeccion": return json(guardarInspeccion(e));
       case "subirArchivo": return json(subirArchivo(e));
+      case "registrarAuditoria": return json(registrarAuditoria(e));
+      case "obtenerAuditoria": return json(obtenerAuditoria(e));
+      case "obtenerInformesAuditoria": return json(obtenerInformesAuditoria(e));
       case "ping": return json({ok:true,mensaje:"API SGT funcionando correctamente.",fecha:new Date().toISOString()});
       default: return json({ok:false,mensaje:"Acción inválida: " + accion});
     }
@@ -184,99 +187,20 @@ function obtenerCatalogoElementosInformables() {
 //======================================================
 // LECTURA ROBUSTA DE HOJA ELEMENTOS
 //======================================================
-// No depende de que la hoja tenga exactamente 19 columnas ni de
-// que las columnas territoriales hayan existido desde el principio.
-// Busca los encabezados por nombre y conserva los registros viejos.
-//======================================================
-
 function obtenerElementosDirectosParaInforme_() {
   const sh = hoja("Elementos");
   const ultimaFila = sh.getLastRow();
   const ultimaColumna = sh.getLastColumn();
-
   if (ultimaFila < 2 || ultimaColumna < 1) return [];
-
   const valores = sh.getRange(1, 1, ultimaFila, ultimaColumna).getDisplayValues();
-  const encabezados = valores[0].map(function(valor) {
-    return String(valor || "").trim();
-  });
-
+  const encabezados = valores[0].map(function(valor) { return String(valor || "").trim(); });
   const indice = {};
-  encabezados.forEach(function(encabezado, i) {
-    const clave = normalizarEncabezadoInforme_(encabezado);
-    if (clave && indice[clave] === undefined) indice[clave] = i;
-  });
-
-  function valorFila_(fila, nombres) {
-    for (let i = 0; i < nombres.length; i++) {
-      const idx = indice[normalizarEncabezadoInforme_(nombres[i])];
-      if (idx !== undefined) {
-        const valor = fila[idx];
-        if (String(valor == null ? "" : valor).trim() !== "") return valor;
-      }
-    }
-    return "";
-  }
-
-  return valores.slice(1).filter(function(fila) {
-    return String(valorFila_(fila, ["ID", "Id", "id"]) || "").trim() !== "";
-  }).map(function(fila) {
-    return {
-      id: valorFila_(fila, ["ID"]),
-      codigo: valorFila_(fila, ["Código", "Codigo"]),
-      tipo: valorFila_(fila, ["Tipo"]),
-      serie: valorFila_(fila, ["Serie"]),
-      nombre: valorFila_(fila, ["Nombre"]),
-      descripcion: valorFila_(fila, ["Descripción", "Descripcion"]),
-      latitud: valorFila_(fila, ["Latitud"]),
-      longitud: valorFila_(fila, ["Longitud"]),
-      direccion: valorFila_(fila, ["Dirección", "Direccion"]),
-      estado: valorFila_(fila, ["Estado"]),
-      caracteristicas: valorFila_(fila, ["Características", "Caracteristicas"]),
-      fechaAlta: valorFila_(fila, ["Fecha alta", "Fecha Alta"]),
-      usuarioAlta: valorFila_(fila, ["Usuario alta", "Usuario Alta"]),
-      activo: valorFila_(fila, ["Activo"]),
-      ciudad: valorFila_(fila, ["Ciudad"]),
-      localidad: valorFila_(fila, ["Localidad"]),
-      zona: valorFila_(fila, ["Zona"])
-    };
-  });
+  encabezados.forEach(function(encabezado, i) { const clave = normalizarEncabezadoInforme_(encabezado); if (clave && indice[clave] === undefined) indice[clave] = i; });
+  function valorFila_(fila, nombres) { for (let i = 0; i < nombres.length; i++) { const idx = indice[normalizarEncabezadoInforme_(nombres[i])]; if (idx !== undefined) { const valor = fila[idx]; if (String(valor == null ? "" : valor).trim() !== "") return valor; } } return ""; }
+  return valores.slice(1).filter(function(fila) { return String(valorFila_(fila, ["ID", "Id", "id"]) || "").trim() !== ""; }).map(function(fila) { return {id:valorFila_(fila,["ID"]),codigo:valorFila_(fila,["Código","Codigo"]),tipo:valorFila_(fila,["Tipo"]),serie:valorFila_(fila,["Serie"]),nombre:valorFila_(fila,["Nombre"]),descripcion:valorFila_(fila,["Descripción","Descripcion"]),latitud:valorFila_(fila,["Latitud"]),longitud:valorFila_(fila,["Longitud"]),direccion:valorFila_(fila,["Dirección","Direccion"]),estado:valorFila_(fila,["Estado"]),caracteristicas:valorFila_(fila,["Características","Caracteristicas"]),fechaAlta:valorFila_(fila,["Fecha alta","Fecha Alta"]),usuarioAlta:valorFila_(fila,["Usuario alta","Usuario Alta"]),activo:valorFila_(fila,["Activo"]),ciudad:valorFila_(fila,["Ciudad"]),localidad:valorFila_(fila,["Localidad"]),zona:valorFila_(fila,["Zona"])}; });
 }
-
-function normalizarEncabezadoInforme_(valor) {
-  return String(valor || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function construirCoordenadasPunto_(latitud, longitud) {
-  const lat = String(latitud == null ? "" : latitud).trim();
-  const lng = String(longitud == null ? "" : longitud).trim();
-  if (!lat || !lng) return "";
-  return lat + ", " + lng;
-}
-
-
-// Los elementos normales se eliminan físicamente mediante eliminarElemento().
-// Por eso un vacío en Activo no significa que estén eliminados.
-function esElementoNormalVigente_(valor) {
-  const texto = String(valor == null ? "" : valor).trim().toUpperCase();
-  return ["NO","N","FALSE","FALSO","INACTIVO","0"].indexOf(texto) === -1;
-}
-
-function esActivoCatalogo_(valor) {
-  const texto = String(valor == null ? "" : valor).trim().toUpperCase();
-  return ["SI","SÍ","YES","TRUE","VERDADERO","ACTIVO","1"].indexOf(texto) !== -1;
-}
-
-
-//======================================================
-// JSON
-//======================================================
-
-function json(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
-}
+function normalizarEncabezadoInforme_(valor) { return String(valor || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim(); }
+function construirCoordenadasPunto_(latitud, longitud) { const lat = String(latitud == null ? "" : latitud).trim(); const lng = String(longitud == null ? "" : longitud).trim(); if (!lat || !lng) return ""; return lat + ", " + lng; }
+function esElementoNormalVigente_(valor) { const texto = String(valor == null ? "" : valor).trim().toUpperCase(); return ["NO","N","FALSE","FALSO","INACTIVO","0"].indexOf(texto) === -1; }
+function esActivoCatalogo_(valor) { const texto = String(valor == null ? "" : valor).trim().toUpperCase(); return ["SI","SÍ","YES","TRUE","VERDADERO","ACTIVO","1"].indexOf(texto) !== -1; }
+function json(obj) { return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }
