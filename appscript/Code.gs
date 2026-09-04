@@ -17,18 +17,18 @@ function doGet(e) {
       case "obtenerCategorias": return json(obtenerCategorias());
       case "obtenerLocalidades": return json(obtenerLocalidades());
       case "obtenerElementos": return json(obtenerElementos());
-      case "guardarElemento": return json(guardarElemento(e));
-      case "actualizarElemento": return json(actualizarElemento(e));
-      case "eliminarElemento": return json(eliminarElemento(e));
+      case "guardarElemento": return json(bloquearSupervisorMovilidadApi_(e) || guardarElemento(e));
+      case "actualizarElemento": return json(bloquearSupervisorMovilidadApi_(e) || actualizarElemento(e));
+      case "eliminarElemento": return json(bloquearSupervisorMovilidadApi_(e) || eliminarElemento(e));
       case "obtenerZonasEstacionamiento": return json(obtenerZonasEstacionamiento(e));
-      case "guardarZonaEstacionamiento": return json(guardarZonaEstacionamiento(e));
-      case "eliminarZonaEstacionamiento": return json(eliminarZonaEstacionamiento(e));
+      case "guardarZonaEstacionamiento": return json(bloquearSupervisorMovilidadApi_(e) || guardarZonaEstacionamiento(e));
+      case "eliminarZonaEstacionamiento": return json(bloquearSupervisorMovilidadApi_(e) || eliminarZonaEstacionamiento(e));
       case "obtenerCordonesRojos": return json(obtenerCordonesRojos(e));
-      case "guardarCordonRojo": return json(guardarCordonRojo(e));
-      case "eliminarCordonRojo": return json(eliminarCordonRojo(e));
+      case "guardarCordonRojo": return json(bloquearSupervisorMovilidadApi_(e) || guardarCordonRojo(e));
+      case "eliminarCordonRojo": return json(bloquearSupervisorMovilidadApi_(e) || eliminarCordonRojo(e));
       case "obtenerCatalogoElementosInformables": return json(obtenerCatalogoElementosInformables());
       case "obtenerInspecciones": return json(obtenerInspecciones(e));
-      case "guardarInspeccion": return json(guardarInspeccion(e));
+      case "guardarInspeccion": return json(bloquearSupervisorMovilidadApi_(e) || guardarInspeccion(e));
       case "subirArchivo": return json(subirArchivo(e));
       case "registrarAuditoria": return json(registrarAuditoria(e));
       case "obtenerAuditoria": return json(obtenerAuditoria(e));
@@ -43,6 +43,15 @@ function doGet(e) {
 }
 
 function doPost(e) { return doGet(e); }
+
+function bloquearSupervisorMovilidadApi_(e){
+  const p=(e&&e.parameter)||{};
+  const rol=String(p.rol||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  if(rol==='supervisor movilidad'){
+    return {ok:false,codigo:'PERMISO_DENEGADO',mensaje:'Supervisor Movilidad solo puede consultar el mapa y generar informes. No puede modificar, eliminar ni registrar actuaciones.'};
+  }
+  return null;
+}
 
 
 //======================================================
