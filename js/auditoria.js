@@ -1,115 +1,15 @@
-let usuario=null;
-let informes=[];
-let auditoria=[];
-
+let usuario=null;let informes=[];let auditoria=[];
 document.addEventListener('DOMContentLoaded',iniciar);
-
-async function iniciar(){
-    try{usuario=JSON.parse(localStorage.getItem('usuarioActual')||localStorage.getItem('usuario')||'null');}catch(e){usuario=null;}
-    if(!usuario){location.href='../index.html';return;}
-    const rol=norm(usuario.rol);
-    const rolesPermitidos=['super admin','super administrador','superadministrador','supervisor','administrador'];
-    if(!rolesPermitidos.includes(rol)){location.href='dashboard.html';return;}
-    const nombre=document.getElementById('usuarioNombre');
-    if(nombre) nombre.textContent=(usuario.nombre||usuario.usuario||'Usuario')+' · '+(usuario.rol||'');
-    document.getElementById('btnDashboard').onclick=()=>location.href='dashboard.html';
-    document.getElementById('btnSalir').onclick=()=>{localStorage.removeItem('usuarioActual');localStorage.removeItem('usuario');location.href='../index.html';};
-    document.getElementById('btnActualizar').onclick=cargar;
-    document.getElementById('btnLimpiarInformes').onclick=limpiarFiltrosInformes;
-    document.getElementById('btnLimpiarAuditoria').onclick=limpiarFiltrosAuditoria;
-    ['buscarInforme','filtroCategoria','fechaDesdeInforme','fechaHastaInforme'].forEach(id=>{const el=document.getElementById(id);if(el) el.addEventListener('input',renderInformes);if(el&&el.tagName==='SELECT')el.addEventListener('change',renderInformes);});
-    ['buscarAuditoria','filtroModulo','filtroAccion','filtroUsuario'].forEach(id=>{const el=document.getElementById(id);if(el){el.addEventListener('input',renderAuditoria);el.addEventListener('change',renderAuditoria);}});
-    await cargar();
-}
-
-async function cargar(){
-    const boton=document.getElementById('btnActualizar');
-    if(boton)boton.classList.add('cargando');
-    try{
-        const resultados=await Promise.all([apiObtenerInformesAuditoria(),apiObtenerAuditoria()]);
-        const ir=resultados[0],ar=resultados[1];
-        informes=ir&&ir.ok?ir.datos||[]:[];
-        auditoria=ar&&ar.ok?ar.datos||[]:[];
-        document.getElementById('contadorInformes').textContent=informes.length;
-        document.getElementById('contadorAuditoria').textContent=auditoria.length;
-        cargarSelectoresAuditoria();
-        renderInformes();
-        renderAuditoria();
-        document.getElementById('ultimaActualizacion').textContent=new Date().toLocaleTimeString('es-UY',{hour:'2-digit',minute:'2-digit'});
-    }catch(error){
-        mostrarError('tablaInformes','No fue posible cargar los informes.');
-        mostrarError('tablaAuditoria','No fue posible cargar el registro de acciones.');
-    }finally{if(boton)boton.classList.remove('cargando');}
-}
-
-function renderInformes(){
-    const texto=norm(document.getElementById('buscarInforme').value);
-    const categoria=norm(document.getElementById('filtroCategoria').value);
-    const desde=document.getElementById('fechaDesdeInforme').value;
-    const hasta=document.getElementById('fechaHastaInforme').value;
-    const filtrados=informes.filter(x=>{
-        const cadena=norm([x.fecha,x.categoriaInforme,x.numeroSerie,x.usuario,x.inspector,x.rol,x.codigoElemento,x.matricula,x.tipoActuacion,x.detalle].join(' '));
-        if(texto&&!cadena.includes(texto))return false;
-        if(categoria&&!norm(x.categoriaInforme).includes(categoria))return false;
-        const fecha=fechaComparable(x.fecha);
-        if(desde&&fecha&&fecha<desde)return false;
-        if(hasta&&fecha&&fecha>hasta)return false;
-        return true;
-    });
-    document.getElementById('contadorInformesFiltrados').textContent=formatearResultados(filtrados.length);
-    const tbody=document.getElementById('tablaInformes');
-    if(!filtrados.length){tbody.innerHTML=estadoVacio('fa-file-circle-xmark','No hay informes que coincidan con los filtros.');return;}
-    tbody.innerHTML=filtrados.map(x=>{
-        const cat=norm(x.categoriaInforme);let clase='badge-inspeccion',icono='fa-magnifying-glass';
-        if(cat.includes('movilidad')){clase='badge-movilidad';icono='fa-road';}else if(cat.includes('fiscal')){clase='badge-fiscalizacion';icono='fa-shield-halved';}
-        const documento=x.pdfUrl?'<a class="pdf-link" href="'+esc(x.pdfUrl)+'" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-file-pdf"></i> Abrir PDF</a>':'<span class="muted">Sin PDF</span>';
-        return '<tr><td>'+esc(x.fecha||'')+'</td><td><span class="badge '+clase+'"><i class="fa-solid '+icono+'"></i>'+esc(x.categoriaInforme||'Sin categoría')+'</span></td><td><span class="ref-code">'+esc(x.numeroSerie||'—')+'</span></td><td>'+esc(x.usuario||x.inspector||'—')+'</td><td>'+esc(x.rol||'—')+'</td><td>'+esc(x.codigoElemento||x.matricula||'—')+'</td><td>'+esc(x.tipoActuacion||x.detalle||'—')+'</td><td>'+documento+'</td></tr>';
-    }).join('');
-}
-
-function renderAuditoria(){
-    const texto=norm(document.getElementById('buscarAuditoria').value);
-    const modulo=norm(document.getElementById('filtroModulo').value);
-    const accion=norm(document.getElementById('filtroAccion').value);
-    const usuarioFiltro=norm(document.getElementById('filtroUsuario').value);
-    const filtrados=auditoria.filter(x=>{
-        const cadena=norm([x.fecha,x.usuario,x.nombre,x.rol,x.accion,x.modulo,x.detalle,x.referencia].join(' '));
-        if(texto&&!cadena.includes(texto))return false;
-        if(modulo&&norm(x.modulo)!==modulo)return false;
-        if(accion&&norm(x.accion)!==accion)return false;
-        const u=norm(x.usuario||x.nombre);if(usuarioFiltro&&u!==usuarioFiltro)return false;
-        return true;
-    });
-    document.getElementById('contadorAccionesFiltradas').textContent=formatearResultados(filtrados.length);
-    const tbody=document.getElementById('tablaAuditoria');
-    if(!filtrados.length){tbody.innerHTML=estadoVacio('fa-clock-rotate-left','No hay acciones que coincidan con los filtros.');return;}
-    tbody.innerHTML=filtrados.map(x=>'<tr><td>'+esc(x.fecha||'')+'</td><td>'+esc(x.usuario||x.nombre||'—')+'</td><td>'+esc(x.rol||'—')+'</td><td><span class="badge badge-accion"><i class="fa-solid fa-bolt"></i>'+esc(x.accion||'—')+'</span></td><td>'+esc(x.modulo||'—')+'</td><td>'+esc(x.detalle||'—')+'</td><td><span class="ref-code">'+esc(x.referencia||'—')+'</span></td></tr>').join('');
-}
-
-function cargarSelectoresAuditoria(){llenarSelector('filtroModulo',auditoria.map(x=>x.modulo));llenarSelector('filtroAccion',auditoria.map(x=>x.accion));llenarSelector('filtroUsuario',auditoria.map(x=>x.usuario||x.nombre));}
-function llenarSelector(id,valores){const select=document.getElementById(id);if(!select)return;const actual=select.value;const unicos=[...new Set(valores.map(v=>String(v||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));const textoBase=id==='filtroModulo'?'Todos':id==='filtroAccion'?'Todas':'Todos';select.innerHTML='<option value="">'+textoBase+'</option>'+unicos.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');if(unicos.includes(actual))select.value=actual;}
-
-function limpiarFiltrosInformes(){
-    ['buscarInforme','filtroCategoria','fechaDesdeInforme','fechaHastaInforme'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    informes=[];
-    const tbody=document.getElementById('tablaInformes');
-    if(tbody)tbody.innerHTML=estadoVacio('fa-broom','Listado de informes limpiado.');
-    const contador=document.getElementById('contadorInformesFiltrados');if(contador)contador.textContent='0 resultados';
-    const total=document.getElementById('contadorInformes');if(total)total.textContent='0';
-}
-
-function limpiarFiltrosAuditoria(){
-    ['buscarAuditoria','filtroModulo','filtroAccion','filtroUsuario'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    auditoria=[];
-    const tbody=document.getElementById('tablaAuditoria');
-    if(tbody)tbody.innerHTML=estadoVacio('fa-broom','Listado de acciones limpiado.');
-    const contador=document.getElementById('contadorAccionesFiltradas');if(contador)contador.textContent='0 resultados';
-    const total=document.getElementById('contadorAuditoria');if(total)total.textContent='0';
-}
-
+async function iniciar(){try{usuario=JSON.parse(localStorage.getItem('usuarioActual')||localStorage.getItem('usuario')||'null');}catch(e){usuario=null;}if(!usuario){location.href='../index.html';return;}const rol=norm(usuario.rol),rolesPermitidos=['super admin','super administrador','superadministrador','supervisor','administrador'];if(!rolesPermitidos.includes(rol)){location.href='dashboard.html';return;}const nombre=document.getElementById('usuarioNombre');if(nombre)nombre.textContent=(usuario.nombre||usuario.usuario||'Usuario')+' · '+(usuario.rol||'');document.getElementById('btnDashboard').onclick=()=>location.href='dashboard.html';document.getElementById('btnSalir').onclick=cerrarSesion;document.getElementById('btnActualizar').onclick=cargar;document.getElementById('btnLimpiarInformes').onclick=limpiarFiltrosInformes;document.getElementById('btnLimpiarAuditoria').onclick=limpiarFiltrosAuditoria;document.getElementById('btnPdfUsuario').onclick=generarPdfUsuario;document.getElementById('btnPdfTodos').onclick=generarPdfTodos;['buscarInforme','filtroCategoria','fechaDesdeInforme','fechaHastaInforme'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',renderInformes);if(el&&el.tagName==='SELECT')el.addEventListener('change',renderInformes);});['buscarAuditoria','filtroModulo','filtroAccion','filtroUsuario','filtroRol'].forEach(id=>{const el=document.getElementById(id);if(el){el.addEventListener('input',renderAuditoria);el.addEventListener('change',renderAuditoria);}});await cargar();}
+async function cerrarSesion(){try{if(typeof apiLogout==='function')await apiLogout();}catch(e){}localStorage.removeItem('usuarioActual');localStorage.removeItem('usuario');location.href='../index.html';}
+async function cargar(){const boton=document.getElementById('btnActualizar');if(boton)boton.classList.add('cargando');try{const resultados=await Promise.all([apiObtenerInformesAuditoria(),apiObtenerAuditoria()]);const ir=resultados[0],ar=resultados[1];informes=ir&&ir.ok?ir.datos||[]:[];auditoria=ar&&ar.ok?ar.datos||[]:[];document.getElementById('contadorInformes').textContent=informes.length;document.getElementById('contadorAuditoria').textContent=auditoria.length;cargarSelectoresAuditoria();renderInformes();renderAuditoria();document.getElementById('ultimaActualizacion').textContent=new Date().toLocaleTimeString('es-UY',{hour:'2-digit',minute:'2-digit'});}catch(error){mostrarError('tablaInformes','No fue posible cargar los informes.');mostrarError('tablaAuditoria','No fue posible cargar el registro de acciones.');}finally{if(boton)boton.classList.remove('cargando');}}
+function renderInformes(){const texto=norm(document.getElementById('buscarInforme').value),categoria=norm(document.getElementById('filtroCategoria').value),desde=document.getElementById('fechaDesdeInforme').value,hasta=document.getElementById('fechaHastaInforme').value;const filtrados=informes.filter(x=>{const cadena=norm([x.fecha,x.categoriaInforme,x.numeroSerie,x.usuario,x.inspector,x.rol,x.codigoElemento,x.matricula,x.tipoActuacion,x.detalle].join(' '));if(texto&&!cadena.includes(texto))return false;if(categoria&&!norm(x.categoriaInforme).includes(categoria))return false;const fecha=fechaComparable(x.fecha);if(desde&&fecha&&fecha<desde)return false;if(hasta&&fecha&&fecha>hasta)return false;return true;});document.getElementById('contadorInformesFiltrados').textContent=formatearResultados(filtrados.length);const tbody=document.getElementById('tablaInformes');if(!filtrados.length){tbody.innerHTML=estadoVacio('fa-file-circle-xmark','No hay informes que coincidan con los filtros.');return;}tbody.innerHTML=filtrados.map(x=>{const cat=norm(x.categoriaInforme);let clase='badge-inspeccion',icono='fa-magnifying-glass';if(cat.includes('movilidad')){clase='badge-movilidad';icono='fa-road';}else if(cat.includes('fiscal')){clase='badge-fiscalizacion';icono='fa-shield-halved';}const documento=x.pdfUrl?'<a class="pdf-link" href="'+esc(x.pdfUrl)+'" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-file-pdf"></i> Abrir PDF</a>':'<span class="muted">Sin PDF</span>';return '<tr><td>'+esc(x.fecha||'')+'</td><td><span class="badge '+clase+'"><i class="fa-solid '+icono+'"></i>'+esc(x.categoriaInforme||'Sin categoría')+'</span></td><td><span class="ref-code">'+esc(x.numeroSerie||'—')+'</span></td><td>'+esc(x.usuario||x.inspector||'—')+'</td><td>'+esc(x.rol||'—')+'</td><td>'+esc(x.codigoElemento||x.matricula||'—')+'</td><td>'+esc(x.tipoActuacion||x.detalle||'—')+'</td><td>'+documento+'</td></tr>';}).join('');}
+function renderAuditoria(){const texto=norm(document.getElementById('buscarAuditoria').value),modulo=norm(document.getElementById('filtroModulo').value),accion=norm(document.getElementById('filtroAccion').value),usuarioFiltro=norm(document.getElementById('filtroUsuario').value),rolFiltro=norm(document.getElementById('filtroRol').value);const filtrados=auditoria.filter(x=>{const cadena=norm([x.fecha,x.usuario,x.nombre,x.rol,x.accion,x.modulo,x.detalle,x.referencia].join(' '));if(texto&&!cadena.includes(texto))return false;if(modulo&&norm(x.modulo)!==modulo)return false;if(accion&&norm(x.accion)!==accion)return false;const u=norm(x.usuario||x.nombre);if(usuarioFiltro&&u!==usuarioFiltro)return false;if(rolFiltro&&norm(x.rol)!==rolFiltro)return false;return true;});document.getElementById('contadorAccionesFiltradas').textContent=formatearResultados(filtrados.length);const tbody=document.getElementById('tablaAuditoria');if(!filtrados.length){tbody.innerHTML=estadoVacio('fa-clock-rotate-left','No hay acciones que coincidan con los filtros.');return;}tbody.innerHTML=filtrados.map(x=>'<tr><td>'+esc(x.fecha||'')+'</td><td>'+esc(x.usuario||'—')+'</td><td>'+esc(x.nombre||'—')+'</td><td>'+esc(x.rol||'—')+'</td><td><span class="badge badge-accion"><i class="fa-solid fa-bolt"></i>'+esc(x.accion||'—')+'</span></td><td>'+esc(x.modulo||'—')+'</td><td>'+esc(x.detalle||'—')+'</td><td><span class="ref-code">'+esc(x.referencia||'—')+'</span></td></tr>').join('');}
+function cargarSelectoresAuditoria(){llenarSelector('filtroUsuario',auditoria.map(x=>x.usuario||x.nombre),'Todos los usuarios');llenarSelector('filtroRol',auditoria.map(x=>x.rol),'Todos los roles');llenarSelector('filtroModulo',auditoria.map(x=>x.modulo),'Todos');llenarSelector('filtroAccion',auditoria.map(x=>x.accion),'Todas');}
+function llenarSelector(id,valores,textoBase){const select=document.getElementById(id);if(!select)return;const actual=select.value,unicos=[...new Set(valores.map(v=>String(v||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));select.innerHTML='<option value="">'+esc(textoBase)+'</option>'+unicos.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');if(unicos.includes(actual))select.value=actual;}
+function limpiarFiltrosInformes(){['buscarInforme','filtroCategoria','fechaDesdeInforme','fechaHastaInforme'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});informes=[];const tbody=document.getElementById('tablaInformes');if(tbody)tbody.innerHTML=estadoVacio('fa-broom','Listado de informes limpiado.');document.getElementById('contadorInformesFiltrados').textContent='0 resultados';document.getElementById('contadorInformes').textContent='0';}
+function limpiarFiltrosAuditoria(){['buscarAuditoria','filtroModulo','filtroAccion','filtroUsuario','filtroRol'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});auditoria=[];const tbody=document.getElementById('tablaAuditoria');if(tbody)tbody.innerHTML=estadoVacio('fa-broom','Listado de acciones limpiado.');document.getElementById('contadorAccionesFiltradas').textContent='0 resultados';document.getElementById('contadorAuditoria').textContent='0';}
+async function generarPdfUsuario(){const usuarioFiltro=document.getElementById('filtroUsuario').value,rolFiltro=document.getElementById('filtroRol').value,estado=document.getElementById('estadoPdfAuditoria');if(!usuarioFiltro){if(estado)estado.textContent='Seleccione un usuario primero.';return;}if(estado)estado.textContent='Generando PDF...';try{const registro=auditoria.find(x=>norm(x.usuario||x.nombre)===norm(usuarioFiltro)),nombre=registro&&registro.nombre?registro.nombre:usuarioFiltro,r=await apiGenerarPdfAuditoria(usuarioFiltro,rolFiltro,nombre);if(r&&r.ok){if(estado)estado.textContent='PDF generado correctamente.';if(r.pdfUrl)window.open(r.pdfUrl,'_blank');}else if(estado)estado.textContent=r&&r.mensaje?r.mensaje:'No fue posible generar el PDF.';}catch(e){if(estado)estado.textContent='Error al generar el PDF.';}}
+async function generarPdfTodos(){const estado=document.getElementById('estadoPdfAuditoria');if(estado)estado.textContent='Generando PDF general...';try{const r=await apiGenerarPdfAuditoria('','','');if(r&&r.ok){if(estado)estado.textContent='PDF general generado correctamente.';if(r.pdfUrl)window.open(r.pdfUrl,'_blank');}else if(estado)estado.textContent=r&&r.mensaje?r.mensaje:'No fue posible generar el PDF.';}catch(e){if(estado)estado.textContent='Error al generar el PDF.';}}
 function fechaComparable(valor){const s=String(valor||'').trim();if(!s)return '';let m=s.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);if(m)return m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');m=s.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);if(m)return m[3]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[1]).padStart(2,'0');return '';}
-function formatearResultados(n){return n+' '+(n===1?'resultado':'resultados');}
-function estadoVacio(icono,mensaje){return '<tr><td class="empty-state" colspan="8"><i class="fa-solid '+icono+'"></i>'+esc(mensaje)+'</td></tr>';}
-function mostrarError(id,mensaje){document.getElementById(id).innerHTML='<tr><td class="empty-state error-state" colspan="8"><i class="fa-solid fa-triangle-exclamation"></i>'+esc(mensaje)+'</td></tr>';}
-function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
-function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;');}
+function formatearResultados(n){return n+' '+(n===1?'resultado':'resultados');}function estadoVacio(icono,mensaje){return '<tr><td class="empty-state" colspan="8"><i class="fa-solid '+icono+'"></i>'+esc(mensaje)+'</td></tr>';}function mostrarError(id,mensaje){document.getElementById(id).innerHTML='<tr><td class="empty-state error-state" colspan="8"><i class="fa-solid fa-triangle-exclamation"></i>'+esc(mensaje)+'</td></tr>';}function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;');}
