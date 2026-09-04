@@ -6,7 +6,7 @@
 <title>SGT | Fiscalización</title>
 <link rel="stylesheet" href="../../css/estilos.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-<link rel="stylesheet" href="inspecciones.css">
+<link rel="stylesheet" href="inspecciones.css?v=20260904-3">
 </head>
 <body>
 <main class="contenido sin-sidebar">
@@ -14,7 +14,8 @@
 <div><h1>Fiscalización</h1><p id="usuarioNombre"></p></div>
 <button type="button" id="btnVolver" class="btn-volver"><i class="fa-solid fa-arrow-left"></i> Volver</button>
 </header>
-<section class="formulario">
+
+<section id="formularioActuacion" class="formulario">
 <h2>Registrar actuación</h2>
 <form id="formInspeccion">
 <h3>Responsable actuante</h3>
@@ -47,31 +48,36 @@
 <h3>Detalle de la actuación</h3>
 <label>Descripción</label>
 <textarea id="detalle" maxlength="3000" placeholder="Describa la actuación para facilitar su comprensión y auditoría."></textarea>
-
 <div id="evidenciaVideo">
 <h3>Evidencia de Fiscalización</h3>
 <label>Video de la actuación <small>(máx. 30 MB)</small></label>
 <input id="video" type="file" accept="video/*">
 </div>
-
 <div id="fotoActuacion">
 <h3>Evidencia fotográfica</h3>
 <label>Fotografías de la actuación <small>(máximo 4 imágenes)</small></label>
 <input id="documento" type="file" accept="image/*" multiple>
 <small id="ayudaFotos">Puede seleccionar hasta 4 fotografías.</small>
 </div>
-
 <button type="submit">Guardar actuación</button>
 </form>
 <p id="mensaje" aria-live="polite"></p>
 </section>
-<section>
+
+<section id="panelActuaciones">
 <h2>Actuaciones registradas</h2>
+<div id="filtrosSupervisor" class="filtros-actuaciones" style="display:none;">
+<div><label for="fechaDesde">Desde</label><input type="date" id="fechaDesde"></div>
+<div><label for="fechaHasta">Hasta</label><input type="date" id="fechaHasta"></div>
+<button type="button" id="btnFiltrar"><i class="fa-solid fa-filter"></i> Filtrar</button>
+<button type="button" id="btnLimpiarFiltro"><i class="fa-solid fa-eraser"></i> Limpiar</button>
+</div>
+<p id="resumenActuaciones" class="resumen-actuaciones"></p>
 <div id="lista"></div>
 </section>
 </main>
-<script src="../../js/api.js"></script>
-<script src="inspecciones.js"></script>
+<script src="../../js/api.js?v=20260904-3"></script>
+<script src="inspecciones.js?v=20260904-3"></script>
 <script>
 (function(){
  const tipo=document.getElementById("tipoActuacion");
@@ -110,8 +116,6 @@
  tipo.addEventListener("change",actualizarVista);
  actualizarVista();
 
- // Para Movilidad reemplazamos el submit original para impedir que cualquier video
- // seleccionado previamente sea procesado y para subir hasta 4 fotografías.
  if(esMovilidad && formulario){
    formulario.onsubmit=async function(ev){
      ev.preventDefault();
@@ -129,20 +133,7 @@
          const url=await archivoBase64(archivo,10*1024*1024);
          if(url)urls.push(url);
        }
-       const datos={
-         beta:"No posee",
-         inspector:usuario.nombre||usuario.usuario||"",
-         usuario:usuario.usuario||"",
-         rol:"movilidad",
-         matricula:document.getElementById("matricula").value.trim().toUpperCase(),
-         tipoActuacion:tipoValor,
-         numeroBoleta:document.getElementById("numeroBoleta").value.trim(),
-         nombreInfractor:document.getElementById("nombreInfractor").value.trim(),
-         cedula:document.getElementById("cedula").value.trim(),
-         detalle:detalle,
-         videoUrl:"",
-         documentoUrl:urls.join(";")
-       };
+       const datos={beta:"No posee",inspector:usuario.nombre||usuario.usuario||"",usuario:usuario.usuario||"",rol:"movilidad",matricula:document.getElementById("matricula").value.trim().toUpperCase(),tipoActuacion:tipoValor,numeroBoleta:document.getElementById("numeroBoleta").value.trim(),nombreInfractor:document.getElementById("nombreInfractor").value.trim(),cedula:document.getElementById("cedula").value.trim(),detalle:detalle,videoUrl:"",documentoUrl:urls.join(";")};
        const r=await apiGuardarInspeccion(datos);
        if(!r||!r.ok)throw new Error(r?.mensaje||"No fue posible guardar la actuación.");
        mostrarReporteGuardado(r);
@@ -154,9 +145,7 @@
      }catch(error){
        console.error("Error guardando actuación de Movilidad:",error);
        mensaje(error.message||"No fue posible guardar la actuación.","error");
-     }finally{
-       if(boton)boton.disabled=false;
-     }
+     }finally{if(boton)boton.disabled=false;}
    };
  }
 })();
