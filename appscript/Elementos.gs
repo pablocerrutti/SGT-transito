@@ -36,6 +36,8 @@ function obtenerElementos() {
   } catch (error) { return {ok:false, mensaje:'No fue posible obtener los elementos: ' + error.message}; }
 }
 function guardarElemento(e) {
+  const bloqueoRol = bloquearMutacionSupervisorMovilidad_(e, 'Supervisor Movilidad no puede crear elementos del mapa.');
+  if (bloqueoRol) return bloqueoRol;
   const p = (e && e.parameter) || {};
   const tipo = String(p.tipo || '').trim() || 'Otro';
   const coordenadas = validarCoordenadas_(p.latitud, p.longitud);
@@ -54,6 +56,8 @@ function guardarElemento(e) {
   } finally { if (bloqueo.hasLock()) bloqueo.releaseLock(); }
 }
 function actualizarElemento(e) {
+  const bloqueoRol = bloquearMutacionSupervisorMovilidad_(e, 'Supervisor Movilidad no puede modificar elementos del mapa.');
+  if (bloqueoRol) return bloqueoRol;
   const p = (e && e.parameter) || {};
   const id = String(p.id || '').trim();
   if (!id) return {ok:false,mensaje:'Falta el identificador del elemento.'};
@@ -68,6 +72,8 @@ function actualizarElemento(e) {
   } catch (error) { return {ok:false,mensaje:'No fue posible actualizar el elemento: ' + error.message}; }
 }
 function eliminarElemento(e) {
+  const bloqueoRol = bloquearMutacionSupervisorMovilidad_(e, 'Supervisor Movilidad no puede eliminar elementos del mapa.');
+  if (bloqueoRol) return bloqueoRol;
   const id = String(((e && e.parameter) || {}).id || '').trim();
   if (!id) return {ok:false,mensaje:'Falta el identificador del elemento.'};
   try { const sh = hoja('Elementos'); const fila = buscarFila(sh, id); if (fila === -1) return {ok:false,mensaje:'Elemento no encontrado.'}; sh.deleteRow(fila); return {ok:true,mensaje:'Elemento eliminado.'};
