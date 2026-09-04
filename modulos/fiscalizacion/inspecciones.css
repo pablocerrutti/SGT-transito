@@ -63,6 +63,64 @@
 }
 
 /*==============================================
+  FILTROS DEL SUPERVISOR
+==============================================*/
+.filtros-actuaciones{
+    display:grid;
+    grid-template-columns:minmax(160px,1fr) minmax(160px,1fr) auto auto;
+    gap:12px;
+    align-items:end;
+    margin:0 0 18px;
+    padding:16px;
+    border:1px solid #284c70;
+    border-radius:10px;
+    background:#0d1d2d;
+}
+
+.filtros-actuaciones label{
+    display:block;
+    margin:0 0 6px;
+    font-weight:700;
+}
+
+.filtros-actuaciones input{
+    width:100%;
+    box-sizing:border-box;
+}
+
+.filtros-actuaciones button{
+    margin:0;
+    min-height:40px;
+}
+
+.resumen-actuaciones{
+    margin:8px 0 14px;
+    color:#b9c8d8;
+    font-size:.95rem;
+}
+
+.acciones-pdf-actuacion{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:12px;
+}
+
+.btn-pdf-actuacion{
+    margin:0 !important;
+    padding:8px 12px;
+    border:1px solid #284c70;
+    border-radius:7px;
+    background:#17324d;
+    color:#fff;
+    cursor:pointer;
+}
+
+.btn-pdf-actuacion:hover{
+    filter:brightness(1.12);
+}
+
+/*==============================================
   CONFIRMACIÓN DE REPORTE GUARDADO
 ==============================================*/
 .reporte-guardado-overlay{
@@ -136,4 +194,14 @@
 
 .reporte-guardado-pdf:hover{
     filter:brightness(1.08);
+}
+
+@media (max-width:720px){
+    .filtros-actuaciones{
+        grid-template-columns:1fr;
+    }
+
+    .filtros-actuaciones button{
+        width:100%;
+    }
 }
