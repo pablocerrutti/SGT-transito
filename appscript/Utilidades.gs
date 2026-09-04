@@ -110,3 +110,33 @@ function buscarFila(hoja,id){
   return -1;
 
 }
+
+/************************************************/
+// PERMISOS CENTRALES
+// Supervisor Movilidad es exclusivamente de consulta
+// en el mapa y no puede ejecutar mutaciones.
+/************************************************/
+
+function rolNormalizadoUtil_(valor){
+  return String(valor || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase()
+    .trim();
+}
+
+function esSupervisorMovilidad_(valor){
+  return rolNormalizadoUtil_(valor) === 'supervisor movilidad';
+}
+
+function bloquearMutacionSupervisorMovilidad_(e, mensaje){
+  const p = (e && e.parameter) || {};
+  if(esSupervisorMovilidad_(p.rol)){
+    return {
+      ok:false,
+      codigo:'PERMISO_DENEGADO',
+      mensaje:mensaje || 'El rol Supervisor Movilidad solo tiene permisos de consulta y generación de informes.'
+    };
+  }
+  return null;
+}
