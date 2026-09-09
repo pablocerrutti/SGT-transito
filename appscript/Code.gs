@@ -9,8 +9,9 @@ function doGet(e) {
   try{
     switch(accion){
       case 'login': return json(login(e));
-      case 'obtenerUsuarios': return json(obtenerUsuarios());
+      case 'obtenerUsuarios': return json(obtenerUsuarios(e));
       case 'guardarUsuario': return json(guardarUsuario(e));
+      case 'actualizarUsuario': return json(actualizarUsuario(e));
       case 'eliminarUsuario': return json(eliminarUsuario(e));
       case 'obtenerCategorias': return json(obtenerCategorias());
       case 'obtenerLocalidades': return json(obtenerLocalidades());
