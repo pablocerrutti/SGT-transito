@@ -3,95 +3,15 @@
  SISTEMA DE GESTIÓN DE TRÁNSITO
  USUARIOS Y PERMISOS
 ********************************************************/
-
 function normalizarRolUsuario_(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
-
-function permisosPorRol_(rol){
-  const r=normalizarRolUsuario_(rol);
-  if(r==='super admin'||r==='super administrador'||r==='superadministrador') return {usuarios:true,movilidad:true,fiscalizacion:true,auditoria:true};
-  if(r==='supervisor') return {usuarios:false,movilidad:true,fiscalizacion:true,auditoria:true};
-  if(r==='supervisor movilidad') return {usuarios:false,movilidad:true,fiscalizacion:false,auditoria:false};
-  if(r==='movilidad') return {usuarios:false,movilidad:true,fiscalizacion:true,auditoria:false};
-  if(r==='consulta movilidad') return {usuarios:false,movilidad:true,fiscalizacion:true,auditoria:false};
-  if(r==='fiscalizacion') return {usuarios:false,movilidad:false,fiscalizacion:true,auditoria:false};
-  return {usuarios:false,movilidad:false,fiscalizacion:false,auditoria:false};
-}
-
-function indiceColumnaPermisos_(sh){
-  const last=Math.max(sh.getLastColumn(),7);
-  const encabezados=sh.getRange(1,1,1,last).getDisplayValues()[0];
-  for(let i=0;i<encabezados.length;i++) if(normalizarRolUsuario_(encabezados[i])==='permisos') return i+1;
-  const nueva=last+1; sh.getRange(1,nueva).setValue('Permisos'); return nueva;
-}
-
-function permisosDeFila_(fila,col){
-  let base=permisosPorRol_(fila[4]);
-  const raw=col>0?fila[col-1]:'';
-  if(raw){try{const p=JSON.parse(String(raw));Object.keys(base).forEach(k=>{if(typeof p[k]==='boolean')base[k]=p[k];});}catch(_){}}
-  if(normalizarRolUsuario_(fila[4]).startsWith('super admin')) base.usuarios=true;
-  return base;
-}
-
-function esSuperAdminActor_(e){
-  const d=(e&&e.parameter)||{};
-  const rol=normalizarRolUsuario_(d.actorRol||d.rol||'');
-  if(!(rol==='super admin'||rol==='super administrador'||rol==='superadministrador')) return false;
-  return true;
-}
-
-function login(e){
-  const usuario=String(e.parameter.usuario||'').trim(), password=String(e.parameter.password||'').trim();
-  const sh=hoja('Usuarios'),datos=sh.getDataRange().getValues(),col=indiceColumnaPermisos_(sh);
-  for(let i=1;i<datos.length;i++){
-    const activo=String(datos[i][5]||'').trim().toUpperCase();
-    if(String(datos[i][1]||'').trim()===usuario && String(datos[i][2]||'').trim()===password && activo==='SI'){
-      return {ok:true,usuario:{id:datos[i][0],usuario:datos[i][1],nombre:datos[i][3],rol:datos[i][4],permisos:permisosDeFila_(datos[i],col)}};
-    }
-  }
-  return {ok:false,mensaje:'Usuario o contraseña incorrectos.'};
-}
-
-function obtenerUsuarios(e){
-  if(!esSuperAdminActor_(e)) return {ok:false,mensaje:'Permiso denegado. Solo Super Admin puede administrar usuarios.'};
-  const sh=hoja('Usuarios'),datos=sh.getDataRange().getValues(),col=indiceColumnaPermisos_(sh),lista=[];
-  for(let i=1;i<datos.length;i++) if(String(datos[i][0]||'').trim()) lista.push({id:datos[i][0],usuario:datos[i][1],nombre:datos[i][3],rol:datos[i][4],activo:datos[i][5],permisos:permisosDeFila_(datos[i],col)});
-  return {ok:true,datos:lista};
-}
-
-function guardarUsuario(e){
-  const d=(e&&e.parameter)||{};
-  if(!esSuperAdminActor_(e)) return {ok:false,mensaje:'Permiso denegado. Solo Super Admin puede crear usuarios.'};
-  if(!String(d.usuario||'').trim()||!String(d.password||'').trim()||!String(d.nombre||'').trim()||!String(d.rol||'').trim()) return {ok:false,mensaje:'Complete todos los datos del usuario.'};
-  const sh=hoja('Usuarios'),col=indiceColumnaPermisos_(sh),id=generarID('USR'),existentes=sh.getDataRange().getValues();
-  for(let i=1;i<existentes.length;i++) if(String(existentes[i][1]||'').trim().toLowerCase()===String(d.usuario).trim().toLowerCase()) return {ok:false,mensaje:'El nombre de usuario ya existe.'};
-  let p=permisosPorRol_(d.rol); if(d.permisos) try{const x=JSON.parse(d.permisos);Object.keys(p).forEach(k=>{if(typeof x[k]==='boolean')p[k]=x[k];});}catch(_){ }
-  if(normalizarRolUsuario_(d.rol).startsWith('super admin')) p.usuarios=true;
-  const fila=[id,d.usuario,d.password,d.nombre,d.rol,'SI',ahora()]; while(fila.length<col) fila.push(''); fila[col-1]=JSON.stringify(p); sh.appendRow(fila);
-  return {ok:true,mensaje:'Usuario creado correctamente.'};
-}
-
-function actualizarUsuario(e){
-  const d=(e&&e.parameter)||{};
-  if(!esSuperAdminActor_(e)) return {ok:false,mensaje:'Permiso denegado. Solo Super Admin puede modificar usuarios.'};
-  const id=String(d.id||'').trim(); if(!id) return {ok:false,mensaje:'Usuario no especificado.'};
-  const sh=hoja('Usuarios'),datos=sh.getDataRange().getValues(),col=indiceColumnaPermisos_(sh);
-  for(let i=1;i<datos.length;i++) if(String(datos[i][0])===id){
-    const nuevoUsuario=String(d.usuario||datos[i][1]||'').trim();
-    for(let j=1;j<datos.length;j++) if(j!==i&&String(datos[j][1]||'').trim().toLowerCase()===nuevoUsuario.toLowerCase()) return {ok:false,mensaje:'El nombre de usuario ya existe.'};
-    const nuevoRol=String(d.rol||datos[i][4]||'').trim();
-    let p=permisosPorRol_(nuevoRol); if(d.permisos) try{const x=JSON.parse(d.permisos);Object.keys(p).forEach(k=>{if(typeof x[k]==='boolean')p[k]=x[k];});}catch(_){ }
-    if(normalizarRolUsuario_(nuevoRol).startsWith('super admin')) p.usuarios=true;
-    sh.getRange(i+1,2).setValue(nuevoUsuario); sh.getRange(i+1,4).setValue(String(d.nombre||datos[i][3]||'')); sh.getRange(i+1,5).setValue(nuevoRol);
-    if(String(d.password||'').trim()) sh.getRange(i+1,3).setValue(String(d.password).trim());
-    sh.getRange(i+1,col).setValue(JSON.stringify(p));
-    return {ok:true,mensaje:'Usuario actualizado correctamente.',usuario:{id:datos[i][0],usuario:nuevoUsuario,nombre:String(d.nombre||datos[i][3]||''),rol:nuevoRol,activo:datos[i][5],permisos:p}};
-  }
-  return {ok:false,mensaje:'Usuario no encontrado.'};
-}
-
-function eliminarUsuario(e){
-  if(!esSuperAdminActor_(e)) return {ok:false,mensaje:'Permiso denegado. Solo Super Admin puede eliminar usuarios.'};
-  const id=String(e.parameter.id||''),sh=hoja('Usuarios'),datos=sh.getDataRange().getValues();
-  for(let i=1;i<datos.length;i++) if(String(datos[i][0])===id){sh.deleteRow(i+1);return {ok:true,mensaje:'Usuario eliminado.'};}
-  return {ok:false,mensaje:'Usuario no encontrado.'};
-}
+function permisosPorRol_(rol){const r=normalizarRolUsuario_(rol);if(r==='super admin'||r==='super administrador'||r==='superadministrador')return{usuarios:true,movilidad:true,fiscalizacion:true,auditoria:true};if(r==='supervisor')return{usuarios:false,movilidad:true,fiscalizacion:true,auditoria:true};if(r==='supervisor movilidad')return{usuarios:false,movilidad:true,fiscalizacion:false,auditoria:false};if(r==='movilidad')return{usuarios:false,movilidad:true,fiscalizacion:true,auditoria:false};if(r==='consulta movilidad')return{usuarios:false,movilidad:true,fiscalizacion:true,auditoria:false};if(r==='fiscalizacion')return{usuarios:false,movilidad:false,fiscalizacion:true,auditoria:false};return{usuarios:false,movilidad:false,fiscalizacion:false,auditoria:false};}
+function indiceColumnaPermisos_(sh){const last=Math.max(sh.getLastColumn(),7),encabezados=sh.getRange(1,1,1,last).getDisplayValues()[0];for(let i=0;i<encabezados.length;i++)if(normalizarRolUsuario_(encabezados[i])==='permisos')return i+1;const nueva=last+1;sh.getRange(1,nueva).setValue('Permisos');return nueva;}
+function permisosDeFila_(fila,col){let base=permisosPorRol_(fila[4]),raw=col>0?fila[col-1]:'';if(raw)try{const p=JSON.parse(String(raw));Object.keys(base).forEach(k=>{if(typeof p[k]==='boolean')base[k]=p[k];});}catch(_){ }if(normalizarRolUsuario_(fila[4]).startsWith('super admin'))base.usuarios=true;return base;}
+function esSuperAdminActor_(e){const d=(e&&e.parameter)||{},rol=normalizarRolUsuario_(d.actorRol||d.rol||'');return rol==='super admin'||rol==='super administrador'||rol==='superadministrador';}
+function usuarioTienePermisoModulo_(usuario,modulo){const sh=hoja('Usuarios'),datos=sh.getDataRange().getValues(),col=indiceColumnaPermisos_(sh),u=String(usuario||'').trim().toLowerCase();if(!u)return false;for(let i=1;i<datos.length;i++)if(String(datos[i][1]||'').trim().toLowerCase()===u){return !!permisosDeFila_(datos[i],col)[String(modulo||'').trim()];}return false;}
+function permisoModuloApi_(e,modulo){const d=(e&&e.parameter)||{},actor=String(d.actorUsuario||'').trim();if(!actor)return null;return usuarioTienePermisoModulo_(actor,modulo)?null:{ok:false,codigo:'PERMISO_MODULO_DENEGADO',mensaje:'El usuario no tiene habilitado el acceso al módulo '+modulo+'.'};}
+function login(e){const usuario=String(e.parameter.usuario||'').trim(),password=String(e.parameter.password||'').trim(),sh=hoja('Usuarios'),datos=sh.getDataRange().getValues(),col=indiceColumnaPermisos_(sh);for(let i=1;i<datos.length;i++){const activo=String(datos[i][5]||'').trim().toUpperCase();if(String(datos[i][1]||'').trim()===usuario&&String(datos[i][2]||'').trim()===password&&activo==='SI')return{ok:true,usuario:{id:datos[i][0],usuario:datos[i][1],nombre:datos[i][3],rol:datos[i][4],permisos:permisosDeFila_(datos[i],col)}};}return{ok:false,mensaje:'Usuario o contraseña incorrectos.'};}
+function obtenerUsuarios(e){if(!esSuperAdminActor_(e))return{ok:false,mensaje:'Permiso denegado. Solo Super Admin puede administrar usuarios.'};const sh=hoja('Usuarios'),datos=sh.getDataRange().getValues(),col=indiceColumnaPermisos_(sh),lista=[];for(let i=1;i<datos.length;i++)if(String(datos[i][0]||'').trim())lista.push({id:datos[i][0],usuario:datos[i][1],nombre:datos[i][3],rol:datos[i][4],activo:datos[i][5],permisos:permisosDeFila_(datos[i],col)});return{ok:true,datos:lista};}
+function guardarUsuario(e){const d=(e&&e.parameter)||{};if(!esSuperAdminActor_(e))return{ok:false,mensaje:'Permiso denegado. Solo Super Admin puede crear usuarios.'};if(!String(d.usuario||'').trim()||!String(d.password||'').trim()||!String(d.nombre||'').trim()||!String(d.rol||'').trim())return{ok:false,mensaje:'Complete todos los datos del usuario.'};const sh=hoja('Usuarios'),col=indiceColumnaPermisos_(sh),id=generarID('USR'),existentes=sh.getDataRange().getValues();for(let i=1;i<existentes.length;i++)if(String(existentes[i][1]||'').trim().toLowerCase()===String(d.usuario).trim().toLowerCase())return{ok:false,mensaje:'El nombre de usuario ya existe.'};let p=permisosPorRol_(d.rol);if(d.permisos)try{const x=JSON.parse(d.permisos);Object.keys(p).forEach(k=>{if(typeof x[k]==='boolean')p[k]=x[k];});}catch(_){ }if(normalizarRolUsuario_(d.rol).startsWith('super admin'))p.usuarios=true;const fila=[id,d.usuario,d.password,d.nombre,d.rol,'SI',ahora()];while(fila.length<col)fila.push('');fila[col-1]=JSON.stringify(p);sh.appendRow(fila);return{ok:true,mensaje:'Usuario creado correctamente.'};}
+function actualizarUsuario(e){const d=(e&&e.parameter)||{};if(!esSuperAdminActor_(e))return{ok:false,mensaje:'Permiso denegado. Solo Super Admin puede modificar usuarios.'};const id=String(d.id||'').trim();if(!id)return{ok:false,mensaje:'Usuario no especificado.'};const sh=hoja('Usuarios'),datos=sh.getDataRange().getValues(),col=indiceColumnaPermisos_(sh);for(let i=1;i<datos.length;i++)if(String(datos[i][0])===id){const nuevoUsuario=String(d.usuario||datos[i][1]||'').trim();for(let j=1;j<datos.length;j++)if(j!==i&&String(datos[j][1]||'').trim().toLowerCase()===nuevoUsuario.toLowerCase())return{ok:false,mensaje:'El nombre de usuario ya existe.'};const nuevoRol=String(d.rol||datos[i][4]||'').trim();let p=permisosPorRol_(nuevoRol);if(d.permisos)try{const x=JSON.parse(d.permisos);Object.keys(p).forEach(k=>{if(typeof x[k]==='boolean')p[k]=x[k];});}catch(_){ }if(normalizarRolUsuario_(nuevoRol).startsWith('super admin'))p.usuarios=true;sh.getRange(i+1,2).setValue(nuevoUsuario);sh.getRange(i+1,4).setValue(String(d.nombre||datos[i][3]||''));sh.getRange(i+1,5).setValue(nuevoRol);if(String(d.password||'').trim())sh.getRange(i+1,3).setValue(String(d.password).trim());sh.getRange(i+1,col).setValue(JSON.stringify(p));return{ok:true,mensaje:'Usuario actualizado correctamente.',usuario:{id:datos[i][0],usuario:nuevoUsuario,nombre:String(d.nombre||datos[i][3]||''),rol:nuevoRol,activo:datos[i][5],permisos:p}};}return{ok:false,mensaje:'Usuario no encontrado.'};}
+function eliminarUsuario(e){if(!esSuperAdminActor_(e))return{ok:false,mensaje:'Permiso denegado. Solo Super Admin puede eliminar usuarios.'};const id=String(e.parameter.id||''),sh=hoja('Usuarios'),datos=sh.getDataRange().getValues();for(let i=1;i<datos.length;i++)if(String(datos[i][0])===id){sh.deleteRow(i+1);return{ok:true,mensaje:'Usuario eliminado.'};}return{ok:false,mensaje:'Usuario no encontrado.'};}
