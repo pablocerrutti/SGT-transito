@@ -12,7 +12,7 @@ async function apiLogout(){const sesion=sesionApi_();return registrarAuditoriaCl
 async function apiObtenerUsuarios(){const s=sesionApi_();return api('obtenerUsuarios',{actorUsuario:s.usuario||'',actorRol:s.rol||''});}
 async function apiGuardarUsuario(usuario){const s=sesionApi_();return api('guardarUsuario',Object.assign({},usuario,{actorUsuario:s.usuario||'',actorRol:s.rol||''}));}
 async function apiActualizarUsuario(usuario){const s=sesionApi_();return api('actualizarUsuario',Object.assign({},usuario,{actorUsuario:s.usuario||'',actorRol:s.rol||''}));}
-async function apiEliminarUsuario(id){const s=sesionApi_();return api('eliminarUsuario',{id,actorUsuario:s.usuario||'',actorRol:s.rol||''});}
+async function apiEliminarUsuario(id,passwordConfirmacion=''){const s=sesionApi_();return api('eliminarUsuario',{id,passwordConfirmacion,actorUsuario:s.usuario||'',actorRol:s.rol||''});}
 async function apiObtenerElementos(){return api('obtenerElementos');}
 function actorDatos_(datos){const s=sesionApi_();return Object.assign({},datos,{rol:datos&&datos.rol||s.rol||'',actorUsuario:s.usuario||'',actorRol:s.rol||''});}
 async function apiGuardarElemento(elemento){return api('guardarElemento',actorDatos_(elemento));}
