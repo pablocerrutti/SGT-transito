@@ -12,6 +12,7 @@
     if(r==='fiscalizacion') return {usuarios:false,movilidad:false,fiscalizacion:true,auditoria:false};
     return {usuarios:false,movilidad:false,fiscalizacion:false,auditoria:false};
   }
+  function session(){try{return JSON.parse(localStorage.getItem('usuarioActual')||'null')||null;}catch(_){return null;}}
   function get(u){
     const base=defaults(u&&u.rol);
     let p=u&&u.permisos;
@@ -21,9 +22,7 @@
     if(norm(u&&u.rol).startsWith('super admin')) p.usuarios=true;
     return p;
   }
-  function has(mod,u){return !!get(u||session()).
-    [N[mod]||mod];}
-  function session(){try{return JSON.parse(localStorage.getItem('usuarioActual')||'null')||null;}catch(_){return null;}}
+  function has(mod,u){return !!get(u||session())[N[mod]||mod];}
   function can(mod){const u=session();if(!u)return false;return has(mod,u);}
   function canManageUsers(){const u=session();return !!u && (norm(u.rol)==='super admin'||norm(u.rol)==='super administrador'||norm(u.rol)==='superadministrador') && has('usuarios',u);}
   window.SGTPermisos={normalizarRol:norm,defaults,get,has,can,canManageUsers,session};
