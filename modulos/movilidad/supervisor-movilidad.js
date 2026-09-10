@@ -1,5 +1,5 @@
 //==================================================
-// SGT - SUPERVISOR MOVILIDAD
+// SGT - SUPERVISOR / SUPERVISOR MOVILIDAD
 // Consulta del mapa + creación de informes.
 // NO puede crear, modificar ni eliminar elementos.
 // NO puede realizar inspecciones desde el popup.
@@ -22,13 +22,15 @@
         }
     }
 
-    function esSupervisorMovilidad() {
+    function esRolConsulta() {
         const usuario = obtenerUsuario();
-        return !!usuario && normalizarRol(usuario.rol) === 'supervisor movilidad';
+        if (!usuario) return false;
+        const rol = normalizarRol(usuario.rol);
+        return rol === 'supervisor' || rol === 'supervisor movilidad';
     }
 
     function ocultarEdicion() {
-        if (!esSupervisorMovilidad()) return;
+        if (!esRolConsulta()) return;
 
         [
             '.panel',
@@ -51,7 +53,6 @@
             descripcion.textContent = 'Consulta de elementos. La creación, modificación y eliminación están deshabilitadas para este rol.';
         }
 
-        // Bloqueo de seguridad del formulario aunque otro script intente mostrarlo.
         const formulario = document.getElementById('formElemento');
         if (formulario) {
             formulario.addEventListener('submit', function (evento) {
@@ -61,13 +62,11 @@
             }, true);
         }
 
-        // Evita selección de una ubicación que pudiera preparar un nuevo elemento.
         if (typeof mapa !== 'undefined' && mapa && typeof seleccionarUbicacion === 'function') {
             mapa.off('click', seleccionarUbicacion);
             mapa.off('contextmenu', finalizarDibujoGeometrico);
         }
 
-        // Bloqueo adicional de acciones de creación/eliminación.
         document.addEventListener('click', function (evento) {
             const objetivo = evento.target && evento.target.closest
                 ? evento.target.closest('#btnNuevaZona, #btnNuevoCordon, #btnCancelarZona, #btnCancelarCordon, #formElemento button[type="submit"]')
@@ -80,7 +79,7 @@
     }
 
     function instalarPopupSoloCaracteristicas() {
-        if (!esSupervisorMovilidad()) return;
+        if (!esRolConsulta()) return;
         if (typeof window.crearPopup !== 'function') return;
 
         window.crearPopup = function (elemento) {
@@ -112,7 +111,7 @@
     }
 
     function iniciar() {
-        if (!esSupervisorMovilidad()) return;
+        if (!esRolConsulta()) return;
         instalarPopupSoloCaracteristicas();
         ocultarEdicion();
     }
