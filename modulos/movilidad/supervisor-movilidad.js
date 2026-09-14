@@ -83,10 +83,19 @@
         if (typeof window.crearPopup !== 'function') return;
 
         window.crearPopup = function (elemento) {
-            const caracteristicas = escapar(elemento && elemento.caracteristicas ? elemento.caracteristicas : '-');
+            const e = elemento || {};
+            const esc = escapar;
+            const localidad = e.localidadNombre || e.localidad || e.nombreLocalidad || '-';
+
             return '<div class="popup-card supervisor-movilidad-popup">' +
-                '<h2>Características</h2>' +
-                '<div class="popup-linea"><strong>Características</strong><br>' + caracteristicas + '</div>' +
+                '<h2>' + esc(e.nombre || e.codigo || e.tipo || 'Elemento') + '</h2>' +
+                '<div class="popup-linea"><strong>Tipo</strong><br>' + esc(e.tipo || '-') + '</div>' +
+                '<div class="popup-linea"><strong>Nombre</strong><br>' + esc(e.nombre || '-') + '</div>' +
+                '<div class="popup-linea"><strong>Dirección</strong><br>' + esc(e.direccion || '-') + '</div>' +
+                '<div class="popup-linea"><strong>Localidad</strong><br>' + esc(localidad) + '</div>' +
+                '<div class="popup-linea"><strong>Estado</strong><br>' + esc(e.estado || '-') + '</div>' +
+                '<div class="popup-linea"><strong>Descripción</strong><br>' + esc(e.descripcion || '-') + '</div>' +
+                '<div class="popup-linea"><strong>Características</strong><br>' + esc(e.caracteristicas || '-') + '</div>' +
                 '</div>';
         };
     }
