@@ -14,24 +14,28 @@
   ['.panel','#btnNuevaZona','#btnCancelarZona','#btnNuevoCordon','#btnCancelarCordon'].forEach(s=>document.querySelectorAll(s).forEach(e=>e.style.display='none'));
   document.querySelectorAll('.zonaEstacionamientoBarra').forEach(e=>e.style.display='none');
   const c=document.querySelector('.contenedorPrincipal');if(c)c.style.gridTemplateColumns='1fr';
-  const p=document.querySelector('header p');if(p)p.textContent='Consulta de elementos existentes. Seleccione un elemento para ver descripción y características.';
+  const p=document.querySelector('header p');if(p)p.textContent='Consulta de elementos existentes. Seleccione un elemento para ver toda su información.';
   const form=document.getElementById('formElemento');if(form)form.addEventListener('submit',e=>{e.preventDefault();e.stopImmediatePropagation();aviso();},true);
   if(typeof mapa!=='undefined'&&mapa){try{if(typeof seleccionarUbicacion==='function')mapa.off('click',seleccionarUbicacion);if(typeof finalizarDibujoGeometrico==='function')mapa.off('contextmenu',finalizarDibujoGeometrico);}catch(_){}try{if(typeof iniciarSeleccionUbicacion==='function')mapa.off('click',iniciarSeleccionUbicacion);}catch(_){} }
   document.addEventListener('click',function(e){const t=e.target&&e.target.closest?e.target.closest('#btnNuevaZona,#btnNuevoCordon,#btnCancelarZona,#btnCancelarCordon,#btnGuardarElemento,#formElemento button[type="submit"],.btn-inspeccionar,.btn-eliminar,.btn-editar,.btnEliminar,.btnEditar'):null;if(!t)return;e.preventDefault();e.stopImmediatePropagation();aviso();},true);
  }
  function popupConsulta(elemento){
   const e=elemento||{};
+  const localidad=e.localidadNombre||e.localidad||e.nombreLocalidad||'-';
   return '<div class="popup-card consulta-movilidad-popup">'+
-   '<h2>'+esc(e.nombre||e.tipo||'Elemento')+'</h2>'+
-   (e.descripcion?'<div class="popup-linea"><strong>Descripción</strong><br>'+esc(e.descripcion)+'</div>':'')+
+   '<h2>'+esc(e.nombre||e.codigo||e.tipo||'Elemento')+'</h2>'+
+   '<div class="popup-linea"><strong>Tipo</strong><br>'+esc(e.tipo||'-')+'</div>'+ 
+   '<div class="popup-linea"><strong>Nombre</strong><br>'+esc(e.nombre||'-')+'</div>'+ 
+   '<div class="popup-linea"><strong>Dirección</strong><br>'+esc(e.direccion||'-')+'</div>'+ 
+   '<div class="popup-linea"><strong>Localidad</strong><br>'+esc(localidad)+'</div>'+ 
+   '<div class="popup-linea"><strong>Estado</strong><br>'+esc(e.estado||'-')+'</div>'+ 
+   '<div class="popup-linea"><strong>Descripción</strong><br>'+esc(e.descripcion||'-')+'</div>'+ 
    '<div class="popup-linea"><strong>Características</strong><br>'+esc(e.caracteristicas||'-')+'</div>'+ 
    '</div>';
  }
  function instalarPopup(){
   if(!esConsulta())return;
   if(typeof window.crearPopup==='function')window.crearPopup=popupConsulta;
-  // Algunos popups pueden ser creados por otros módulos; eliminamos botones
-  // de inspección/edición/eliminación después de cada inserción.
   const limpiar=()=>document.querySelectorAll('.leaflet-popup-content button,.leaflet-popup-content .btn-inspeccionar,.leaflet-popup-content .btn-eliminar,.leaflet-popup-content .btn-editar').forEach(e=>e.remove());
   limpiar();
   if(document.body)new MutationObserver(limpiar).observe(document.body,{childList:true,subtree:true});
