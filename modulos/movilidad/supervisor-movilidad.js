@@ -44,6 +44,12 @@
             });
         });
 
+        // Igualar el ancho del mapa al de Consulta Movilidad.
+        const contenedorPrincipal = document.querySelector('.contenedorPrincipal');
+        if (contenedorPrincipal) {
+            contenedorPrincipal.style.gridTemplateColumns = '1fr';
+        }
+
         document.querySelectorAll('.zonaEstacionamientoBarra').forEach(function (barra) {
             barra.style.display = 'none';
         });
