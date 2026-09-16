@@ -27,7 +27,9 @@ function doGet(e) {
       case 'eliminarCordonRojo': return json(permisoModuloApi_(e,'movilidad') || bloquearConsultaMapaApi_(e) || eliminarCordonRojo(e));
       case 'obtenerCatalogoElementosInformables': return json(obtenerCatalogoElementosInformables());
       case 'obtenerInspecciones': return json(obtenerInspecciones(e));
-      case 'generarPdfActuacionExistente': return json(generarPdfActuacionExistente(e));
+      case 'obtenerFotoInspeccion': return json(obtenerFotoInspeccionSeguro_(e));
+      case 'generarPdfActuacionExistente': return json(generarPdfActuacionExistenteSeguro_(e));
+      case 'resolverIncidencia': return json(permisoModuloApi_(e,'fiscalizacion') || bloquearConsultaMapaApi_(e) || resolverIncidenciaSeguro_(e));
       case 'guardarInspeccion': return json(permisoModuloApi_(e,'fiscalizacion') || bloquearConsultaMapaApi_(e) || guardarInspeccion(e));
       case 'subirArchivo': return json(subirArchivo(e));
       case 'registrarAuditoria': return json(registrarAuditoria(e));
