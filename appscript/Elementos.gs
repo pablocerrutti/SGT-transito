@@ -6,7 +6,7 @@
  ********************************************************/
 
 const TIPO_OBSERVACIONES = 'Observaciones';
-const TIPO_ESPACIO_RESERVADO = 'ESPACIO RESERVADO';
+const TIPO_ESPACIO_RESERVADO = 'Espacio Reservado';
 
 function esTipoObservaciones_(tipo) {
   const valor = String(tipo || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
