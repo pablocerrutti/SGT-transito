@@ -5,7 +5,7 @@
  * Hoja: EspaciosReservados
  ********************************************************/
 
-const TIPO_ESPACIO_RESERVADO = 'ESPACIO RESERVADO';
+const TIPO_ESPACIO_RESERVADO = 'Espacio Reservado';
 
 function hojaEspaciosReservados_(){
   let sh=bd().getSheetByName('EspaciosReservados');
@@ -46,7 +46,7 @@ function obtenerEspaciosReservados(){
           return {
             id:f[0],
             codigo:f[1],
-            tipo:f[2]||TIPO_ESPACIO_RESERVADO,
+            tipo:TIPO_ESPACIO_RESERVADO,
             serie:f[3],
             nombre:f[4],
             descripcion:f[5],
@@ -79,8 +79,6 @@ function guardarEspacioReservado(e){
   if(!coordenadas)return {ok:false,mensaje:'Seleccione al menos dos puntos en el mapa para definir el espacio reservado.'};
 
   const puntos=leerPuntosCordon_(coordenadas);
-
-  // Igual que el dibujo de CORDÓN ROJO: exactamente 2 puntos.
   if(puntos.length!==2)return {ok:false,mensaje:'El espacio reservado debe contener exactamente 2 puntos válidos.'};
 
   const bloqueo=LockService.getScriptLock();
@@ -138,7 +136,6 @@ function eliminarEspacioReservado(e){
     const ultimaFila=sh.getLastRow();
     if(ultimaFila<2)return {ok:false,mensaje:'No existen espacios reservados.'};
 
-    // Igual que CORDÓN ROJO: eliminación lógica, no se borra la fila.
     const encabezados=sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0];
     let columnaId=-1;
     let columnaActivo=-1;
