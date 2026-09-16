@@ -2,7 +2,7 @@
 (function(){
   const N={usuarios:'usuarios',movilidad:'movilidad',fiscalizacion:'fiscalizacion',auditoria:'auditoria'};
   function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
-  function esSuperAdmin(rol){const r=norm(rol);return r==='super admin'||r==='super administrador'||r==='superadministrador';}
+  function esSuperAdmin(rol){const r=norm(rol);return r==='super admin'||r==='super administrador'||r==='superadministrador'||r==='super usuario'||r==='superusuario'||r==='super user';}
   function defaults(rol){
     const r=norm(rol);
     if(esSuperAdmin(r)) return {usuarios:true,movilidad:true,fiscalizacion:true,auditoria:true};
