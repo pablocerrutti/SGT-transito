@@ -21,36 +21,30 @@
 
   function forzarDescarga(url,nombre){
     if(!url)return;
-    const a=document.createElement('a');
-    a.href=url;
-    a.download=nombre||'actuacion.pdf';
-    a.target='_blank';
-    a.rel='noopener noreferrer';
-    a.style.display='none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function(){a.remove();},1000);
+    const a=document.createElement('a');a.href=url;a.download=nombre||'actuacion.pdf';a.target='_blank';a.rel='noopener noreferrer';a.style.display='none';
+    document.body.appendChild(a);a.click();setTimeout(function(){a.remove();},1000);
   }
 
   function instalar(){
     if(typeof window.apiGenerarPdfActuacionExistente!=='function')return;
     if(window.apiGenerarPdfActuacionExistente.__sgtPdfFix)return;
-
     const original=window.apiGenerarPdfActuacionExistente;
 
     async function versionCorregida(id){
+      // Abrimos una pestaña vacía de forma síncrona, dentro del gesto del usuario.
+      // Esto evita que el navegador bloquee la apertura posterior del PDF.
+      let ventana=null;
+      try{ventana=window.open('about:blank','sgt_pdf_incidencia','noopener,noreferrer');}catch(_){ventana=null;}
+
       const r=await original(id);
-      if(!r||!r.ok)return r;
+      if(!r||!r.ok){if(ventana&&!ventana.closed)ventana.close();return r;}
 
       const descarga=r.pdfDownloadUrl||r.pdfUrl||'';
       const vista=r.pdfUrl||descarga;
-
       forzarDescarga(descarga,r.pdfNombre||('actuacion-'+id+'.pdf'));
 
-      if(vista){
-        setTimeout(function(){
-          try{window.open(vista,'_blank','noopener,noreferrer');}catch(_){ }
-        },350);
+      if(ventana&&!ventana.closed&&vista){
+        try{ventana.location.href=vista;}catch(_){ }
       }
 
       registrarAuditoriaPdf(id,r);
@@ -61,11 +55,6 @@
     window.apiGenerarPdfActuacionExistente=versionCorregida;
   }
 
-  function esperar(){
-    instalar();
-    if(typeof window.apiGenerarPdfActuacionExistente==='function')return;
-    setTimeout(esperar,150);
-  }
-
+  function esperar(){instalar();if(typeof window.apiGenerarPdfActuacionExistente==='function')return;setTimeout(esperar,150);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',esperar);else esperar();
 })();
