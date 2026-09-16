@@ -62,8 +62,6 @@
     function urlImagen(url){
         let u=String(url||'').trim();
         if(!u)return '';
-        // Google Drive: transforma enlaces /file/d/ID/view y open?id=ID
-        // al endpoint de miniatura, que sí puede utilizarse directamente en <img>.
         let m=u.match(/drive\.google\.com\/file\/d\/([^/?#]+)/i);
         if(m)return 'https://drive.google.com/thumbnail?id='+encodeURIComponent(m[1])+'&sz=w1600';
         m=u.match(/[?&]id=([^&#]+)/i);
@@ -74,11 +72,7 @@
     }
 
     function fotosRelacionadas(i){
-        const campos=[
-            i.fotos,i.fotografias,i.imagenes,i.imagenesUrl,i.fotosUrl,
-            i.documentoUrl,i.fotoUrl,i.foto,i.fotoInspeccion,i.evidenciaUrl,
-            i.evidencias,i.archivoUrl,i.archivosUrl
-        ];
+        const campos=[i.fotos,i.fotografias,i.imagenes,i.imagenesUrl,i.fotosUrl,i.documentoUrl,i.fotoUrl,i.foto,i.fotoInspeccion,i.evidenciaUrl,i.evidencias,i.archivoUrl,i.archivosUrl];
         const resultado=[];
         campos.forEach(c=>listaFotos(c).forEach(url=>{if(!resultado.some(x=>x.original===url))resultado.push({original:url,imagen:urlImagen(url)});}));
         return resultado;
@@ -96,23 +90,39 @@
         return '<div class="bloque-evidencia resolucion-evidencia"><h4>EVIDENCIA FOTOGRÁFICA DE LA RESOLUCIÓN</h4><div class="galeria-evidencia"><figure class="foto-evidencia"><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(img)+'" alt="Fotografía de incidencia resuelta" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.insertAdjacentHTML(\'afterend\',\'<div class=\"foto-error\">No se pudo cargar la imagen. <a href=\"'+esc(url)+'\" target=\"_blank\" rel=\"noopener noreferrer\">Abrir fotografía</a></div>\')"></a><figcaption>Incidencia finalizada</figcaption></figure></div></div>';
     }
 
+    function campoObjeto(e,nombre,valor){
+        const v=String(valor==null?'':valor).trim();
+        if(!v)return '';
+        return '<div class="ficha-dato"><strong>'+esc(nombre)+'</strong>'+esc(v)+'</div>';
+    }
+
     function renderFicha(){
         const cont=document.getElementById('fichaInspeccion');if(!cont||!seleccionado)return;
         const e=seleccionado.elemento,i=seleccionado.inspeccion,res=normalizar(i.incidenciaEstado||'pendiente')==='resuelta';
         const fotoFinal=i.fotoResolucionUrl||'';
-        cont.innerHTML='<h3>'+esc(e.nombre||e.codigo||'Elemento inspeccionado')+'</h3>'+
-        '<div class="ficha-grid"><div class="ficha-dato"><strong>Tipo de elemento</strong>'+esc(e.tipo||'-')+'</div><div class="ficha-dato"><strong>Código</strong>'+esc(e.codigo||i.codigoElemento||'-')+'</div><div class="ficha-dato"><strong>Nombre</strong>'+esc(e.nombre||'-')+'</div><div class="ficha-dato"><strong>Dirección</strong>'+esc(e.direccion||'-')+'</div><div class="ficha-dato"><strong>Localidad</strong>'+esc(e.localidad||'-')+'</div><div class="ficha-dato"><strong>Fecha del reporte</strong>'+esc(i.fecha||'-')+'</div><div class="ficha-dato"><strong>Inspector</strong>'+esc(i.inspector||'-')+'</div><div class="ficha-dato"><strong>Número de serie</strong>'+esc(i.numeroSerie||i.id||'-')+'</div><div class="ficha-dato"><strong>Estado de la incidencia</strong>'+esc(res?'RESUELTA':'PENDIENTE')+'</div>'+(res?'<div class="ficha-dato"><strong>Fecha de resolución</strong>'+esc(i.fechaResolucion||'-')+'</div><div class="ficha-dato"><strong>Usuario que resolvió</strong>'+esc(i.usuarioResolucion||'-')+'</div>':'')+'</div>'+ 
+        cont.innerHTML='<h3>'+esc(e.nombre||e.codigo||'Elemento inspeccionado')+'</h3>'+ 
+        '<div class="ficha-grid">'+
+        campoObjeto(e,'Tipo de elemento',e.tipo)+campoObjeto(e,'Código',e.codigo||i.codigoElemento)+campoObjeto(e,'Nombre',e.nombre)+campoObjeto(e,'Número de serie',e.serie)+
+        campoObjeto(e,'Dirección',e.direccion)+campoObjeto(e,'Localidad',e.localidad)+campoObjeto(e,'Ciudad',e.ciudad)+campoObjeto(e,'Zona',e.zona)+
+        campoObjeto(e,'Estado del objeto',e.estado)+campoObjeto(e,'Características',e.caracteristicas)+campoObjeto(e,'Descripción del objeto',e.descripcion)+
+        campoObjeto(e,'Coordenadas',e.coordenadas)+campoObjeto(e,'Geometría',e.geometria)+campoObjeto(e,'Fecha de alta',e.fechaAlta)+campoObjeto(e,'Usuario de alta',e.usuarioAlta)+
+        '<div class="ficha-dato"><strong>Fecha del reporte</strong>'+esc(i.fecha||'-')+'</div><div class="ficha-dato"><strong>Inspector</strong>'+esc(i.inspector||'-')+'</div><div class="ficha-dato"><strong>Número de serie de actuación</strong>'+esc(i.numeroSerie||i.id||'-')+'</div><div class="ficha-dato"><strong>Estado de la incidencia</strong>'+esc(res?'RESUELTA':'PENDIENTE')+'</div>'+ 
+        (res?'<div class="ficha-dato"><strong>Fecha de resolución</strong>'+esc(i.fechaResolucion||'-')+'</div><div class="ficha-dato"><strong>Usuario que resolvió</strong>'+esc(i.usuarioResolucion||'-')+'</div>':'')+ 
+        '</div>'+ 
         '<div class="ficha-detalle"><strong>INSPECCIÓN / INCIDENCIA</strong><br>'+esc(i.incidencia||i.detalle||'Sin detalle')+'</div>'+ 
+        '<div class="ficha-detalle"><strong>DATOS COMPLETOS DE LA ACTUACIÓN</strong><br>'+ 
+        esc(['Tipo de actuación: '+(i.tipoActuacion||''),'Beta: '+(i.beta||'No posee'),'Matrícula: '+(i.matricula||'No informada'),'Número de boleta: '+(i.numeroBoleta||'No informado'),'Nombre del infractor: '+(i.nombreInfractor||'No informado'),'Cédula: '+(i.cedula||'No informada'),'Usuario: '+(i.usuario||''),'Rol: '+(i.rol||'')].filter(x=>x.replace(/[: ]/g,'')).join('\n'))+'</div>'+ 
         '<div class="bloque-evidencia"><h4>EVIDENCIA FOTOGRÁFICA DE LA INSPECCIÓN</h4>'+renderGaleria(i)+'</div>'+ 
         renderFotoResolucion(fotoFinal)+
-        '<div class="acciones-incidencia"><button type="button" id="btnPdfInspeccion" class="btn-incidencia btn-pdf-inspeccion">🖨 Imprimir PDF</button>'+(res?'':'<button type="button" id="btnResolverInspeccion" class="btn-incidencia btn-resolver-inspeccion">✓ Incidencia resuelta</button>')+'</div>'+(res?'':'<div id="panelResolverInspeccion" class="resolucion-panel" hidden><label for="fotoResolucion">Fotografía obligatoria de la incidencia finalizada</label><input id="fotoResolucion" type="file" accept="image/*" capture="environment"><div class="acciones-incidencia"><button type="button" id="btnConfirmarResolucion" class="btn-incidencia btn-resolver-inspeccion">Confirmar resolución</button></div></div>')+'<p id="mensajeInspeccionFicha" class="mensaje-inspecciones"></p>';
+        '<div class="acciones-incidencia"><button type="button" id="btnPdfInspeccion" class="btn-incidencia btn-pdf-inspeccion">🖨 Imprimir PDF</button>'+(res?'':'<button type="button" id="btnResolverInspeccion" class="btn-incidencia btn-resolver-inspeccion">✓ Incidencia resuelta</button>')+'</div>'+ 
+        (res?'':'<div id="panelResolverInspeccion" class="resolucion-panel" hidden><label for="fotoResolucion">Fotografía obligatoria de la incidencia finalizada</label><input id="fotoResolucion" type="file" accept="image/*" capture="environment"><div class="acciones-incidencia"><button type="button" id="btnConfirmarResolucion" class="btn-incidencia btn-resolver-inspeccion">Confirmar resolución</button></div></div>')+'<p id="mensajeInspeccionFicha" class="mensaje-inspecciones"></p>';
         document.getElementById('btnPdfInspeccion').onclick=imprimirPDF;
         if(!res)document.getElementById('btnResolverInspeccion').onclick=()=>{document.getElementById('panelResolverInspeccion').hidden=false;};
         if(!res)document.getElementById('btnConfirmarResolucion').onclick=resolver;
     }
     async function imprimirPDF(){
         const btn=document.getElementById('btnPdfInspeccion');if(btn)btn.disabled=true;
-        try{const r=await apiGenerarPdfActuacionExistente(seleccionado.inspeccion.id);if(!r||!r.ok)throw new Error(r?.mensaje||'No fue posible generar el PDF.');if(r.pdfUrl)window.open(r.pdfUrl,'_blank','noopener,noreferrer');else throw new Error('El servidor no devolvió el PDF.');}
+        try{const r=await apiGenerarPdfActuacionExistente(seleccionado.inspeccion.id);if(!r||!r.ok)throw new Error(r?.mensaje||'No fue posible generar el PDF.');}
         catch(e){mostrarMensajeFicha(e.message||'No fue posible generar el PDF.','error');}
         finally{if(btn)btn.disabled=false;}
     }
