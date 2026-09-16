@@ -72,6 +72,7 @@
     try{
       const u=usuario();const r=await api('guardarEspacioReservado',{coordenadas:JSON.stringify(puntos),nombre:'ESPACIO RESERVADO',descripcion:'Espacio reservado definido mediante dos puntos en el mapa.',estado:'Activo',usuario:u.usuario||u.nombre||'admin',rol:u.rol||''});
       if(!r||!r.ok)throw new Error((r&&r.mensaje)||'No fue posible guardar el espacio reservado.');
+      try{await apiRegistrarAuditoria({usuario:u.usuario||'',nombre:u.nombre||'',rol:u.rol||'',accionRealizada:'Creación de espacio reservado',modulo:'Movilidad',detalle:'Creación de ESPACIO RESERVADO mediante dos puntos.',referencia:r.codigo||''});}catch(_){ }
       mostrar('Espacio reservado '+(r.codigo||'')+' guardado correctamente.','exito');cancelarDibujo();await cargar();
     }catch(error){mostrar(error.message||'No fue posible guardar el espacio reservado.','error');if(btn){btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-floppy-disk"></i> Guardar espacio reservado';}}
   }
