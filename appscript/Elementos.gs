@@ -29,7 +29,7 @@ function obtenerPrefijo(tipo) {
     'Cámara':'CAM',
     'Estacionamiento Tarifado':'ET',
     'Cordón Rojo':'CR',
-    'ESPACIO RESERVADO':'ER',
+    'Espacio Reservado':'ER',
     'Observaciones':'OBS',
     'Otro':'OBS',
     'Otros':'OBS'
