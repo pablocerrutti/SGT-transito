@@ -6,6 +6,7 @@
  ********************************************************/
 
 const TIPO_OBSERVACIONES = 'Observaciones';
+const TIPO_ESPACIO_RESERVADO = 'ESPACIO RESERVADO';
 
 function esTipoObservaciones_(tipo) {
   const valor = String(tipo || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -28,6 +29,7 @@ function obtenerPrefijo(tipo) {
     'Cámara':'CAM',
     'Estacionamiento Tarifado':'ET',
     'Cordón Rojo':'CR',
+    'ESPACIO RESERVADO':'ER',
     'Observaciones':'OBS',
     'Otro':'OBS',
     'Otros':'OBS'
@@ -64,25 +66,9 @@ function obtenerElementos() {
       ok:true,
       datos:datos.filter(function(f){ return String(f[0]||'').trim() !== ''; }).map(function(f){
         return {
-          id:f[0],
-          codigo:f[1],
-          tipo:nombreTipoElemento_(f[2]),
-          serie:f[3],
-          nombre:f[4],
-          descripcion:f[5],
-          latitud:f[6],
-          longitud:f[7],
-          direccion:f[8],
-          estado:f[9],
-          caracteristicas:f[10],
-          fechaAlta:f[11],
-          usuarioAlta:f[12],
-          fechaModificacion:f[13],
-          usuarioModificacion:f[14],
-          activo:f[15],
-          ciudad:f[16],
-          localidad:f[17],
-          zona:f[18]
+          id:f[0],codigo:f[1],tipo:nombreTipoElemento_(f[2]),serie:f[3],nombre:f[4],descripcion:f[5],
+          latitud:f[6],longitud:f[7],direccion:f[8],estado:f[9],caracteristicas:f[10],fechaAlta:f[11],
+          usuarioAlta:f[12],fechaModificacion:f[13],usuarioModificacion:f[14],activo:f[15],ciudad:f[16],localidad:f[17],zona:f[18]
         };
       })
     };
@@ -103,17 +89,7 @@ function guardarElemento(e) {
     bloqueo.waitLock(30000);
     const sh = hoja('Elementos'), serie = obtenerSiguienteSerieEnHoja_(sh,tipo), codigo = obtenerPrefijo(tipo)+'-'+('000000'+serie).slice(-6), usuario = String(p.usuario||'admin').trim() || 'admin';
     asegurarColumnasTerritoriales_(sh);
-    sh.appendRow([
-      generarID('EL'),codigo,tipo,serie,
-      String(p.nombre||'').trim(),
-      String(p.descripcion||'').trim(),
-      coordenadas.latitud,coordenadas.longitud,
-      String(p.direccion||'').trim(),
-      String(p.estado||'Activo').trim(),
-      String(p.caracteristicas||'').trim(),
-      ahora(),usuario,'','','SI',
-      String(p.ciudad||'').trim(),String(p.localidad||'').trim(),String(p.zona||'').trim()
-    ]);
+    sh.appendRow([generarID('EL'),codigo,tipo,serie,String(p.nombre||'').trim(),String(p.descripcion||'').trim(),coordenadas.latitud,coordenadas.longitud,String(p.direccion||'').trim(),String(p.estado||'Activo').trim(),String(p.caracteristicas||'').trim(),ahora(),usuario,'','','SI',String(p.ciudad||'').trim(),String(p.localidad||'').trim(),String(p.zona||'').trim()]);
     return {ok:true,mensaje:'Elemento guardado correctamente.',codigo:codigo,serie:serie};
   } catch(error) {
     return {ok:false,mensaje:'No fue posible guardar el elemento: '+error.message};
@@ -132,11 +108,7 @@ function actualizarElemento(e) {
   try {
     const sh = hoja('Elementos'), fila = buscarFila(sh,id);
     if (fila === -1) return {ok:false,mensaje:'Elemento no encontrado.'};
-    sh.getRange(fila,5,1,7).setValues([[
-      String(p.nombre||'').trim(),String(p.descripcion||'').trim(),
-      coordenadas.latitud,coordenadas.longitud,String(p.direccion||'').trim(),
-      String(p.estado||'').trim(),String(p.caracteristicas||'').trim()
-    ]]);
+    sh.getRange(fila,5,1,7).setValues([[String(p.nombre||'').trim(),String(p.descripcion||'').trim(),coordenadas.latitud,coordenadas.longitud,String(p.direccion||'').trim(),String(p.estado||'').trim(),String(p.caracteristicas||'').trim()]]);
     sh.getRange(fila,14,1,2).setValues([[ahora(),String(p.usuario||'admin').trim()||'admin']]);
     return {ok:true,mensaje:'Elemento actualizado.'};
   } catch(error) {
@@ -160,11 +132,8 @@ function eliminarElemento(e) {
 }
 
 function validarCoordenadas_(latitud,longitud) {
-  const lat = Number(String(latitud==null?'':latitud).replace(',','.')),
-        lng = Number(String(longitud==null?'':longitud).replace(',','.'));
-  if (!Number.isFinite(lat)||lat<-90||lat>90||!Number.isFinite(lng)||lng<-180||lng>180) {
-    return {ok:false,mensaje:'Seleccione un punto válido en el mapa antes de guardar.'};
-  }
+  const lat = Number(String(latitud==null?'':latitud).replace(',','.')), lng = Number(String(longitud==null?'':longitud).replace(',','.'));
+  if (!Number.isFinite(lat)||lat<-90||lat>90||!Number.isFinite(lng)||lng<-180||lng>180) return {ok:false,mensaje:'Seleccione un punto válido en el mapa antes de guardar.'};
   return {ok:true,latitud:lat,longitud:lng};
 }
 
