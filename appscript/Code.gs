@@ -31,7 +31,7 @@ function doGet(e) {
       case 'obtenerCatalogoElementosInformables': return json(obtenerCatalogoElementosInformables());
       case 'obtenerInspecciones': return json(obtenerInspeccionesSeguro_(e));
       case 'obtenerFotoInspeccion': return json(obtenerFotoInspeccionSeguro_(e));
-      case 'generarPdfActuacionExistente': return json(generarPdfActuacionOrdenTrabajo_(e));
+      case 'generarPdfActuacionExistente': return json(generarPdfActuacionOrdenTrabajoConObjeto_(e));
       case 'resolverIncidencia': return json(permisoModuloApi_(e,'fiscalizacion') || bloquearConsultaMapaApi_(e) || resolverIncidenciaSeguro_(e));
       case 'guardarInspeccion': return json(permisoModuloApi_(e,'fiscalizacion') || bloquearConsultaMapaApi_(e) || guardarInspeccion(e));
       case 'subirArchivo': return json(subirArchivo(e));
