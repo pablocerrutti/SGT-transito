@@ -1,7 +1,7 @@
 /********************************************************
  * SGT - ESPACIOS RESERVADOS
- * Geometría especial: línea de 2 o más puntos.
- * Se representa en el mapa como cordón amarillo.
+ * Misma lógica de CORDÓN ROJO.
+ * Diferencia funcional: representación amarilla en frontend.
  * Hoja: EspaciosReservados
  ********************************************************/
 
@@ -79,7 +79,9 @@ function guardarEspacioReservado(e){
   if(!coordenadas)return {ok:false,mensaje:'Seleccione al menos dos puntos en el mapa para definir el espacio reservado.'};
 
   const puntos=leerPuntosCordon_(coordenadas);
-  if(puntos.length<2)return {ok:false,mensaje:'El espacio reservado debe contener al menos 2 puntos válidos.'};
+
+  // Igual que el dibujo de CORDÓN ROJO: exactamente 2 puntos.
+  if(puntos.length!==2)return {ok:false,mensaje:'El espacio reservado debe contener exactamente 2 puntos válidos.'};
 
   const bloqueo=LockService.getScriptLock();
   try{
@@ -133,12 +135,37 @@ function eliminarEspacioReservado(e){
 
   try{
     const sh=hojaEspaciosReservados_();
-    const fila=buscarFila(sh,id);
-    if(fila===-1)return {ok:false,mensaje:'Espacio reservado no encontrado.'};
-    sh.deleteRow(fila);
-    return {ok:true,mensaje:'Espacio reservado eliminado.'};
+    const ultimaFila=sh.getLastRow();
+    if(ultimaFila<2)return {ok:false,mensaje:'No existen espacios reservados.'};
+
+    // Igual que CORDÓN ROJO: eliminación lógica, no se borra la fila.
+    const encabezados=sh.getRange(1,1,1,sh.getLastColumn()).getValues()[0];
+    let columnaId=-1;
+    let columnaActivo=-1;
+
+    encabezados.forEach(function(encabezado,indice){
+      const nombre=String(encabezado||'').trim().toLowerCase();
+      if(nombre==='id')columnaId=indice+1;
+      if(nombre==='activo')columnaActivo=indice+1;
+    });
+
+    if(columnaId===-1||columnaActivo===-1){
+      return {ok:false,mensaje:'La hoja EspaciosReservados no contiene las columnas necesarias.'};
+    }
+
+    const ids=sh.getRange(2,columnaId,ultimaFila-1,1).getValues();
+
+    for(let i=0;i<ids.length;i++){
+      if(String(ids[i][0]||'').trim()===id){
+        sh.getRange(i+2,columnaActivo).setValue('NO');
+        SpreadsheetApp.flush();
+        return {ok:true,mensaje:'Espacio reservado desactivado correctamente.',id:id};
+      }
+    }
+
+    return {ok:false,mensaje:'No se encontró el espacio reservado indicado.'};
   }catch(error){
-    return {ok:false,mensaje:'No fue posible eliminar el espacio reservado: '+(error.message||error)};
+    return {ok:false,mensaje:'No fue posible desactivar el espacio reservado: '+(error.message||error)};
   }
 }
 
