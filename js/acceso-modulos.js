@@ -1,7 +1,7 @@
 /* SGT - Protección de acceso directo por permisos */
 (function(){
   function normalizar(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
-  function esSuperAdmin(rol){const r=normalizar(rol);return r==='super admin'||r==='super administrador'||r==='superadministrador';}
+  function esSuperAdmin(rol){const r=normalizar(rol);return r==='super admin'||r==='super administrador'||r==='superadministrador'||r==='super usuario'||r==='superusuario'||r==='super user';}
   function usuario(){try{return JSON.parse(localStorage.getItem('usuarioActual')||'null')||null;}catch(_){return null;}}
   function permisos(u){
     const base={usuarios:false,movilidad:false,fiscalizacion:false,auditoria:false};
@@ -10,6 +10,9 @@
       'super admin':{usuarios:true,movilidad:true,fiscalizacion:true,auditoria:true},
       'super administrador':{usuarios:true,movilidad:true,fiscalizacion:true,auditoria:true},
       'superadministrador':{usuarios:true,movilidad:true,fiscalizacion:true,auditoria:true},
+      'super usuario':{usuarios:true,movilidad:true,fiscalizacion:true,auditoria:true},
+      'superusuario':{usuarios:true,movilidad:true,fiscalizacion:true,auditoria:true},
+      'super user':{usuarios:true,movilidad:true,fiscalizacion:true,auditoria:true},
       'supervisor':{movilidad:true,fiscalizacion:true,auditoria:true},
       'supervisor movilidad':{movilidad:true},
       'movilidad':{movilidad:true,fiscalizacion:true},
