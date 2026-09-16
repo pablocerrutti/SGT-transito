@@ -74,7 +74,9 @@
     if(instalado)return;if(!disponible()){setTimeout(instalar,200);return;}instalado=true;
     asegurarCategoria();instalarObservadorSelectores();
     const tipo=document.getElementById('tipo'),filtro=document.getElementById('filtroTipo');
-    if(tipo)tipo.addEventListener('change',function(){if(norm(tipo.value)===norm(TIPO)){if(filtro)filtro.value=TIPO;iniciar();}});
+    // IMPORTANTE: seleccionar ESPACIO RESERVADO en el formulario NO debe cambiar
+    // el filtro del mapa. El usuario debe poder seguir viendo todos los elementos.
+    if(tipo)tipo.addEventListener('change',function(){if(norm(tipo.value)===norm(TIPO))iniciar();});
     if(filtro)filtro.addEventListener('change',function(){setTimeout(dibujar,0);if(norm(filtro.value)===norm(TIPO))asegurarCapa();});
     const buscar=document.getElementById('buscar');if(buscar)buscar.addEventListener('input',function(){setTimeout(dibujar,0);});
     const loc=document.getElementById('filtroLocalidad');if(loc)loc.addEventListener('change',function(){setTimeout(dibujar,0);});
