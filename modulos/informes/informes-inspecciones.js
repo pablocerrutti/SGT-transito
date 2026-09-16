@@ -51,14 +51,42 @@
         Array.from(cont.querySelectorAll('.elemento-inspeccionado')).forEach(card=>card.addEventListener('click',()=>seleccionar(lista[Number(card.dataset.idx)])));
     }
     function seleccionar(g){seleccionado=g;renderLista();renderFicha();}
+
+    // Convierte cualquier campo de fotografías en una lista de URLs.
+    // Admite saltos de línea, punto y coma y comas, además de arrays.
+    function listaFotos(v){
+        if(Array.isArray(v)) return v.flatMap(listaFotos).map(x=>String(x||'').trim()).filter(Boolean);
+        const s=String(v||'').trim();
+        if(!s)return [];
+        return s.split(/[\n\r;,]+/).map(x=>x.trim()).filter(x=>/^https?:\/\//i.test(x));
+    }
+
+    function fotosRelacionadas(i){
+        const campos=[
+            i.fotos,i.fotografias,i.imagenes,i.imagenesUrl,i.fotosUrl,
+            i.documentoUrl,i.fotoUrl,i.foto,i.fotoInspeccion,i.evidenciaUrl,
+            i.evidencias,i.archivoUrl,i.archivosUrl
+        ];
+        const resultado=[];
+        campos.forEach(c=>listaFotos(c).forEach(url=>{if(!resultado.includes(url))resultado.push(url);}));
+        return resultado;
+    }
+
+    function renderGaleria(i){
+        const fotos=fotosRelacionadas(i);
+        if(!fotos.length)return '<div class="sin-evidencia">No hay fotografías asociadas a esta inspección.</div>';
+        return '<div class="galeria-evidencia">'+fotos.map((url,n)=>'<figure class="foto-evidencia"><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(url)+'" alt="Evidencia fotográfica '+(n+1)+'" loading="lazy" onerror="this.closest(\'figure\').classList.add(\'foto-error\')"></a><figcaption>Fotografía '+(n+1)+'</figcaption></figure>').join('')+'</div>';
+    }
+
     function renderFicha(){
         const cont=document.getElementById('fichaInspeccion');if(!cont||!seleccionado)return;
         const e=seleccionado.elemento,i=seleccionado.inspeccion,res=normalizar(i.incidenciaEstado||'pendiente')==='resuelta';
-        const foto=i.documentoUrl||i.fotoUrl||'';const fotoFinal=i.fotoResolucionUrl||'';
+        const fotoFinal=i.fotoResolucionUrl||'';
         cont.innerHTML='<h3>'+esc(e.nombre||e.codigo||'Elemento inspeccionado')+'</h3>'+
-        '<div class="ficha-grid"><div class="ficha-dato"><strong>Tipo de elemento</strong>'+esc(e.tipo||'-')+'</div><div class="ficha-dato"><strong>Código</strong>'+esc(e.codigo||i.codigoElemento||'-')+'</div><div class="ficha-dato"><strong>Nombre</strong>'+esc(e.nombre||'-')+'</div><div class="ficha-dato"><strong>Dirección</strong>'+esc(e.direccion||'-')+'</div><div class="ficha-dato"><strong>Localidad</strong>'+esc(e.localidad||'-')+'</div><div class="ficha-dato"><strong>Fecha del reporte</strong>'+esc(i.fecha||'-')+'</div><div class="ficha-dato"><strong>Inspector</strong>'+esc(i.inspector||'-')+'</div><div class="ficha-dato"><strong>Número de serie</strong>'+esc(i.numeroSerie||i.id||'-')+'</div><div class="ficha-dato"><strong>Estado de la incidencia</strong>'+esc(res?'RESUELTA':'PENDIENTE')+'</div>'+(res?'<div class="ficha-dato"><strong>Fecha de resolución</strong>'+esc(i.fechaResolucion||'-')+'</div><div class="ficha-dato"><strong>Usuario que resolvió</strong>'+esc(i.usuarioResolucion||'-')+'</div>':'')+'</div>'+
-        '<div class="ficha-detalle"><strong>INSPECCIÓN / INCIDENCIA</strong><br>'+esc(i.incidencia||i.detalle||'Sin detalle')+'</div>'+
-        '<div class="evidencia-inspeccion">'+(foto?'<figure><img src="'+esc(foto)+'" alt="Fotografía de la inspección"><figcaption>Fotografía original de la inspección</figcaption></figure>':'')+(fotoFinal?'<figure><img src="'+esc(fotoFinal)+'" alt="Fotografía de incidencia resuelta"><figcaption>Fotografía de la incidencia finalizada</figcaption></figure>':'')+'</div>'+
+        '<div class="ficha-grid"><div class="ficha-dato"><strong>Tipo de elemento</strong>'+esc(e.tipo||'-')+'</div><div class="ficha-dato"><strong>Código</strong>'+esc(e.codigo||i.codigoElemento||'-')+'</div><div class="ficha-dato"><strong>Nombre</strong>'+esc(e.nombre||'-')+'</div><div class="ficha-dato"><strong>Dirección</strong>'+esc(e.direccion||'-')+'</div><div class="ficha-dato"><strong>Localidad</strong>'+esc(e.localidad||'-')+'</div><div class="ficha-dato"><strong>Fecha del reporte</strong>'+esc(i.fecha||'-')+'</div><div class="ficha-dato"><strong>Inspector</strong>'+esc(i.inspector||'-')+'</div><div class="ficha-dato"><strong>Número de serie</strong>'+esc(i.numeroSerie||i.id||'-')+'</div><div class="ficha-dato"><strong>Estado de la incidencia</strong>'+esc(res?'RESUELTA':'PENDIENTE')+'</div>'+(res?'<div class="ficha-dato"><strong>Fecha de resolución</strong>'+esc(i.fechaResolucion||'-')+'</div><div class="ficha-dato"><strong>Usuario que resolvió</strong>'+esc(i.usuarioResolucion||'-')+'</div>':'')+'</div>'+ 
+        '<div class="ficha-detalle"><strong>INSPECCIÓN / INCIDENCIA</strong><br>'+esc(i.incidencia||i.detalle||'Sin detalle')+'</div>'+ 
+        '<div class="bloque-evidencia"><h4>EVIDENCIA FOTOGRÁFICA DE LA INSPECCIÓN</h4>'+renderGaleria(i)+'</div>'+ 
+        (fotoFinal?'<div class="bloque-evidencia resolucion-evidencia"><h4>EVIDENCIA FOTOGRÁFICA DE LA RESOLUCIÓN</h4><div class="galeria-evidencia"><figure class="foto-evidencia"><a href="'+esc(fotoFinal)+'" target="_blank" rel="noopener noreferrer"><img src="'+esc(fotoFinal)+'" alt="Fotografía de incidencia resuelta" loading="lazy"></a><figcaption>Incidencia finalizada</figcaption></figure></div></div>':'')+
         '<div class="acciones-incidencia"><button type="button" id="btnPdfInspeccion" class="btn-incidencia btn-pdf-inspeccion">🖨 Imprimir PDF</button>'+(res?'':'<button type="button" id="btnResolverInspeccion" class="btn-incidencia btn-resolver-inspeccion">✓ Incidencia resuelta</button>')+'</div>'+(res?'':'<div id="panelResolverInspeccion" class="resolucion-panel" hidden><label for="fotoResolucion">Fotografía obligatoria de la incidencia finalizada</label><input id="fotoResolucion" type="file" accept="image/*" capture="environment"><div class="acciones-incidencia"><button type="button" id="btnConfirmarResolucion" class="btn-incidencia btn-resolver-inspeccion">Confirmar resolución</button></div></div>')+'<p id="mensajeInspeccionFicha" class="mensaje-inspecciones"></p>';
         document.getElementById('btnPdfInspeccion').onclick=imprimirPDF;
         if(!res)document.getElementById('btnResolverInspeccion').onclick=()=>{document.getElementById('panelResolverInspeccion').hidden=false;};
@@ -67,7 +95,7 @@
     async function imprimirPDF(){
         const btn=document.getElementById('btnPdfInspeccion');if(btn)btn.disabled=true;
         try{const r=await apiGenerarPdfActuacionExistente(seleccionado.inspeccion.id);if(!r||!r.ok)throw new Error(r?.mensaje||'No fue posible generar el PDF.');if(r.pdfUrl)window.open(r.pdfUrl,'_blank','noopener,noreferrer');else throw new Error('El servidor no devolvió el PDF.');}
-        catch(e){mostrarMensaje(e.message||'No fue posible generar el PDF.','error');}
+        catch(e){mostrarMensajeFicha(e.message||'No fue posible generar el PDF.','error');}
         finally{if(btn)btn.disabled=false;}
     }
     async function resolver(){
