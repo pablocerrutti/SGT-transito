@@ -18,6 +18,7 @@ let localidades = [];
 
 const TIPO_ZONA_ESTACIONAMIENTO = "Estacionamiento Tarifado";
 const TIPO_CORDON_ROJO = "Cordón Rojo";
+const TIPO_ESPACIO_RESERVADO = "Espacio Reservado";
 
 
 //==================================================
@@ -34,6 +35,83 @@ let poligonoZonaTemporal = null;
 
 
 //==================================================
+// ESPACIOS RESERVADOS
+//==================================================
+
+function iniciarDibujoEspacioReservado() {
+    if (!mapa || dibujandoZona || dibujandoCordon || dibujandoEspacioReservado) return;
+    dibujandoEspacioReservado = true;
+    puntosEspacioReservado = [];
+    if (lineaEspacioReservadoTemporal) { mapa.removeLayer(lineaEspacioReservadoTemporal); lineaEspacioReservadoTemporal = null; }
+    const selector = document.getElementById("tipo"); if (selector) selector.value = TIPO_ESPACIO_RESERVADO;
+    actualizarTextoAyuda("Marque exactamente 2 puntos para definir el espacio reservado. El segundo punto finaliza automáticamente.");
+    mapa.getContainer().style.cursor = "crosshair";
+    mostrarMensaje("Dibujando espacio reservado...", "");
+}
+
+function agregarPuntoEspacioReservado(e) {
+    if (!dibujandoEspacioReservado || puntosEspacioReservado.length >= 2) return;
+    puntosEspacioReservado.push([e.latlng.lat,e.latlng.lng]);
+    if (lineaEspacioReservadoTemporal) mapa.removeLayer(lineaEspacioReservadoTemporal);
+    lineaEspacioReservadoTemporal = L.polyline(puntosEspacioReservado,{color:"#FFD400",weight:5,opacity:0.95,lineCap:"round",lineJoin:"round",interactive:false}).addTo(mapa);
+    const estado=document.getElementById("estadoCordon"); if(estado) estado.textContent="Puntos marcados: "+puntosEspacioReservado.length+".";
+    if(puntosEspacioReservado.length===2) finalizarEspacioReservado();
+}
+
+function finalizarEspacioReservado() {
+    if (!dibujandoEspacioReservado || puntosEspacioReservado.length !== 2) return;
+    const c=document.getElementById("coordenadas"); if(c)c.value=JSON.stringify(puntosEspacioReservado.slice(0,2));
+    const t=document.getElementById("tipo"); if(t)t.value=TIPO_ESPACIO_RESERVADO;
+    dibujandoEspacioReservado=false;
+    if(mapa)mapa.getContainer().style.cursor="";
+    mostrarPanelNuevoElemento();
+    actualizarTextoAyuda("Complete los datos del espacio reservado y guarde.");
+    mostrarMensaje("Espacio reservado definido. Complete los datos y guarde.","");
+}
+
+async function guardarEspacioReservadoEnServidor(datos) {
+    try {
+        const u=obtenerUsuarioActual(); datos.usuario=u.nombre||u.usuario||"admin";
+        const r=await apiGuardarEspacioReservado(datos);
+        if(!r||!r.ok)throw new Error(r?.mensaje||"No fue posible guardar el espacio reservado.");
+        mostrarMensaje("Espacio reservado guardado correctamente.","exito");
+        const form=document.getElementById("formElemento"); if(form)form.reset();
+        limpiarDibujoEspacioReservado(); await cargarEspaciosReservados();
+    }catch(e){console.error("Error guardando espacio reservado:",e);mostrarMensaje(e.message||"No fue posible guardar el espacio reservado.","error");}
+}
+
+async function cargarEspaciosReservados() {
+    if(!capaEspaciosReservados)return;
+    try{const r=await apiObtenerEspaciosReservados(); if(!r||!r.ok){espaciosReservados=[];mostrarEspaciosReservados();return;} espaciosReservados=Array.isArray(r.datos)?r.datos:[];mostrarEspaciosReservados();}
+    catch(e){console.error("Error cargando espacios reservados:",e);espaciosReservados=[];}
+}
+
+function mostrarEspaciosReservados() {
+    if(!capaEspaciosReservados)return;
+    capaEspaciosReservados.clearLayers();
+    const f=document.getElementById("filtroLocalidad"),loc=f?f.value:"";
+    espaciosReservados.forEach(function(e){
+        if(String(e.activo||"").toUpperCase()!=="SI")return;
+        const p=leerCoordenadas(e.coordenadas); if(p.length!==2)return;
+        if(loc&&normalizar(e.localidadNombre||e.localidad||"")!==normalizar(loc))return;
+        const l=L.polyline(p,{color:"#FFD400",weight:5,opacity:0.95,lineCap:"round",lineJoin:"round",interactive:true});
+        l.bindPopup(crearPopup({id:e.id,codigo:e.codigo||"ER",tipo:TIPO_ESPACIO_RESERVADO,nombre:e.nombre||TIPO_ESPACIO_RESERVADO,localidadNombre:e.localidadNombre||e.localidad||"Sin localidad",estado:e.estado||"Activo",direccion:e.direccion||"-",descripcion:e.descripcion||"-",caracteristicas:e.caracteristicas||"-"}));
+        l.addTo(capaEspaciosReservados);
+    });
+}
+
+function contarEspaciosReservadosActivos(){return espaciosReservados.filter(function(e){return String(e.activo||"").toUpperCase()==="SI";}).length;}
+
+async function eliminarEspacioReservado(id){
+    if(!confirm("¿Está seguro de desactivar este espacio reservado?"))return;
+    try{const r=await apiEliminarEspacioReservado(id);if(!r||!r.ok)throw new Error(r?.mensaje||"No fue posible desactivar el espacio reservado.");await cargarEspaciosReservados();mostrarMensaje("Espacio reservado desactivado correctamente.","exito");}
+    catch(e){mostrarMensaje(e.message||"No fue posible desactivar el espacio reservado.","error");}
+}
+
+function cancelarDibujoEspacioReservado(){limpiarDibujoEspacioReservado();actualizarTextoAyuda("Seleccione un punto del mapa para registrar un nuevo elemento.");}
+function limpiarDibujoEspacioReservado(){dibujandoEspacioReservado=false;puntosEspacioReservado=[];if(lineaEspacioReservadoTemporal&&mapa)mapa.removeLayer(lineaEspacioReservadoTemporal);lineaEspacioReservadoTemporal=null;if(mapa)mapa.getContainer().style.cursor="";}
+
+//==================================================
 // CORDONES ROJOS
 //==================================================
 
@@ -43,6 +121,11 @@ let cordonesRojos = [];
 let dibujandoCordon = false;
 let puntosCordon = [];
 let lineaCordonTemporal = null;
+let capaEspaciosReservados = null;
+let espaciosReservados = [];
+let dibujandoEspacioReservado = false;
+let puntosEspacioReservado = [];
+let lineaEspacioReservadoTemporal = null;
 
 
 //==================================================
@@ -85,6 +168,7 @@ async function iniciarPagina() {
     await cargarElementos();
     await cargarZonasEstacionamiento();
     await cargarCordonesRojos();
+    await cargarEspaciosReservados();
 
     console.log("====================================");
     console.log("SGT - MAPA INICIADO CORRECTAMENTE");
@@ -304,6 +388,9 @@ function iniciarMapa() {
     capaCordonesRojos =
         L.layerGroup().addTo(mapa);
 
+    capaEspaciosReservados =
+        L.layerGroup().addTo(mapa);
+
 
     //==============================================
     // CLICK MAPA
@@ -442,43 +529,23 @@ async function cargarCategorias() {
         //==========================================
         // CORDON ROJO
         //==========================================
+        // CORDON ROJO
+        //==========================================
 
-        if (
-            !categorias.some(
-                function (c) {
+        if (!categorias.some(function (c) {
+            return normalizar(c.nombre) === normalizar(TIPO_CORDON_ROJO);
+        })) {
+            categorias.push({codigo:"GE002",nombre:TIPO_CORDON_ROJO,icono:"road",color:"rojo",activo:"SI",geometria:"linea"});
+        }
 
-                    return normalizar(
-                        c.nombre
-                    ) === normalizar(
-                        TIPO_CORDON_ROJO
-                    );
+        //==========================================
+        // ESPACIO RESERVADO
+        //==========================================
 
-                }
-            )
-        ) {
-
-            categorias.push({
-
-                codigo:
-                    "GE002",
-
-                nombre:
-                    TIPO_CORDON_ROJO,
-
-                icono:
-                    "road",
-
-                color:
-                    "rojo",
-
-                activo:
-                    "SI",
-
-                geometria:
-                    "linea"
-
-            });
-
+        if (!categorias.some(function (c) {
+            return normalizar(c.nombre) === normalizar(TIPO_ESPACIO_RESERVADO);
+        })) {
+            categorias.push({codigo:"GE003",nombre:TIPO_ESPACIO_RESERVADO,icono:"road",color:"amarillo",activo:"SI",geometria:"linea"});
         }
 
 
@@ -1048,7 +1115,14 @@ function manejarCambioTipo() {
         )
     ) {
 
-        actualizarTextoAyuda(
+        if (normalizar(tipo) === normalizar(TIPO_ESPACIO_RESERVADO)) {
+        actualizarTextoAyuda("Marque exactamente 2 puntos para definir el espacio reservado. El segundo punto finaliza automáticamente.");
+        if (!dibujandoEspacioReservado) iniciarDibujoEspacioReservado();
+        return;
+    }
+
+
+    actualizarTextoAyuda(
             "Marque exactamente 2 puntos para definir el cordón rojo. El segundo punto finaliza automáticamente."
         );
 
@@ -1108,11 +1182,13 @@ function seleccionarUbicacion(e) {
     }
 
     if (dibujandoCordon) {
-
         agregarPuntoCordon(e);
-
         return;
+    }
 
+    if (dibujandoEspacioReservado) {
+        agregarPuntoEspacioReservado(e);
+        return;
     }
 
 
@@ -1348,11 +1424,8 @@ function renderizarMarcadores() {
         );
 
 
-    const mostrandoCordon =
-        normalizar(filtroTipo) ===
-        normalizar(
-            TIPO_CORDON_ROJO
-        );
+    const mostrandoCordon = normalizar(filtroTipo) === normalizar(TIPO_CORDON_ROJO);
+    const mostrandoEspacioReservado = normalizar(filtroTipo) === normalizar(TIPO_ESPACIO_RESERVADO);
 
 
     // Cuando se selecciona una geometría especial, mostrar EXCLUSIVAMENTE
@@ -1376,10 +1449,20 @@ function renderizarMarcadores() {
         return;
 
     }
+    if (mostrandoEspacioReservado) {
+        capaZonasEstacionamiento.clearLayers();
+        capaCordonesRojos.clearLayers();
+        capaMarcadores.clearLayers();
+        mostrarEspaciosReservados(true);
+        actualizarContadorGeometrias();
+        return;
+    }
+
 
     // Para cualquier categoría normal se ocultan las dos geometrías especiales.
     capaZonasEstacionamiento.clearLayers();
     capaCordonesRojos.clearLayers();
+    capaEspaciosReservados.clearLayers();
 
 
     const visibles =
@@ -1534,9 +1617,8 @@ function renderizarMarcadores() {
             false
         );
 
-        mostrarCordonesRojos(
-            false
-        );
+        mostrarCordonesRojos(false);
+        mostrarEspaciosReservados(false);
 
     }
 
@@ -1557,7 +1639,9 @@ function renderizarMarcadores() {
                 contarZonasActivas() +
                 " zonas + " +
                 contarCordonesActivos() +
-                " cordones";
+                " cordones + " +
+                contarEspaciosReservadosActivos() +
+                " espacios reservados";
 
         } else {
 
@@ -1862,6 +1946,18 @@ function centrarLocalidadSeleccionada() {
 
         }
     );
+
+
+    //==============================================
+    // ESPACIOS RESERVADOS
+    //==============================================
+
+    espaciosReservados.forEach(function (espacio) {
+        if (String(espacio.activo || "").toUpperCase() !== "SI") return;
+        const localidad = espacio.localidadNombre || espacio.localidad || "";
+        if (normalizar(localidad) !== localidadSeleccionada) return;
+        leerCoordenadas(espacio.coordenadas).forEach(function (punto) { puntos.push(punto); });
+    });
 
 
     if (puntos.length) {
@@ -2498,6 +2594,13 @@ async function eliminarElemento(id) {
         }
 
 
+        if (idStr.indexOf("ER") === 0) {
+            const respuesta = await apiEliminarEspacioReservado(id);
+            if (respuesta && respuesta.ok) await cargarEspaciosReservados();
+            else mostrarMensaje(respuesta?.mensaje || "No fue posible desactivar el espacio reservado.", "error");
+            return;
+        }
+
         // Elemento normal
         const respuesta =
             await apiEliminarElemento(
@@ -2701,6 +2804,27 @@ async function guardarElemento(e) {
 
         return;
 
+    }
+
+
+    if (normalizar(tipo) === normalizar(TIPO_ESPACIO_RESERVADO)) {
+        const coordenadas = document.getElementById("coordenadas")?.value || "";
+        const puntos = leerCoordenadas(coordenadas);
+        if (puntos.length !== 2) {
+            mostrarMensaje("Primero dibuje el espacio reservado con exactamente 2 puntos.", "error");
+            return;
+        }
+        await guardarEspacioReservadoEnServidor({
+            tipo:tipo,
+            nombre:document.getElementById("nombre")?.value||"",
+            descripcion:document.getElementById("descripcion")?.value||"",
+            direccion:document.getElementById("direccion")?.value||"",
+            estado:document.getElementById("estado")?.value||"Activo",
+            caracteristicas:document.getElementById("caracteristicas")?.value||"",
+            coordenadas:JSON.stringify(puntos),
+            localidad:document.getElementById("filtroLocalidad")?.value||""
+        });
+        return;
     }
 
 
@@ -3833,14 +3957,8 @@ document.addEventListener(
         }
 
 
-        if (
-            e.key === "Escape" &&
-            dibujandoCordon
-        ) {
-
-            cancelarDibujoCordon();
-
-        }
+        if (e.key === "Escape" && dibujandoCordon) cancelarDibujoCordon();
+        if (e.key === "Escape" && dibujandoEspacioReservado) cancelarDibujoEspacioReservado();
 
     }
 );
