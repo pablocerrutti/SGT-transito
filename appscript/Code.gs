@@ -14,6 +14,7 @@ function doGet(e) {
       case 'actualizarUsuario': return json(actualizarUsuario(e));
       case 'eliminarUsuario': return json(eliminarUsuario(e));
       case 'obtenerCategorias': return json(obtenerCategorias());
+      case 'subirFoto': return json(subirFoto(e));
       case 'obtenerLocalidades': return json(obtenerLocalidades());
       case 'obtenerElementos': return json(obtenerElementos());
       case 'guardarElemento': return json(permisoModuloApi_(e,'movilidad') || bloquearConsultaMapaApi_(e) || guardarElemento(e));
@@ -45,6 +46,51 @@ function doGet(e) {
 }
 function doPost(e){return doGet(e);}
 function bloquearConsultaMapaApi_(e){const p=(e&&e.parameter)||{},rol=String(p.rol||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();if(rol==='supervisor movilidad'||rol==='consulta movilidad')return {ok:false,codigo:'PERMISO_DENEGADO',mensaje:rol==='consulta movilidad'?'Consulta Movilidad solo puede consultar el mapa y generar informes. No puede crear, modificar, eliminar elementos ni registrar actuaciones.':'Supervisor Movilidad solo puede consultar el mapa y generar informes. No puede modificar, eliminar ni registrar actuaciones.'};return null;}
+function obtenerCategorias(){
+  try{
+    const sh=hoja('Categorias');
+    if(sh && sh.getLastRow()>1){
+      const valores=sh.getDataRange().getDisplayValues();
+      const encabezados=valores[0].map(function(v){return normalizarEncabezadoInforme_(v);});
+      const idx=function(nombres){
+        for(let i=0;i<nombres.length;i++){
+          const pos=encabezados.indexOf(normalizarEncabezadoInforme_(nombres[i]));
+          if(pos!==-1)return pos;
+        }
+        return -1;
+      };
+      const iCodigo=idx(['Código','Codigo']), iNombre=idx(['Nombre','Tipo']), iIcono=idx(['Icono']), iColor=idx(['Color']), iActivo=idx(['Activo']), iGeometria=idx(['Geometria','Geometría']);
+      const datos=valores.slice(1).filter(function(f){return iNombre===-1||String(f[iNombre]||'').trim()!=='';}).map(function(f){
+        return {
+          codigo:iCodigo>=0?String(f[iCodigo]||'').trim():'',
+          nombre:iNombre>=0?String(f[iNombre]||'').trim():'',
+          icono:iIcono>=0?String(f[iIcono]||'').trim():'',
+          color:iColor>=0?String(f[iColor]||'').trim():'',
+          activo:iActivo>=0?String(f[iActivo]||'SI').trim():'SI',
+          geometria:iGeometria>=0?String(f[iGeometria]||'PUNTO').trim():'PUNTO'
+        };
+      });
+      if(datos.length)return {ok:true,datos:datos};
+    }
+  }catch(error){
+    console.warn('No fue posible leer Categorias; se utilizará catálogo interno.',error);
+  }
+  return {ok:true,datos:[
+    {codigo:'SEM',nombre:'Semáforo',icono:'traffic-light',color:'rojo',activo:'SI',geometria:'punto'},
+    {codigo:'RAD',nombre:'Radar',icono:'radar',color:'azul',activo:'SI',geometria:'punto'},
+    {codigo:'CRU',nombre:'Cruce Peatonal',icono:'road',color:'azul',activo:'SI',geometria:'punto'},
+    {codigo:'LOM',nombre:'Lomo de Burro',icono:'road',color:'amarillo',activo:'SI',geometria:'punto'},
+    {codigo:'CAR',nombre:'Cartel',icono:'sign',color:'azul',activo:'SI',geometria:'punto'},
+    {codigo:'SVE',nombre:'Señal Vertical',icono:'sign',color:'azul',activo:'SI',geometria:'punto'},
+    {codigo:'SHO',nombre:'Señal Horizontal',icono:'road',color:'azul',activo:'SI',geometria:'punto'},
+    {codigo:'CAM',nombre:'Cámara',icono:'video',color:'azul',activo:'SI',geometria:'punto'},
+    {codigo:'OBS',nombre:'Observaciones',icono:'info',color:'gris',activo:'SI',geometria:'punto'},
+    {codigo:'ET',nombre:'Estacionamiento Tarifado',icono:'parking',color:'naranja',activo:'SI',geometria:'linea'},
+    {codigo:'CR',nombre:'Cordón Rojo',icono:'road',color:'rojo',activo:'SI',geometria:'linea'},
+    {codigo:'ER',nombre:'Espacio Reservado',icono:'road',color:'amarillo',activo:'SI',geometria:'linea'}
+  ]};
+}
+
 function obtenerCatalogoElementosInformables(){try{const datos=[];obtenerElementosDirectosParaInforme_().forEach(function(elemento){if(!elemento||!String(elemento.id||'').trim()||!esElementoNormalVigente_(elemento.activo))return;datos.push({tipoElemento:'ELEMENTO',id:String(elemento.id||'').trim(),codigo:String(elemento.codigo||'').trim(),tipo:String(elemento.tipo||'').trim(),serie:String(elemento.serie||'').trim(),nombre:String(elemento.nombre||'').trim(),descripcion:String(elemento.descripcion||'').trim(),direccion:String(elemento.direccion||'').trim(),estado:String(elemento.estado||'').trim(),caracteristicas:String(elemento.caracteristicas||'').trim(),ciudad:String(elemento.ciudad||'').trim(),localidad:String(elemento.localidad||elemento.localidadNombre||elemento.ciudad||'').trim(),zona:String(elemento.zona||'').trim(),latitud:String(elemento.latitud||'').trim(),longitud:String(elemento.longitud||'').trim(),coordenadas:construirCoordenadasPunto_(elemento.latitud,elemento.longitud),geometria:'PUNTO',fechaAlta:String(elemento.fechaAlta||'').trim(),usuarioAlta:String(elemento.usuarioAlta||'').trim(),activo:'SI'});});const zonas=obtenerZonasEstacionamiento({parameter:{incluirInactivos:'NO'}});if(zonas&&zonas.ok&&Array.isArray(zonas.datos))zonas.datos.forEach(function(zona){if(!zona||!String(zona.id||'').trim()||!esActivoCatalogo_(zona.activo))return;datos.push({tipoElemento:'ZONA_ESTACIONAMIENTO',id:String(zona.id||'').trim(),codigo:String(zona.codigo||'').trim(),tipo:String(zona.tipo||'Estacionamiento Tarifado').trim(),serie:String(zona.serie||'').trim(),nombre:String(zona.nombre||'').trim(),descripcion:String(zona.descripcion||'').trim(),direccion:String(zona.direccion||'').trim(),estado:String(zona.estado||'').trim(),caracteristicas:String(zona.caracteristicas||'').trim(),ciudad:String(zona.ciudad||'').trim(),localidad:String(zona.localidad||zona.localidadNombre||'').trim(),zona:String(zona.zona||'').trim(),coordenadas:String(zona.coordenadas||'[]').trim(),geometria:'LINEA',fechaAlta:String(zona.fechaAlta||'').trim(),usuarioAlta:String(zona.usuarioAlta||'').trim(),activo:'SI'});});let cordones;
 try {
   cordones = (typeof obtenerCordonesRojos === 'function')
