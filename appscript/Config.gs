@@ -14,16 +14,8 @@ const CONFIG = {
   DRIVE_ID: "1MdujvY_US_TrcUi8PrEYy4YzjRsO9-PY"
 };
 
-function bd(){
-  return SpreadsheetApp.openById(CONFIG.SHEET_ID);
-}
-
 function carpetaFotos(){
   return DriveApp.getFolderById(CONFIG.DRIVE_ID);
-}
-
-function generarID(prefijo){
-  return prefijo + "-" + new Date().getTime();
 }
 
 function fecha(){
