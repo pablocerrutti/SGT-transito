@@ -2,10 +2,11 @@
  * SGT - ESPACIOS RESERVADOS
  * Misma lógica de CORDÓN ROJO.
  * Diferencia funcional: representación amarilla en frontend.
+ * La hoja existente EspaciosReservados se conserva para no perder datos.
  * Hoja: EspaciosReservados
  ********************************************************/
 
-const TIPO_ESPACIO_RESERVADO = 'Espacio Reservado';
+const TIPO_ESPACIO_RESERVADO = 'ESPACIO RESERVADO';
 
 function hojaEspaciosReservados_(){
   let sh=bd().getSheetByName('EspaciosReservados');
