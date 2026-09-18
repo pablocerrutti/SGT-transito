@@ -1115,21 +1115,31 @@ function manejarCambioTipo() {
         )
     ) {
 
-        if (normalizar(tipo) === normalizar(TIPO_ESPACIO_RESERVADO)) {
-        actualizarTextoAyuda("Marque exactamente 2 puntos para definir el espacio reservado. El segundo punto finaliza automáticamente.");
-        if (!dibujandoEspacioReservado) iniciarDibujoEspacioReservado();
-        return;
-    }
-
-
-    actualizarTextoAyuda(
+        actualizarTextoAyuda(
             "Marque exactamente 2 puntos para definir el cordón rojo. El segundo punto finaliza automáticamente."
         );
 
         if (!dibujandoCordon) {
-
             iniciarDibujoCordon();
+        }
 
+        return;
+
+    }
+
+    if (
+        normalizar(tipo) ===
+        normalizar(
+            TIPO_ESPACIO_RESERVADO
+        )
+    ) {
+
+        actualizarTextoAyuda(
+            "Marque exactamente 2 puntos para definir el espacio reservado. El segundo punto finaliza automáticamente."
+        );
+
+        if (!dibujandoEspacioReservado) {
+            iniciarDibujoEspacioReservado();
         }
 
         return;
