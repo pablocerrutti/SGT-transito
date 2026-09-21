@@ -153,30 +153,61 @@ function guardarCordonRojo(e) {
     bloqueo.waitLock(30000);
 
     const sh = hojaCordonesRojos_();
+    const headers = sh.getRange(1, 1, 1, Math.max(sh.getLastColumn(), 1)).getDisplayValues()[0];
+    const normalizados = headers.map(function(v) {
+      return normalizarTextoCordon_(v).replace(/\s+/g, ' ');
+    });
+
+    function idx_(nombres, defecto) {
+      for (let i = 0; i < nombres.length; i++) {
+        const n = normalizarTextoCordon_(nombres[i]).replace(/\s+/g, ' ');
+        const pos = normalizados.indexOf(n);
+        if (pos !== -1) return pos;
+      }
+      return defecto;
+    }
+
+    // Estructura real de la hoja CordonesRojos:
+    // A id | B nombre | C coordenadas | D usuario | E fechaAlta |
+    // F activo | G codigo | H localidad | I usuarioAlta |
+    // J Descripcion | K Direccion | L Caracteristicas
+    const iId = idx_(['id'], 0);
+    const iNombre = idx_(['nombre'], 1);
+    const iCoordenadas = idx_(['coordenadas'], 2);
+    const iUsuario = idx_(['usuario'], 3);
+    const iFechaAlta = idx_(['fechaAlta','Fecha alta','Fecha Alta'], 4);
+    const iActivo = idx_(['activo','Activa','Vigente'], 5);
+    const iCodigo = idx_(['codigo','Código','Codigo'], 6);
+    const iLocalidad = idx_(['localidad','Localidad'], 7);
+    const iUsuarioAlta = idx_(['usuarioAlta','Usuario alta','Usuario Alta'], 8);
+    const iDescripcion = idx_(['Descripcion','Descripción'], 9);
+    const iDireccion = idx_(['Direccion','Dirección'], 10);
+    const iCaracteristicas = idx_(['Caracteristicas','Características'], 11);
+
     const serie = obtenerSiguienteSerieEnHoja_(sh, tipo);
     const prefijo = obtenerPrefijoCordon_();
     const codigo = prefijo + '-' + ('000000' + serie).slice(-6);
     const usuario = String(p.usuario || p.usuarioAlta || 'admin').trim() || 'admin';
-
+    const fecha = ahora();
     const localidad = determinarLocalidadCordon_(puntos);
 
-    sh.appendRow([
-      generarID('CR'),
-      codigo,
-      tipo,
-      serie,
-      String(p.nombre || '').trim(),
-      String(p.descripcion || '').trim(),
-      String(p.direccion || '').trim(),
-      String(p.estado || 'Activo').trim(),
-      String(p.caracteristicas || '').trim(),
-      localidad,
-      JSON.stringify(puntos),
-      ahora(),
-      usuario,
-      '',
-      '',
-      'SI'
+    const nuevaFila = new Array(Math.max(headers.length, 12)).fill('');
+
+    nuevaFila[iId] = generarID('CR');
+    nuevaFila[iNombre] = String(p.nombre || '').trim();
+    nuevaFila[iCoordenadas] = JSON.stringify(puntos);
+    nuevaFila[iUsuario] = usuario;
+    nuevaFila[iFechaAlta] = fecha;
+    nuevaFila[iActivo] = 'SI';
+    nuevaFila[iCodigo] = codigo;
+    nuevaFila[iLocalidad] = localidad;
+    nuevaFila[iUsuarioAlta] = usuario;
+    nuevaFila[iDescripcion] = String(p.descripcion || '').trim();
+    nuevaFila[iDireccion] = String(p.direccion || '').trim();
+    nuevaFila[iCaracteristicas] = String(p.caracteristicas || '').trim();
+
+    sh.getRange(sh.getLastRow() + 1, 1, 1, headers.length).setValues([
+      nuevaFila.slice(0, headers.length)
     ]);
 
     return {
@@ -193,7 +224,6 @@ function guardarCordonRojo(e) {
     if (bloqueo.hasLock()) bloqueo.releaseLock();
   }
 }
-
 //==================================================
 // LOCALIDAD DESDE COORDENADAS
 //==================================================
