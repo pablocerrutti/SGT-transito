@@ -45,7 +45,7 @@ function obtenerCordonesRojos() {
         return {
           id:f[0],
           codigo:f[1],
-          tipo:f[2],
+          tipo:'Cordón rojo',
           serie:f[3],
           nombre:f[4],
           descripcion:f[5],
@@ -77,7 +77,7 @@ function obtenerCordonesRojos() {
 
 function guardarCordonRojo(e) {
   const p = (e && e.parameter) || {};
-  const tipo = 'Cordón Rojo';
+  const tipo = 'Cordón rojo';
   const coordenadas = String(p.coordenadas || '').trim();
 
   if (!coordenadas) {
