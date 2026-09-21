@@ -99,7 +99,15 @@ try {
 } catch (errorCordones) {
   console.warn('obtenerCordonesRojos no disponible. Se utiliza lectura directa de CordonesRojos.', errorCordones);
   cordones = obtenerCordonesRojosDirectosParaInforme_();
-}if(cordones&&cordones.ok&&Array.isArray(cordones.datos))cordones.datos.forEach(function(cordon){if(!cordon||!String(cordon.id||'').trim()||!esActivoCatalogo_(cordon.activo))return;datos.push({tipoElemento:'CORDON_ROJO',id:String(cordon.id||'').trim(),codigo:String(cordon.codigo||'').trim(),tipo:String(cordon.tipo||'Cordón Rojo').trim(),serie:String(cordon.serie||'').trim(),nombre:String(cordon.nombre||'').trim(),descripcion:String(cordon.descripcion||'').trim(),direccion:String(cordon.direccion||'').trim(),estado:String(cordon.estado||'').trim(),caracteristicas:String(cordon.caracteristicas||'').trim(),ciudad:String(cordon.ciudad||'').trim(),localidad:String(cordon.localidad||cordon.localidadNombre||cordon.ciudad||'').trim(),zona:String(cordon.zona||'').trim(),coordenadas:String(cordon.coordenadas||'[]').trim(),geometria:'LINEA',fechaAlta:String(cordon.fechaAlta||'').trim(),usuarioAlta:String(cordon.usuarioAlta||'').trim(),activo:'SI'});});const espacios=obtenerEspaciosReservados({parameter:{incluirInactivos:'NO'}});if(espacios&&espacios.ok&&Array.isArray(espacios.datos))espacios.datos.forEach(function(espacio){if(!espacio||!String(espacio.id||'').trim()||!esActivoCatalogo_(espacio.activo))return;datos.push({tipoElemento:'ESPACIO_RESERVADO',id:String(espacio.id||'').trim(),codigo:String(espacio.codigo||'').trim(),tipo:'Espacio Reservado',serie:String(espacio.serie||'').trim(),nombre:String(espacio.nombre||'').trim(),descripcion:String(espacio.descripcion||'').trim(),direccion:String(espacio.direccion||'').trim(),estado:String(espacio.estado||'').trim(),caracteristicas:String(espacio.caracteristicas||'').trim(),ciudad:String(espacio.ciudad||'').trim(),localidad:String(espacio.localidad||espacio.localidadNombre||'').trim(),zona:String(espacio.zona||'').trim(),coordenadas:String(espacio.coordenadas||'[]').trim(),geometria:'LINEA',fechaAlta:String(espacio.fechaAlta||'').trim(),usuarioAlta:String(espacio.usuarioAlta||'').trim(),activo:'SI'});});const vistos={},resultado=[];datos.forEach(function(elemento){const clave=String(elemento.tipoElemento||'')+'|'+String(elemento.id||'').trim();if(vistos[clave])return;vistos[clave]=true;resultado.push(elemento);});return {ok:true,datos:resultado,cantidad:resultado.length};}catch(error){console.error('ERROR catálogo informable:',error);return {ok:false,datos:[],cantidad:0,mensaje:error&&error.message?error.message:'No fue posible obtener el catálogo informable.'};}}
+}if(cordones&&cordones.ok&&Array.isArray(cordones.datos))cordones.datos.forEach(function(cordon){if(!cordon||!String(cordon.id||'').trim()||!esActivoCatalogo_(cordon.activo))return;datos.push({tipoElemento:'CORDON_ROJO',id:String(cordon.id||'').trim(),codigo:String(cordon.codigo||'').trim(),tipo:String(cordon.tipo||'Cordón Rojo').trim(),serie:String(cordon.serie||'').trim(),nombre:String(cordon.nombre||'').trim(),descripcion:String(cordon.descripcion||'').trim(),direccion:String(cordon.direccion||'').trim(),estado:String(cordon.estado||'').trim(),caracteristicas:String(cordon.caracteristicas||'').trim(),ciudad:String(cordon.ciudad||'').trim(),localidad:String(cordon.localidad||cordon.localidadNombre||cordon.ciudad||'').trim(),zona:String(cordon.zona||'').trim(),coordenadas:String(cordon.coordenadas||'[]').trim(),geometria:'LINEA',fechaAlta:String(cordon.fechaAlta||'').trim(),usuarioAlta:String(cordon.usuarioAlta||'').trim(),activo:'SI'});});let espacios;
+try {
+  espacios = (typeof obtenerEspaciosReservados === 'function')
+    ? obtenerEspaciosReservados({parameter:{incluirInactivos:'NO'}})
+    : obtenerEspaciosReservadosDirectosParaInforme_();
+} catch (errorEspacios) {
+  console.warn('obtenerEspaciosReservados no disponible. Se utiliza lectura directa de EspaciosReservados.', errorEspacios);
+  espacios = obtenerEspaciosReservadosDirectosParaInforme_();
+}if(espacios&&espacios.ok&&Array.isArray(espacios.datos))espacios.datos.forEach(function(espacio){if(!espacio||!String(espacio.id||'').trim()||!esActivoCatalogo_(espacio.activo))return;datos.push({tipoElemento:'ESPACIO_RESERVADO',id:String(espacio.id||'').trim(),codigo:String(espacio.codigo||'').trim(),tipo:'Espacio Reservado',serie:String(espacio.serie||'').trim(),nombre:String(espacio.nombre||'').trim(),descripcion:String(espacio.descripcion||'').trim(),direccion:String(espacio.direccion||'').trim(),estado:String(espacio.estado||'').trim(),caracteristicas:String(espacio.caracteristicas||'').trim(),ciudad:String(espacio.ciudad||'').trim(),localidad:String(espacio.localidad||espacio.localidadNombre||'').trim(),zona:String(espacio.zona||'').trim(),coordenadas:String(espacio.coordenadas||'[]').trim(),geometria:'LINEA',fechaAlta:String(espacio.fechaAlta||'').trim(),usuarioAlta:String(espacio.usuarioAlta||'').trim(),activo:'SI'});});const vistos={},resultado=[];datos.forEach(function(elemento){const clave=String(elemento.tipoElemento||'')+'|'+String(elemento.id||'').trim();if(vistos[clave])return;vistos[clave]=true;resultado.push(elemento);});return {ok:true,datos:resultado,cantidad:resultado.length};}catch(error){console.error('ERROR catálogo informable:',error);return {ok:false,datos:[],cantidad:0,mensaje:error&&error.message?error.message:'No fue posible obtener el catálogo informable.'};}}
 function obtenerCordonesRojosDirectosParaInforme_(){
   try{
     const sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CordonesRojos');
@@ -135,6 +143,43 @@ function obtenerCordonesRojosDirectosParaInforme_(){
     return {ok:true,datos:datos};
   }catch(error){
     return {ok:false,datos:[],mensaje:'No fue posible leer CordonesRojos directamente: '+(error&&error.message?error.message:error)};
+  }
+}
+
+function obtenerEspaciosReservadosDirectosParaInforme_(){
+  try{
+    const sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName('EspaciosReservados');
+    if(!sh) return {ok:true,datos:[]};
+    const ultimaFila=sh.getLastRow();
+    const ultimaColumna=sh.getLastColumn();
+    if(ultimaFila<2||ultimaColumna<1) return {ok:true,datos:[]};
+
+    const valores=sh.getRange(1,1,ultimaFila,Math.max(16,ultimaColumna)).getDisplayValues();
+    const datos=valores.slice(1)
+      .filter(function(fila){ return String(fila[0]||'').trim()!==''; })
+      .map(function(fila){
+        return {
+          id:String(fila[0]||'').trim(),
+          codigo:String(fila[1]||'').trim(),
+          tipo:String(fila[2]||'ESPACIO RESERVADO').trim()||'ESPACIO RESERVADO',
+          serie:String(fila[3]||'').trim(),
+          nombre:String(fila[4]||'').trim(),
+          descripcion:String(fila[5]||'').trim(),
+          direccion:String(fila[6]||'').trim(),
+          estado:String(fila[7]||'').trim(),
+          caracteristicas:String(fila[8]||'').trim(),
+          localidad:String(fila[9]||'').trim(),
+          coordenadas:String(fila[10]||'[]').trim(),
+          fechaAlta:String(fila[11]||'').trim(),
+          usuarioAlta:String(fila[12]||'').trim(),
+          activo:String(fila[15]||'').trim()
+        };
+      })
+      .filter(function(espacio){ return esActivoCatalogo_(espacio.activo); });
+
+    return {ok:true,datos:datos};
+  }catch(error){
+    return {ok:false,datos:[],mensaje:'No fue posible leer EspaciosReservados directamente: '+(error&&error.message?error.message:error)};
   }
 }
 
