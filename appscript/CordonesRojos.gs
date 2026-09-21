@@ -10,68 +10,79 @@
  ********************************************************/
 
 function hojaCordonesRojos_() {
-  let sh = bd().getSheetByName('CordonesRojos');
-  if (!sh) {
-    sh = bd().insertSheet('CordonesRojos');
-    sh.appendRow(['ID','Código','Tipo','Serie','Nombre','Descripción','Dirección','Estado','Características','Localidad','Coordenadas','FechaAlta','UsuarioAlta','FechaMod','UsuarioMod','Activo']);
-  }
+  const ss = bd();
+  if (!ss) throw new Error('No se pudo abrir la base de datos configurada.');
+  const sh = ss.getSheetByName('CordonesRojos');
+  if (!sh) throw new Error('No existe la hoja "CordonesRojos" en la planilla configurada.');
   return sh;
 }
 
 function obtenerCordonesRojos() {
   try {
-    const sh = hojaCordonesRojos_();
+    const ss = bd();
+    const sh = ss.getSheetByName('CordonesRojos');
+
+    if (!sh) {
+      return {
+        ok:false, datos:[], cantidad:0,
+        mensaje:'No existe la hoja "CordonesRojos" en la planilla configurada.',
+        hoja:'CordonesRojos', spreadsheetId:ss.getId()
+      };
+    }
+
     const ultimaFila = sh.getLastRow();
-    if (ultimaFila < 2) return {ok:true, datos:[]};
+    const ultimaColumna = sh.getLastColumn();
+    if (ultimaFila < 2) return {ok:true, datos:[], cantidad:0, hoja:'CordonesRojos'};
 
-    const datos = sh.getRange(2, 1, ultimaFila - 1, 16).getDisplayValues();
+    const valores = sh.getRange(1, 1, ultimaFila, Math.max(16, ultimaColumna)).getDisplayValues();
+    const datos = [];
 
-    const lista = datos
-      .filter(function(f){ return String(f[0] || '').trim() !== ''; })
-      .map(function(f) {
-        let localidad = String(f[9] || '').trim();
+    for (let i = 1; i < valores.length; i++) {
+      const f = valores[i];
+      if (!String(f[0] || '').trim()) continue;
 
-        // Compatibilidad con registros antiguos sin localidad.
-        // La localidad se recupera desde las coordenadas guardadas.
-        if (!localidad || localidad.toLowerCase() === 'sin localidad') {
-          try {
-            const puntos = JSON.parse(String(f[10] || '[]'));
-            if (Array.isArray(puntos) && puntos.length) {
-              localidad = determinarLocalidadCordon_(puntos);
-            }
-          } catch (_) {}
-        }
+      const coordenadas = String(f[10] || '').trim() || '[]';
+      let localidad = String(f[9] || '').trim();
 
-        return {
-          id:f[0],
-          codigo:f[1],
-          tipo:'Cordón rojo',
-          serie:f[3],
-          nombre:f[4],
-          descripcion:f[5],
-          direccion:f[6],
-          estado:f[7],
-          caracteristicas:f[8],
-          localidad:localidad,
-          localidadNombre:localidad,
-          coordenadas:f[10],
-          fechaAlta:f[11],
-          usuarioAlta:f[12],
-          fechaModificacion:f[13],
-          usuarioModificacion:f[14],
-          activo:f[15]
-        };
+      if (!localidad || normalizarTextoCordon_(localidad) === 'sin localidad') {
+        try {
+          const puntos = leerPuntosCordon_(coordenadas);
+          if (puntos.length) localidad = determinarLocalidadCordon_(puntos);
+        } catch (_) {}
+      }
+
+      datos.push({
+        id:String(f[0] || '').trim(),
+        codigo:String(f[1] || '').trim(),
+        tipo:'Cordón rojo',
+        serie:String(f[3] || '').trim(),
+        nombre:String(f[4] || '').trim(),
+        descripcion:String(f[5] || '').trim(),
+        direccion:String(f[6] || '').trim(),
+        estado:String(f[7] || '').trim(),
+        caracteristicas:String(f[8] || '').trim(),
+        localidad:localidad,
+        localidadNombre:localidad,
+        coordenadas:coordenadas,
+        fechaAlta:String(f[11] || '').trim(),
+        usuarioAlta:String(f[12] || '').trim(),
+        fechaModificacion:String(f[13] || '').trim(),
+        usuarioModificacion:String(f[14] || '').trim(),
+        activo:String(f[15] || '').trim()
       });
+    }
 
-    return {
-      ok:true,
-      datos:lista.filter(function(c) {
-        return normalizarActivoCordon_(c.activo) === 'SI';
-      })
-    };
+    const activos = datos.filter(function(c) {
+      return normalizarActivoCordon_(c.activo) === 'SI';
+    });
+
+    return {ok:true, datos:activos, cantidad:activos.length, hoja:'CordonesRojos'};
 
   } catch (error) {
-    return {ok:false, mensaje:'No fue posible obtener los cordones rojos: ' + error.message};
+    return {
+      ok:false, datos:[],
+      mensaje:'No fue posible leer la hoja "CordonesRojos": ' + (error && error.message ? error.message : error)
+    };
   }
 }
 
