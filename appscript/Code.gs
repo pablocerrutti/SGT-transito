@@ -23,7 +23,7 @@ function doGet(e) {
       case 'obtenerZonasEstacionamiento': return json(obtenerZonasEstacionamiento(e));
       case 'guardarZonaEstacionamiento': return json(permisoModuloApi_(e,'movilidad') || bloquearConsultaMapaApi_(e) || guardarZonaEstacionamiento(e));
       case 'eliminarZonaEstacionamiento': return json(permisoModuloApi_(e,'movilidad') || bloquearConsultaMapaApi_(e) || eliminarZonaEstacionamiento(e));
-      case 'obtenerCordonesRojos': return json(typeof obtenerCordonesRojos === 'function' ? obtenerCordonesRojos(e) : obtenerCordonesRojosDirectosParaInforme_(e));
+      case 'obtenerCordonesRojos': return json(obtenerCordonesRojos(e));
       case 'guardarCordonRojo': return json(permisoModuloApi_(e,'movilidad') || bloquearConsultaMapaApi_(e) || guardarCordonRojo(e));
       case 'eliminarCordonRojo': return json(permisoModuloApi_(e,'movilidad') || bloquearConsultaMapaApi_(e) || eliminarCordonRojo(e));
       case 'obtenerEspaciosReservados': return json(obtenerEspaciosReservados(e));
