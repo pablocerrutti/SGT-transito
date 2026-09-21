@@ -1,6 +1,6 @@
 //==================================================
 // SGT - INFORMES
-// VERSIÓN 2026-09-18-4 - catálogo único API
+// VERSIÓN 2026-09-21-5 - catálogo único API
 // Fuente única: catálogo actual del servidor.
 // Nunca usa datos antiguos de localStorage ni fusiona
 // geometrías con registros históricos.
