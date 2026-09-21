@@ -24,25 +24,62 @@ function obtenerCordonesRojos() {
 
     if (!sh) {
       return {
-        ok:false, datos:[], cantidad:0,
+        ok:false,
+        datos:[],
+        cantidad:0,
         mensaje:'No existe la hoja "CordonesRojos" en la planilla configurada.',
-        hoja:'CordonesRojos', spreadsheetId:ss.getId()
+        hoja:'CordonesRojos',
+        spreadsheetId:ss.getId()
       };
     }
 
     const ultimaFila = sh.getLastRow();
-    const ultimaColumna = sh.getLastColumn();
-    if (ultimaFila < 2) return {ok:true, datos:[], cantidad:0, hoja:'CordonesRojos'};
+    const ultimaColumna = Math.max(sh.getLastColumn(), 16);
 
-    const valores = sh.getRange(1, 1, ultimaFila, Math.max(16, ultimaColumna)).getDisplayValues();
+    if (ultimaFila < 2) {
+      return {ok:true, datos:[], cantidad:0, hoja:'CordonesRojos', filas:0};
+    }
+
+    const valores = sh.getRange(1, 1, ultimaFila, ultimaColumna).getDisplayValues();
+    const encabezados = valores[0].map(function(v) {
+      return normalizarTextoCordon_(v).replace(/\s+/g, ' ');
+    });
+
+    function indice_(nombres, porDefecto) {
+      for (let i = 0; i < nombres.length; i++) {
+        const buscado = normalizarTextoCordon_(nombres[i]).replace(/\s+/g, ' ');
+        const idx = encabezados.indexOf(buscado);
+        if (idx !== -1) return idx;
+      }
+      return porDefecto;
+    }
+
+    const iId = indice_(['ID'], 0);
+    const iCodigo = indice_(['Código','Codigo'], 1);
+    const iTipo = indice_(['Tipo'], 2);
+    const iSerie = indice_(['Serie'], 3);
+    const iNombre = indice_(['Nombre'], 4);
+    const iDescripcion = indice_(['Descripción','Descripcion'], 5);
+    const iDireccion = indice_(['Dirección','Direccion'], 6);
+    const iEstado = indice_(['Estado'], 7);
+    const iCaracteristicas = indice_(['Características','Caracteristicas'], 8);
+    const iLocalidad = indice_(['Localidad','Localidad Nombre','Nombre Localidad','Ciudad'], 9);
+    const iCoordenadas = indice_(['Coordenadas','Coordenada','Geometría','Geometria'], 10);
+    const iFechaAlta = indice_(['Fecha alta','Fecha Alta'], 11);
+    const iUsuarioAlta = indice_(['Usuario alta','Usuario Alta'], 12);
+    const iFechaMod = indice_(['Fecha modificación','Fecha modificacion','Fecha Modificacion'], 13);
+    const iUsuarioMod = indice_(['Usuario modificación','Usuario modificacion','Usuario Modificacion'], 14);
+    const iActivo = indice_(['Activo','Activa','Vigente'], 15);
+
     const datos = [];
 
     for (let i = 1; i < valores.length; i++) {
       const f = valores[i];
-      if (!String(f[0] || '').trim()) continue;
+      const id = String(f[iId] || '').trim();
+      if (!id) continue;
 
-      const coordenadas = String(f[10] || '').trim() || '[]';
-      let localidad = String(f[9] || '').trim();
+      const coordenadas = String(f[iCoordenadas] || '').trim() || '[]';
+      let localidad = String(f[iLocalidad] || '').trim();
 
       if (!localidad || normalizarTextoCordon_(localidad) === 'sin localidad') {
         try {
@@ -51,41 +88,52 @@ function obtenerCordonesRojos() {
         } catch (_) {}
       }
 
+      const activoOriginal = String(f[iActivo] || '').trim();
+
       datos.push({
-        id:String(f[0] || '').trim(),
-        codigo:String(f[1] || '').trim(),
+        id:id,
+        codigo:String(f[iCodigo] || '').trim(),
         tipo:'Cordón rojo',
-        serie:String(f[3] || '').trim(),
-        nombre:String(f[4] || '').trim(),
-        descripcion:String(f[5] || '').trim(),
-        direccion:String(f[6] || '').trim(),
-        estado:String(f[7] || '').trim(),
-        caracteristicas:String(f[8] || '').trim(),
+        serie:String(f[iSerie] || '').trim(),
+        nombre:String(f[iNombre] || '').trim(),
+        descripcion:String(f[iDescripcion] || '').trim(),
+        direccion:String(f[iDireccion] || '').trim(),
+        estado:String(f[iEstado] || '').trim(),
+        caracteristicas:String(f[iCaracteristicas] || '').trim(),
         localidad:localidad,
         localidadNombre:localidad,
         coordenadas:coordenadas,
-        fechaAlta:String(f[11] || '').trim(),
-        usuarioAlta:String(f[12] || '').trim(),
-        fechaModificacion:String(f[13] || '').trim(),
-        usuarioModificacion:String(f[14] || '').trim(),
-        activo:String(f[15] || '').trim()
+        fechaAlta:String(f[iFechaAlta] || '').trim(),
+        usuarioAlta:String(f[iUsuarioAlta] || '').trim(),
+        fechaModificacion:String(f[iFechaMod] || '').trim(),
+        usuarioModificacion:String(f[iUsuarioMod] || '').trim(),
+        activo:activoOriginal
       });
     }
 
+    // La hoja puede usar SI/SÍ, TRUE, ACTIVO, 1, etc.
     const activos = datos.filter(function(c) {
       return normalizarActivoCordon_(c.activo) === 'SI';
     });
 
-    return {ok:true, datos:activos, cantidad:activos.length, hoja:'CordonesRojos'};
+    return {
+      ok:true,
+      datos:activos,
+      cantidad:activos.length,
+      filasLeidas:datos.length,
+      hoja:'CordonesRojos',
+      spreadsheetId:ss.getId()
+    };
 
   } catch (error) {
     return {
-      ok:false, datos:[],
+      ok:false,
+      datos:[],
+      cantidad:0,
       mensaje:'No fue posible leer la hoja "CordonesRojos": ' + (error && error.message ? error.message : error)
     };
   }
 }
-
 function guardarCordonRojo(e) {
   const p = (e && e.parameter) || {};
   const tipo = 'Cordón rojo';
