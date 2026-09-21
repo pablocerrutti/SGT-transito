@@ -17,7 +17,7 @@ let localidades = [];
 //==================================================
 
 const TIPO_ZONA_ESTACIONAMIENTO = "Estacionamiento Tarifado";
-const TIPO_CORDON_ROJO = "Cordón Rojo";
+const TIPO_CORDON_ROJO = "Cordón rojo";
 const TIPO_ESPACIO_RESERVADO = "Espacio Reservado";
 
 
