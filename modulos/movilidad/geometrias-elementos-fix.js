@@ -7,7 +7,7 @@
     "use strict";
 
     const TIPO_ET = "Estacionamiento Tarifado";
-    const TIPO_CR = "Cordón Rojo";
+    const TIPO_CR = "Cordón rojo";
 
     function normalizarLocal(valor) {
         return String(valor || "")
