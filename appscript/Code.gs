@@ -39,6 +39,8 @@ function doGet(e) {
       case 'registrarAuditoria': return json(registrarAuditoria(e));
       case 'obtenerAuditoria': return json(obtenerAuditoria(e));
       case 'obtenerInformesAuditoria': return json(obtenerInformesAuditoria(e));
+      case 'obtenerLogisticaPapa': return json(obtenerLogisticaPapa(e));
+      case 'guardarLogisticaPapa': return json(guardarLogisticaPapa(e));
       case 'ping': return json({ok:true,mensaje:'API SGT funcionando correctamente.',fecha:new Date().toISOString()});
       default: return json({ok:false,mensaje:'Acción inválida: '+accion});
     }
